@@ -1,0 +1,1439 @@
+{
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "NETWORKING CONFIGURATION"
+                    },
+                    "Parameters": [
+                        "vpcCidrBlock",
+                        "subnet1CidrBlock",
+                        "subnet2CidrBlock",
+                        "subnet1Az",
+                        "subnet2Az"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Accept BIG-IQ License: https://aws.amazon.com/marketplace/pp/B00KIZG6KA"
+                    },
+                    "Parameters": []
+                },
+                {
+                    "Label": {
+                        "default": "Accept BIG-IP License: https://aws.amazon.com/marketplace/pp/B079C4WR32"
+                    },
+                    "Parameters": []
+                },
+                {
+                    "Label": {
+                        "default": "BIG-IQ/IP CONFIGURATION"
+                    },
+                    "Parameters": [
+                        "bigIqPassword",
+                        "bigIpPassword",
+                        "bigIqAmi",
+                        "bigIpAmi",
+                        "licenseKey1",
+                        "licenseKey2",
+                        "instanceType",
+                        "restrictedSrcAddress",
+                        "sshKey",
+                        "iamAccessKey",
+                        "iamSecretKey",
+                        "ssgName"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "bigIpAmi": {
+                    "default": "BIG-IP AMI"
+                },
+                "bigIpPassword": {
+                    "default": "BIG-IP Admin Password"
+                },
+                "bigIqAmi": {
+                    "default": "BIG-IQ AMI"
+                },
+                "bigIqPassword": {
+                    "default": "BIG-IQ Admin Password"
+                },
+                "iamAccessKey": {
+                    "default": "IAM Access Key"
+                },
+                "iamSecretKey": {
+                    "default": "IAM Secret Key"
+                },
+                "imageName": {
+                    "default": "Image Name"
+                },
+                "instanceType": {
+                    "default": "AWS Instance Size"
+                },
+                "licenseKey1": {
+                    "default": "License Key 1"
+                },
+                "licenseKey2": {
+                    "default": "License Key 2"
+                },
+                "restrictedSrcAddress": {
+                    "default": "Source Address(es) for SSH Access"
+                },
+                "ssgName": {
+                    "default": "SSG CloudFormation Stack Name"
+                },
+                "sshKey": {
+                    "default": "SSH Key"
+                },
+                "subnet1Az": {
+                    "default": "Subnet AZ1"
+                },
+                "subnet1CidrBlock": {
+                    "default": "Subnet 1 CIDR Block"
+                },
+                "subnet2Az": {
+                    "default": "Subnet AZ2"
+                },
+                "subnet2CidrBlock": {
+                    "default": "Subnet 2 CIDR Block"
+                },
+                "vpcCidrBlock": {
+                    "default": "VPC CIDR Block"
+                }
+            }
+        },
+        "Version": "1.0.0"
+    },
+    "Outputs": {
+        "BigIqCmEipAddress": {
+            "Description": "IP address of the management port on BIG-IQ",
+            "Value": {
+                "Ref": "CmElasticIp"
+            }
+        },
+        "BigIqCmExternalInterfacePrivateIp": {
+            "Description": "Internally routable IP of the public interface on BIG-IQ",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BigIqCmEth0",
+                    "PrimaryPrivateIpAddress"
+                ]
+            }
+        },
+        "BigIqCmInstanceId": {
+            "Description": "Instance Id of BIG-IQ in Amazon",
+            "Value": {
+                "Ref": "BigIqCm"
+            }
+        },
+        "BigIqCmManagementInterface": {
+            "Description": "Management interface ID on BIG-IQ",
+            "Value": {
+                "Ref": "BigIqCmEth0"
+            }
+        },
+        "BigIqCmUrl": {
+            "Description": "BIG-IQ CM Management GUI",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Fn::GetAtt": [
+                                "BigIqCm",
+                                "PublicIp"
+                            ]
+                        }
+                    ]
+                ]
+            }
+        },
+        "availabilityZone1": {
+            "Description": "Availability Zone",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BigIqCm",
+                    "AvailabilityZone"
+                ]
+            }
+        }
+    },
+    "Parameters": {
+        "bigIpAmi": {
+            "ConstraintDescription": "Must be a valid AMI ID",
+            "Default": "ami-030fd17c",
+            "Description": "If you would like to deploy using a custom BIG-IP image, provide the AMI **Note**: Unless specifically required, leave the default value. Must use a Utility AMI",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "bigIqAmi": {
+            "ConstraintDescription": "Must be a valid AMI ID",
+            "Default": "ami-8f9bebf0",
+            "Description": "If you would like to deploy using a custom BIG-IQ image, provide the AMI **Note**: Unless specifically required, leave the default value.",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "instanceType": {
+            "AllowedValues": [
+                "t2.medium",
+                "t2.large",
+                "m3.2xlarge",
+                "m4.large",
+                "m4.xlarge",
+                "m4.2xlarge",
+                "m4.4xlarge",
+                "m4.10xlarge",
+                "c3.2xlarge",
+                "c3.4xlarge",
+                "c3.8xlarge",
+                "c4.xlarge",
+                "c4.2xlarge",
+                "c4.4xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type for BIG-IQ",
+            "Default": "m4.2xlarge",
+            "Description": "Size of the F5 BIG-IQ Virtual Instance",
+            "Type": "String"
+        },
+        "licenseKey1": {
+            "ConstraintDescription": "Verify your F5 BYOL regkey.",
+            "Description": "F5 BIG-IQ license key",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "licenseKey2": {
+            "ConstraintDescription": "Verify your F5 BYOL regkey.",
+            "Description": "F5 BIG-IQ license key",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "restrictedSrcAddress": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "0.0.0.0/0",
+            "Description": " The IP address range used to SSH and access managment GUI on the EC2 instances",
+            "MaxLength": 18,
+            "MinLength": 9,
+            "Type": "String"
+        },
+        "ssgName": {
+            "AllowedPattern": "[\\da-zA-Z\\-]{1,25}",
+            "ConstraintDescription": "SSG Name must contain only alphanumerics and hyphens and be less than 25 characters long",
+            "Description": "A unique CloudFormation StackName within your AWS account",
+            "MaxLength": 25,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "sshKey": {
+            "Description": "Key pair for accessing the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "subnet1Az": {
+            "Description": "Name of an Availability Zone in this Region",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "subnet1CidrBlock": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "10.1.1.0/24",
+            "Description": " The CIDR block for the second subnet which is compatible with the VPC CIDR block",
+            "MaxLength": 18,
+            "MinLength": 9,
+            "Type": "String"
+        },
+        "subnet2Az": {
+            "Description": "Name of an Availability Zone in this Region which is different than Subnet AZ1",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "subnet2CidrBlock": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "10.1.2.0/24",
+            "Description": " The CIDR block for the second subnet which is compatible with the VPC CIDR block",
+            "MaxLength": 18,
+            "MinLength": 9,
+            "Type": "String"
+        },
+        "vpcCidrBlock": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "10.1.0.0/16",
+            "Description": " The CIDR block for the VPC",
+            "MaxLength": 18,
+            "MinLength": 9,
+            "Type": "String"
+        }
+    },
+    "Resources": {
+        "BigIqCm": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "/config/cloud/activate-dcd-services.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport argparse\nimport logging\nimport requests\nimport string\nimport sys\nimport urllib3\nimport util\n\nSERVICES = [ \"access\", \"dos\", \"websafe\", \"ipsec\", \"afm\", \"asm\" ]\n\n# Key is front end representation\n# Value is backend representation\n# This will be used to print a message helpful in navigating our confused domain\nSERVICE_TRANSLATION = {\n    \"Access\":                   \"access\",\n    \"DoS Protection\":           \"dos\",\n    \"Fraud Protection Service\": \"websafe\",\n    \"IPsec\":                    \"ipsec\",\n    \"Network Security\":         \"afm\",\n    \"Web Application Security\": \"asm\",\n}\n\nSERVICE_NAME_TO_URL = {\n    \"access\":  \"cm/access/event-logs/listener/add-listener-task/\",\n    \"dos\":     \"cm/security-shared/tasks/add-dos-listener\",\n    \"websafe\": \"cm/websafe/tasks/add-listener/\",\n    \"ipsec\":   \"cm/adc-core/tasks/add-listener/\",\n    \"afm\":     \"cm/firewall/tasks/add-afm-listener\",\n    \"asm\":     \"cm/asm/tasks/add-syslog-listener\"\n}\n\ndef parse_args ():\n    parser = argparse.ArgumentParser()\n    services_help = (\"Specify the list of services you wish to be activated on the DCD.\\n\"\n                     \"Available options are: \"\n                    )\n\n    services_help += string.join(SERVICES, \", \")\n\n    parser.add_argument(\n        \"--SERVICES\",\n        nargs=\"+\",\n        type=str,\n        default=[],\n        help=services_help\n\n    )\n    parser.add_argument(\"--LIST_SERVICES\", type=bool, default=False)\n    parser.add_argument(\"--DCD_IP_ADDRESS\", type=str, required=True)\n    parser.add_argument(\"--BIGIQ_ADDR\", type=str, default=\"localhost\")\n    parser.add_argument(\"--BIGIQ_USERNAME\", type=str, default=None)\n    parser.add_argument(\"--BIGIQ_PWD\", type=str, default=None)\n\n    return parser.parse_args()\n\n# Transform the service name from the the front end representation to the\n# backend representation.\ndef print_service_name_translation ():\n    print(\"Translation of service names to keys: \")\n    for ui_name, backend_name in SERVICE_TRANSLATION.iteritems():\n        print(ui_name + \" = \" + backend_name)\n\n\ndef activate_service (env, service, dcd_self_link, listener_interface_address):\n    json_body = {\n                \"module\": service,\n                \"listenerInterfaceAddress\": listener_interface_address,\n                \"deviceReference\": {\n                    \"link\": dcd_self_link\n                }\n            }\n    # ASM has a special property\n    if service == \"asm\":\n        json_body[\"indexName\"] = \"asmindex\"\n\n    util.req(\n        env[\"base_url\"] + SERVICE_NAME_TO_URL[service],\n        env[\"auth\"],\n        method=\"POST\",\n        json=json_body\n    )\n\ndef activate_services (env, dcd_ip, dcd_self_link, services):\n    for service in services:\n        activate_service(env, service, dcd_self_link, dcd_ip)\n        util.print_partial(\".\")\n        # ASM has a different JSON body\n\n# Get the self link for the data collection device. This is necessary for any\n# service activation request\ndef get_dcd_device_reference (env, dcd_ip):\n    devices_res = util.req(\n        env[\"base_url\"] + \"shared/resolver/device-groups/cm-esmgmt-logging-group/devices/\",\n        env[\"auth\"]\n    )\n\n    # Suppose just let this fail if any of these steps puke\n    # Distill the response down into just the data collection device on which\n    # we are activating services\n    devices = devices_res.json()\n    devices = devices[\"items\"]\n    devices = [device for device in devices if device[\"address\"] == dcd_ip]\n    device = devices[0]\n\n    return device[\"selfLink\"]\n\n# Check that every service the user specified exists in the services list\ndef verify_services_are_valid (user_specified_services):\n    for service in user_specified_services:\n        if not service in SERVICES:\n            print(\"Invalid service specified: \" + service)\n            print(\"Refer to the following list for valid service names:\")\n            print_service_name_translation()\n            sys.exit(1)\n\n\ndef main ():\n    util.kill_ssl_warnings(logging, urllib3)\n    args = parse_args()\n    verify_services_are_valid(args.SERVICES)\n    if args.LIST_SERVICES:\n        print_service_name_translation()\n        sys.exit(0)\n        return\n\n    if not args.SERVICES:\n        print(\"No services specified\")\n        sys.exit(0)\n        return\n\n    env = util.get_environment(args.BIGIQ_ADDR, username=args.BIGIQ_USERNAME, pwd=args.BIGIQ_PWD)\n\n    util.poll_for_services_available(env[\"address\"], auth=env[\"auth\"],  timeout=360)\n    util.complete()\n\n    util.print_partial(\"Retrieving DCD identifier...\")\n    dcd_self_link = get_dcd_device_reference(env, args.DCD_IP_ADDRESS)\n    util.complete()\n\n    util.print_partial(\"Activating services: \" + string.join(args.SERVICES, \", \") + \"...\")\n    activate_services(env, args.DCD_IP_ADDRESS, dcd_self_link, args.SERVICES)\n    util.complete()\n\n\nif __name__ == '__main__':\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/add-dcd.py": {
+                                "content": "#! /usr/local/bin/python2.7\n\nimport argparse\nimport requests\nimport sys\nimport time\nimport util\nimport logging\nimport urllib3\n# Add a data collection device to a BIG IQ CM device\nutil.kill_ssl_warnings(logging, urllib3)\n\n# Return an object representing the arguments passed in to this program\ndef parse_args ():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\n        \"--BIGIQ_ADDR\",\n        type=str,\n        default=\"localhost\",\n        help=\"Address of BIG-IQ CM instance to which a data collection device will be added. Optional: defaults to localhost\"\n    )\n    parser.add_argument(\n        \"--DCD_IP_ADDRESS\",\n        type=str,\n        required=True,\n        help=\"IP of the BIG-IQ DCD instance. This must already be configured with the logging_node personality\"\n    )\n    parser.add_argument(\n        \"--DCD_USERNAME\",\n        type=str,\n        required=True,\n        help=\"Username to use for the DCD\"\n    )\n    parser.add_argument(\n        \"--DCD_PWD\",\n        type=str,\n        required=True,\n        help=\"Password to use for the DCD\"\n    )\n    parser.add_argument(\n        \"--BIGIQ_USERNAME\",\n        type=str,\n        help=\"Username to use for the BIG-IQ CM instance. This is not necessary when running against localhost\"\n    )\n    parser.add_argument(\n        \"--BIGIQ_PWD\",\n        type=str,\n        help=\"Password to use for the BIG-IQ CM instance. This is not necessary when running against localhost\"\n    )\n    parser.add_argument(\n        \"--TIMEOUT_SEC\",\n        type=str,\n        help=\"Time to wait in seconds for the services to come available. This is approximate. Total wait time will be strictly greater than or equal to the time specified.\",\n        default=60\n    )\n    args = parser.parse_args()\n    return args\n\n# Determine the environment from url, either localhost or remote\ndef get_environment (address, username=None, pwd=None):\n    return util.get_environment(address, username, pwd)\n\n# Returns UUID of new node\ndef add_node (env, ip_address, username, password):\n    # POST\n    # https://18.232.246.131/mgmt/cm/shared/esmgmt/add-node\n    # {\"address\":\"35.173.117.194\",\"bigIqUsername\":\"admin\",\"bigIqPassword\":\"P@$$Word!\",\"httpPort\":9200,\"transportAddress\":\"10.1.1.230\",\"transportPort\":9300,\"zone\":\"default\"}\n    # Returns something like\n    # {\"address\":\"35.173.117.194\",\"transportAddress\":\"10.1.1.230\",\"httpPort\":\"9200\",\"transportPort\":\"9300\",\"zone\":\"default\",\"bigIqUsername\":\"admin\",\"bigIqPassword\":\"P@$$Word!\",\"id\":\"0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"status\":\"STARTED\",\"userReference\":{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"},\"identityReferences\":[{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"}],\"ownerMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"taskWorkerGeneration\":1,\"generation\":1,\"lastUpdateMicros\":1525977026342300,\"kind\":\"cm:shared:esmgmt:add-node:esaddnodetaskstate\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\"}\n    node_res = util.req(\n        env['base_url'] + \"cm/shared/esmgmt/add-node\",\n        env['auth'],\n        method=\"POST\",\n        json={\n            \"address\": ip_address,\n            \"bigIqUsername\": username,\n            \"bigIqPassword\": password,\n            \"httpPort\": 9200,\n            \"transportAddress\": ip_address,\n            \"transportPort\":9300,\n            \"zone\":\"default\"\n        }\n    )\n    # Won't reach this point w/o 200 OK\n    return node_res.json()['id']\n\n\ndef poll_for_result (env, uuid):\n    # Based on a the UUID returned from add_node poll this endpoint until something happens\n    # GET\n    # https://18.232.246.131/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\n    # Returns something like this in progress\n    # {\"address\":\"35.173.117.194\",\"bigIqPassword\":\"\",\"bigIqUsername\":\"admin\",\"cluster\":{\"clusterName\":\"39d30597-4d09-419b-ad64-450e5ba01edf\",\"primaryMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"clusterIndexCollectionReference\":{\"link\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e/indices\",\"isSubcollection\":true},\"nodes\":[{\"machineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"allowData\":false,\"allowMaster\":true,\"httpAddress\":\"127.0.0.1\",\"httpPort\":\"9200\",\"transportAddress\":\"10.1.1.169/24\",\"transportPort\":\"9300\",\"zone\":\"default\",\"mlockall\":false,\"repo\":\"/var/config/rest/elasticsearch/data\",\"generation\":0,\"lastUpdateMicros\":0}],\"numberOfDataNodes\":0,\"id\":\"3fa8567f-b10d-49d1-8e50-09d8741ada4e\",\"generation\":1,\"lastUpdateMicros\":1525976702076194,\"kind\":\"cm:shared:esmgmt:cluster:esclusterinstancestate\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e\"},\"currentStep\":\"CHECK_DEVICE_STATUS_ADD\",\"deviceReference\":{\"link\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"deviceState\":{\"uuid\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"deviceUri\":\"https://35.173.117.194:443\",\"machineId\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"state\":\"PENDING\",\"address\":\"35.173.117.194\",\"httpsPort\":443,\"properties\":{\"isLoggingNode\":true},\"groupName\":\"cm-esmgmt-logging-group\",\"generation\":1,\"lastUpdateMicros\":1525977026535394,\"kind\":\"shared:resolver:device-groups:restdeviceresolverdevicestate\",\"selfLink\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"generation\":5,\"httpPort\":\"9200\",\"id\":\"0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"identityReferences\":[{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"}],\"kind\":\"cm:shared:esmgmt:add-node:esaddnodetaskstate\",\"lastUpdateMicros\":1525977028708833,\"ownerMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"startDateTime\":\"2018-05-10T11:30:26.360-0700\",\"status\":\"STARTED\",\"transportAddress\":\"10.1.1.230\",\"transportPort\":\"9300\",\"userReference\":{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"},\"username\":\"admin\",\"zone\":\"default\"}\n    i = 0\n    while i < 120:\n        add_node_res = util.req(env['base_url'] + \"cm/shared/esmgmt/add-node/\" + uuid, env['auth'])\n        status = add_node_res.json()['status']\n        if status == \"FINISHED\":\n            break\n        elif status == \"FAILED\":\n            print(\"\")\n            print(\"Node addition failed with:\")\n            print(add_node_res.json()['errorMessage'])\n            sys.exit(1)\n\n        util.print_partial(\".\")\n        time.sleep(2)\n        i += 2\n\n    # Returns something like this on failure\n    # {\"address\":\"35.173.117.194\",\"bigIqPassword\":\"\",\"bigIqUsername\":\"admin\",\"cluster\":{\"clusterName\":\"39d30597-4d09-419b-ad64-450e5ba01edf\",\"primaryMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"clusterIndexCollectionReference\":{\"link\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e/indices\",\"isSubcollection\":true},\"nodes\":[{\"machineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"allowData\":false,\"allowMaster\":true,\"httpAddress\":\"127.0.0.1\",\"httpPort\":\"9200\",\"transportAddress\":\"10.1.1.169/24\",\"transportPort\":\"9300\",\"zone\":\"default\",\"mlockall\":false,\"repo\":\"/var/config/rest/elasticsearch/data\",\"generation\":0,\"lastUpdateMicros\":0}],\"numberOfDataNodes\":0,\"id\":\"3fa8567f-b10d-49d1-8e50-09d8741ada4e\",\"generation\":1,\"lastUpdateMicros\":1525976702076194,\"kind\":\"cm:shared:esmgmt:cluster:esclusterinstancestate\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e\"},\"currentStep\":\"POST_DEVICE_ES\",\"deviceReference\":{\"link\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"deviceState\":{\"uuid\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"deviceUri\":\"https://35.173.117.194:443\",\"machineId\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"state\":\"ACTIVE\",\"address\":\"35.173.117.194\",\"httpsPort\":443,\"hostname\":\"bigiq1\",\"version\":\"6.0.0\",\"product\":\"BIG-IQ\",\"edition\":\"Final\",\"build\":\"0.0.1490\",\"restFrameworkVersion\":\"6.0.0-0.0.1490\",\"managementAddress\":\"10.1.1.230\",\"mcpDeviceName\":\"/Common/localhost\",\"properties\":{\"shared:resolver:device-groups:discoverer\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"isLoggingNode\":true},\"isClustered\":false,\"isVirtual\":true,\"groupName\":\"cm-esmgmt-logging-group\",\"slots\":[{\"volume\":\"HD1.1\",\"product\":\"BIG-IQ\",\"version\":\"6.0.0\",\"build\":\"0.0.1490\",\"isActive\":true}],\"generation\":3,\"lastUpdateMicros\":1525977031900228,\"kind\":\"shared:resolver:device-groups:restdeviceresolverdevicestate\",\"selfLink\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"endDateTime\":\"2018-05-10T11:30:33.773-0700\",\"errorMessage\":\"Unable to add Data Collection Device 35.173.117.194 to logging cluster with error 'invalid\\r\\ntransportAddress: 10.1.1.169/24'\",\"generation\":7,\"httpPort\":\"9200\",\"id\":\"0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"identityReferences\":[{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"}],\"kind\":\"cm:shared:esmgmt:add-node:esaddnodetaskstate\",\"lastUpdateMicros\":1525977033823047,\"ownerMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"startDateTime\":\"2018-05-10T11:30:26.360-0700\",\"status\":\"FAILED\",\"transportAddress\":\"10.1.1.230\",\"transportPort\":\"9300\",\"userReference\":{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"},\"username\":\"admin\",\"zone\":\"default\"}\n\n    # Success response includes \"FINISHED\" in the \"status\" property\n\ndef check_that_device_not_already_registered (env, dcd_ip):\n    res = util.req(\n        env[\"base_url\"] + \"shared/resolver/device-groups/cm-esmgmt-logging-group/devices\",\n        env[\"auth\"]\n    )\n    devices = res.json()[\"items\"]\n\n    if any(device[\"address\"] == dcd_ip for device in devices):\n        print(\"\")\n        print(\"Device is already registered.\")\n        sys.exit(0)\n\n\ndef main ():\n    # load vars from parser\n    args = parse_args()\n    # Determine local or remote\n    environment = get_environment(args.BIGIQ_ADDR, username=args.DCD_USERNAME, pwd=args.DCD_PWD)\n    # Test authentication?\n    util.poll_for_services_available(environment['address'], auth=environment['auth'])\n    util.complete()\n\n    # Wait for DCD available and assume basic auth is enabled\n    util.poll_for_system_setup(\n        args.DCD_IP_ADDRESS,\n        auth=requests.auth.HTTPBasicAuth(args.DCD_USERNAME,\n        args.DCD_PWD),\n        timeout=args.TIMEOUT_SEC\n    )\n    util.complete()\n\n    # Verify that device is not added already\n    util.print_partial(\"Checking that device is not already registered...\")\n    check_that_device_not_already_registered(environment, args.DCD_IP_ADDRESS)\n    util.complete()\n\n    # post to add node\n    util.print_partial(\"Adding node...\")\n    node_uuid = add_node(environment, args.DCD_IP_ADDRESS, args.DCD_USERNAME, args.DCD_PWD)\n    util.complete()\n\n    # poll add until success or failure\n    util.print_partial(\"Waiting for result...\")\n    poll_for_result(environment, node_uuid)\n    util.complete()\n\n\nif __name__ == \"__main__\":\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/configure-bigiq.py": {
+                                "content": "#! /usr/local/bin/python2.7\n# Run a BIG IQ through the licensing and configuration wizard without any user interaction\n# Return control when the BIG IQ is fully configured\nimport sys\nimport argparse\nimport requests\nfrom requests.auth import HTTPBasicAuth\nimport time\nimport logging\nimport urllib3\nimport util\nfrom util import print_partial, complete\n\nutil.kill_ssl_warnings(logging, urllib3)\n\n# Enter the license key into the BIQ\ndef enter_license_info (license_key):\n    req(\n        BIGIQ_REST_URL + \"tm/shared/licensing/activation\",\n        method=\"POST\",\n        json={\"baseRegKey\":LICENSE_KEY,\"addOnKeys\":[],\"activationMethod\":\"AUTOMATIC\"},\n        auth=AUTH\n    )\n    # assume that a dossier is enclosed in the response which should be\n    # submitted with the next request\n\n\n# The dossier is retrievable from this endpoint always\n# Register the return dossier\ndef poll_for_licensing_complete ():\n    sys.stdout.write(\"Waiting for license activation...\")\n    sys.stdout.flush()\n    i = 0\n    while True:\n        i += 1\n        activation_res = req(BIGIQ_REST_URL + \"tm/shared/licensing/activation\")\n        res_json = activation_res.json()\n        if res_json['status'] == \"LICENSING_COMPLETE\" or i > TIMEOUT_SEC:\n            # Break when licensing is complete or the operation has timed out\n            break\n        elif activation_res.json()['status'] == \"LICENSING_FAILED\":\n            print(\"\")\n            print(\"Licensing failure, reason given: \")\n            print(activation_res.json()['errorText'])\n            sys.exit(1)\n            break\n        elif res_json['status'] == \"NEED_EULA_ACCEPT\":\n            req(\n                BIGIQ_REST_URL + \"tm/shared/licensing/activation\",\n                method=\"POST\",\n                json={\n                    \"baseRegKey\": LICENSE_KEY,\n                    \"addOnKeys\": [],\n                    \"activationMethod\": \"AUTOMATIC\",\n                    \"eulaText\": res_json['eulaText']\n                }\n\n            )\n            # Reset timeout\n            i = 0\n        else:\n            time.sleep(1)\n        sys.stdout.write(\".\")\n        sys.stdout.flush()\n\n    licenseText = \"\"\n    try:\n        licenseText = activation_res.json()['licenseText']\n    except KeyError:\n        pass\n\n    # License text could be set but be empty\n    if not licenseText:\n        print(\" Licensing failed\")\n        sys.exit(1)\n\n    req(\n        BIGIQ_REST_URL + \"tm/shared/licensing/registration\",\n        json={ 'licenseText': licenseText },\n        method=\"PUT\"\n    )\n\n    return activation_res.json()\n\n# Configure as CM or DCD node\ndef configure_big_iq_type (dcd=False):\n    if dcd:\n        req(\n            BIGIQ_REST_URL + \"cm/system/provisioning\",\n            json={\"systemPersonality\":\"logging_node\"},\n            method=\"POST\"\n        )\n\n# Step 3 configure managment address\ndef set_management_address ():\n    default_config_res = req(BIGIQ_REST_URL + \"shared/system/easy-setup\")\n    cfg = default_config_res.json()\n    # I guess just post back what is set, TODO is this required then?\n    management_addr = cfg[\"managementIpAddress\"]\n    # Turn it from cidr to ip\n    management_addr = management_addr[:-3]\n    req(\n        BIGIQ_REST_URL + \"shared/system/easy-setup\",\n        json={\n                \"hostname\": cfg[\"hostname\"],\n                \"managementIpAddress\": cfg[\"managementIpAddress\"],\n                \"managementRouteAddress\": cfg[\"managementRouteAddress\"]\n            },\n        method=\"PATCH\"\n    )\n\n\n    time.sleep(2)\n    print(\"Setting discovery address to \" + management_addr)\n    req(\n        BIGIQ_REST_URL + \"shared/identified-devices/config/discovery\",\n        json={\"discoveryAddress\":management_addr},\n        method=\"PUT\"\n    )\n\n    # Suspicious of BIQ/TMOS interaction being fully atomic when this previous request returns\n    time.sleep(2)\n    disco_addr_res = req(\n        BIGIQ_REST_URL + \"shared/identified-devices/config/discovery\"\n    )\n\n    try:\n        if not disco_addr_res.json()['discoveryAddress'] == management_addr:\n            print(\"Discovery address could not be set\")\n            sys.exit(1)\n    except KeyError:\n        print(\"Discovery address could not be set\")\n        sys.exit(1)\n\n\n\n# Step 4 set the ntp and dns servers\ndef configure_services ():\n    req(\n        BIGIQ_REST_URL + \"tm/sys/dns\",\n        json={\"nameServers\":[\"8.8.8.8\"],\"search\":[\"localhost\"]},\n        method=\"PATCH\"\n    )\n\n    req(\n        BIGIQ_REST_URL + \"tm/sys/ntp\",\n        json={\"servers\":[\"time.nist.gov\"],\"timezone\":\"America/Los_Angeles\"},\n        method=\"PATCH\"\n    )\n\n\n# Step 5 set the master key. This can only be done once. This function is aware of that\ndef set_master_key ():\n    mk_res = req(\n        BIGIQ_REST_URL + \"cm/shared/secure-storage/masterkey\",\n        json={\"passphrase\": MASTER_PASSPHRASE},\n        method=\"POST\",\n        verify=False\n    )\n\n    if (not mk_res.ok and\n            mk_res.json()['message'] == 'The Master Key has already been set on this system and cannot be reset'):\n        return\n\n    util.verify_success(mk_res)\n\n# Step 6 Passwords are set using tmsh, this function marks the admin and root password as having been changed\ndef set_passwords ():\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\"\n    ).json()\n\n    # This doesn't work, suspect there is some weird encoding issue between client and server\n    # Suffice to change the pwd using tmsh\n    # Saving this code because it's correct, and if I can ever figure out why the service is sending me a 400\n    # Then it would be better to have this working\n\n    # print(\"Changing root password\")\n    # time.sleep(5)\n    # root_res = req(\n    #     BIGIQ_REST_URL + \"shared/authn/root\",\n    #     json={\n    #         \"oldPassword\":\"default\",\n    #         \"newPassword\":ROOT_PWD\n    #     },\n    #     method=\"POST\",\n    #     verify=False\n    # )\n    # # Something isn't working right with the password setting\n    # # Pausing might make it happier\n    # time.sleep(5)\n    # # verify_success(root_res)\n    # # TODO verify that root pwd changed special case here\n    # print(\"Changing pwd from\" + AUTH.password + \" to \" + NEW_AUTH.password)\n    # res = req(\n    #     BIGIQ_REST_URL + \"shared/authz/users\",\n    #     json={\n    #             \"name\":\"admin\",\n    #             \"displayName\":\"Admin User\",\n    #             \"kind\":\"shared:authz:users:usersworkerstate\",\n    #             \"selfLink\":\"https://localhost/mgmt/shared/authz/users/admin\",\n    #             \"oldPassword\": unicode(AUTH.password, \"utf-8\"),\n    #             \"password\":  unicode(NEW_AUTH.password, \"utf-8\"),\n    #             \"password2\": unicode(NEW_AUTH.password, \"utf-8\")\n    #         },\n    #     method=\"PUT\",\n    #     verify=False\n    # )\n    # print(str(res.json()))\n\n\n\n    # # Poll for authentication change persisting properly\n    # i = 0\n    # while i < TIMEOUT_SEC:\n    #     time.sleep(10)\n    #     res = req(BIGIQ_REST_URL + \"shared/echo\", verify=False, auth=NEW_AUTH)\n    #     if res.status_code == 200:\n    #         break\n    #     # Wait 10 in order to not freak out the password limit\n    #     i += 9\n\n    # if not res.ok:\n    #     print(\"\")\n    #     print(\"Setting password failed\")\n\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\",\n        json={\"isRootPasswordChanged\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\",\n        json={\"isAdminPasswordChanged\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n\n\n# Step 7 Set a flag to true indicating that the setup wizard is complete\ndef set_system_setup ():\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\",\n        json={\"isSystemSetup\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n# Step 8 Restart the system\ndef do_restart ():\n    req(\n        BIGIQ_REST_URL + \"shared/failover-state\",\n        json={\"restart\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n# True response indicates a succesful service bring up\n# Wrap the util function which was extracted from this file originally\ndef poll_for_services_available ():\n    return util.poll_for_services_available(BIGIQ_ADDR, AUTH, timeout=TIMEOUT_SEC)\n\n# Okay wrapper for requests which encapsulates with defaults some of the repetitive stuff that makes my eyes bleed\ndef req (url, json=None, method=\"GET\", auth=None, verify=True):\n    return util.req(url, auth or AUTH, json=json, method=method, verify=verify)\n\n# Test that the authentication is working correctly. In a remote context, this will verify that basic auth is correct and the username\n# password combination is correct. When run local to the BIQ, this proves nothing, because it doesn't need to.\ndef test_auth ():\n    global AUTH\n    res = req(BIGIQ_REST_URL + \"shared/echo\", verify=False)\n\n    if res.ok:\n        return\n    else:\n        print(\"Authentication failed, ensure that basic auth is enabled and your username password combinations are correct\")\n        sys.exit(1)\n\n# Run through the steps of the setup wizard in order\ndef main():\n    if not poll_for_services_available():\n        print(\" Timed out\")\n        sys.exit(1)\n    else:\n        complete()\n\n    print_partial(\"Verifying authentication information...\")\n    test_auth()\n    complete()\n\n    if not SKIP_LICENSING:\n        print_partial(\"Adding license key...\")\n        enter_license_info(LICENSE_KEY)\n        complete()\n        poll_for_licensing_complete()\n        complete()\n\n\n    print_partial(\"Configuring role...\")\n    configure_big_iq_type(dcd=(NODE_TYPE==\"DCD\"))\n    complete()\n\n    print_partial(\"Setting management address...\")\n    set_management_address()\n    complete()\n\n    poll_for_services_available()\n    complete()\n\n    print_partial(\"Configuring NTP/DNS services...\")\n    configure_services()\n    complete()\n\n    print_partial(\"Setting masterkey...\")\n    set_master_key()\n    complete()\n\n    if not poll_for_services_available():\n        print(\" Timed out\")\n        sys.exit(1)\n    else:\n        complete()\n\n    print_partial(\"Setting password status to updated...\")\n    set_passwords()\n    complete()\n\n    print_partial(\"Configuration complete, restarting services\")\n    # Wait for toku to flush everything to disk? Maybe?\n    time.sleep(10)\n    do_restart()\n    complete()\n    util.poll_for_system_down(BIGIQ_ADDR, timeout=TIMEOUT_SEC)\n    complete()\n    poll_for_services_available()\n    set_system_setup()\n    complete()\n\n\n# Generate the CLI argument parser\ndef generate_parser ():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\n        \"--BIGIQ_ADDR\",\n        type=str,\n        help=\"The IPv4 address of the BIG-IQ on which the setup will be run. If not specified, the script runs against localhost.\"\n    )\n    parser.add_argument(\n        \"--BIGIQ_REST_URL\",\n        type=str,\n        help=\"This should probably always be omitted. Read the source to figure out if you want to set this.\"\n    )\n    parser.add_argument(\n        \"--LICENSE_KEY\",\n        type=str,\n        help=\"The license key to use for this setup. Can be omitted if you want to manually license your BIG-IQ\"\n    )\n    parser.add_argument(\n        \"--MASTER_PASSPHRASE\",\n        type=str,\n        default=\"ValidPasswordValidPassword12341234!\",\n        help=\"The passphrase to use for the BIG-IQ\"\n    )\n    parser.add_argument(\n        \"--SKIP_LICENSING\",\n        type=bool,\n        default=False,\n        help=\"Set this if your wish to skip the licensing process when your BIG-IQ has already been licensed manually for instance.\"\n    )\n    parser.add_argument(\n        \"--ADMIN_USERNAME\",\n        type=str,\n        default=\"admin\",\n        help=\"Username for the administrative account\"\n    )\n    parser.add_argument(\n        \"--ADMIN_PWD\",\n        type=str,\n        default=\"f5site02\",\n        help=\"The admin password for the BIG-IQ\"\n    )\n    parser.add_argument(\n        \"--TIMEOUT_SEC\",\n        type=int,\n        default=120, help=\"The time in seconds to wait for the asynchronous polling operations in the setup process\"\n    )\n    parser.add_argument(\n        \"--NODE_TYPE\",\n        type=str,\n        default=\"CM\", help=\"Either 'CM' for central management or 'DCD' for data collection device\"\n    )\n\n    args = parser.parse_args()\n\n    global BIGIQ_ADDR\n    global BIGIQ_REST_URL\n    global LICENSE_KEY\n    global MASTER_PASSPHRASE\n    global SKIP_LICENSING\n    global ADMIN_PWD\n    global NODE_TYPE\n    global TIMEOUT_SEC\n\n    BIGIQ_ADDR = args.BIGIQ_ADDR\n    # Remember DeMorgan...\n    if not BIGIQ_ADDR and not BIGIQ_REST_URL:\n        BIGIQ_REST_URL = \"http://localhost:8100/\"\n        BIGIQ_ADDR = \"localhost:8100\"\n    else:\n        BIGIQ_REST_URL = args.BIGIQ_REST_URL or \"https://\" + BIGIQ_ADDR + \"/mgmt/\"\n\n    LICENSE_KEY = args.LICENSE_KEY\n    MASTER_PASSPHRASE = args.MASTER_PASSPHRASE\n    SKIP_LICENSING = args.SKIP_LICENSING\n    ADMIN_PWD = args.ADMIN_PWD\n    NODE_TYPE = args.NODE_TYPE\n    TIMEOUT_SEC = args.TIMEOUT_SEC\n\n    return args\n\n# Configured global\nBIGIQ_ADDR = None\nBIGIQ_REST_URL = None\nLICENSE_KEY = None\nMASTER_PASSPHRASE = None\nSKIP_LICENSING = None\nADMIN_PWD = None\nNODE_TYPE = None\n\nTIMEOUT_SEC = 120\n# Declare these globals in a global scope, ie, not main\n\nif __name__ == \"__main__\":\n    args = generate_parser()\n    AUTH = HTTPBasicAuth(args.ADMIN_USERNAME, ADMIN_PWD)\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/create-auto-scaling.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport sys\nimport argparse\nimport requests\nfrom requests.auth import HTTPBasicAuth\nimport time\nimport logging\nimport urllib3\n\nfrom util import print_partial, complete, req\n\n# Creates auto scaling resources on BIG-IQ\n\n# Vars which must exist in the env variable\ndef parse_args ():\n    # Ugly but expedient conversion of ansible-playbook to a parameterized python script\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--AWS_SUBNET_1A\", type=str, required=True)\n    parser.add_argument(\"--AWS_SUBNET_1B\", type=str, required=True)\n    parser.add_argument(\"--AWS_US_EAST_1A\", type=str, required=True)\n    parser.add_argument(\"--AWS_US_EAST_1B\", type=str, required=True)\n    parser.add_argument(\"--AWS_SSH_KEY\", type=str, required=True)\n    parser.add_argument(\"--AWS_VPC\", type=str, required=True)\n    parser.add_argument(\"--AWS_ACCESS_KEY_ID\", type=str, required=True)\n    parser.add_argument(\"--AWS_SECRET_ACCESS_KEY\", type=str, required=True)\n    parser.add_argument(\"--BIGIP_AMI\", type=str, required=True)\n    parser.add_argument(\"--BIGIQ_URI\", type=str, required=True)\n    parser.add_argument(\"--BIGIP_PWD\", type=str, required=True)\n    parser.add_argument(\"--BIGIP_USER\", type=str, required=True)\n    parser.add_argument(\"--CLOUD_PROVIDER_NAME\", type=str, required=True)\n    parser.add_argument(\"--CLOUD_ENVIRONMENT_NAME\", type=str, required=True)\n    parser.add_argument(\"--DEFAULT_REGION\", type=str, required=True)\n    parser.add_argument(\"--DEVICE_TEMPLATE_NAME\", type=str, required=True)\n    parser.add_argument(\"--LOOKUP_SERVER_LIST\", type=str, required=True)\n    parser.add_argument(\"--NTP_SERVER\", type=str, required=True)\n    parser.add_argument(\"--SSG_NAME\", type=str, required=True)\n    return parser.parse_args()\n\n\ndef post(url, json, identifier_name=None):\n    # Set the id name by which duplicates will be detected\n    identifier_name = \"name\" if not identifier_name else identifier_name\n\n    # Check for duplicate by 'identifier_name'\n    response = req(url, None)\n    duplicates = [ item for item in response.json()[\"items\"] if item[identifier_name] == json[identifier_name] ]\n    # if duplicates return that duplicate entry\n    if duplicates:\n        return duplicates[0]\n\n    # else post and return the response body\n    response = req(url, None, json=json, method=\"POST\")\n\n    return response.json()\n\n\ndef create_device_template(env):\n    return post(\n        env.BIGIQ_URI + \"/cm/device/templates\",\n        {\n            \"name\": env.DEVICE_TEMPLATE_NAME,\n            \"timeZone\": \"UTC\",\n            \"ntpServerList\": [env.NTP_SERVER],\n            \"lookupServerList\": [env.LOOKUP_SERVER_LIST],\n            # \"provisionedModuleList\": [{\n            #     \"module\": \"LTM\",\n            #     \"level\": \"NOMINAL\"\n            # }],\n            \"userAccountList\": [{\n                \"username\": env.BIGIP_USER,\n                \"password\": env.BIGIP_PWD,\n                \"role\": \"admin\"\n            }]\n        }\n    )\n    # var_name: device_template_result\n\n\ndef create_cloud_resources(env, device_template_result):\n    cloud_provider_result = post(\n        env.BIGIQ_URI + \"/cm/cloud/providers\",\n        {\n            \"providerType\": \"AWS\",\n            \"name\": env.CLOUD_PROVIDER_NAME,\n            \"description\": \"AWS cloud provider\",\n            \"awsProperties\": {\n                \"accessKeyId\": env.AWS_ACCESS_KEY_ID,\n                \"secretAccessKey\": env.AWS_SECRET_ACCESS_KEY\n            }\n        }\n    )\n\n    # Creating cloud environment\n    return post(\n        env.BIGIQ_URI + \"/cm/cloud/environments\",\n        {\n            \"name\": env.CLOUD_ENVIRONMENT_NAME,\n            \"description\": \"AWS cloud environment\",\n            \"providerReference\": {\n                \"link\": \"https://localhost/mgmt/cm/cloud/providers/\" + cloud_provider_result[\"id\"]\n            },\n            \"deviceTemplateReference\": {\n                \"link\": \"https://localhost/mgmt/cm/device/templates/\" + device_template_result[\"id\"]\n            },\n            \"awsProperties\": {\n                \"region\": env.DEFAULT_REGION,\n                \"vpc\": env.AWS_VPC,\n                \"availabilityZones\": [env.AWS_US_EAST_1A, env.AWS_US_EAST_1B],\n                \"subnets\": [env.AWS_SUBNET_1A, env.AWS_SUBNET_1B],\n                \"restrictedSourceAddress\": \"0.0.0.0/0\",\n                \"sshKeyName\": env.AWS_SSH_KEY,\n                \"moduleSelection\": \"WAF\",\n                \"licenseType\": \"Utility\",\n                \"imageId\": env.BIGIP_AMI,\n                \"instanceType\": \"m4.xlarge\"\n            },\n            \"isVmwCluster\": True\n        }\n    )\n\n\ndef create_ssg(env, cloud_environment_result):\n    # Create service scaling group\n    return post(\n        env.BIGIQ_URI + \"/cm/cloud/service-scaling-groups\",\n        {\n            \"name\": env.SSG_NAME,\n            \"description\": \"AWS scaling group\",\n            \"environmentReference\": {\n                \"link\": \"https://localhost/mgmt/cm/cloud/environments/\" + cloud_environment_result[\"id\"]\n            },\n            \"minSize\": 1,\n            \"maxSize\": 5,\n            \"maxSupportedApplications\": 3,\n            \"desiredSize\": 1,\n            \"postDeviceCreationUserScriptReference\": None,\n            \"preDeviceDeletionUserScriptReference\": None,\n            \"scalingPolicies\": [{\n                \"name\": \"scale-out\",\n                \"cooldown\": 15,\n                \"direction\": \"ADD\",\n                \"type\": \"ChangeCount\",\n                \"value\": 1\n            },\n            {\n                \"name\": \"scale-in\",\n                \"cooldown\": 15,\n                \"direction\": \"REMOVE\",\n                \"type\": \"ChangeCount\",\n                \"value\": 1\n            }]\n        }\n    )\n# TODO Verify=False ???\n\n\ndef create_scale_rules_and_alerts(env, ssg_result):\n    # Creating scale in alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"name\": env.SSG_NAME + \"-device-scale-in\",\n            \"alertTypeId\": \"device-scale-in-recommendation\",\n            \"isDefault\": False,\n            \"producerType\": \"device\",\n            \"alertType\": \"active\",\n            \"alertContext\": \"scale-in-recommendation\",\n            \"includeInternalAlerts\": False,\n            \"aggregationMethod\": \"and\",\n            \"external\": \"true\",\n            \"nestedRules\": [{\n                \"alertTypeId\": \"device-cpu\",\n                \"alertRuleType\": \"nested-metric\",\n                \"warningThreshold\": 5,\n                \"errorThreshold\": 5,\n                \"unit\": \"percent\",\n                \"operator\": \"less-than\",\n                \"enabled\": True\n            },\n            {\n                \"alertTypeId\": \"device-throughput-in\",\n                \"alertRuleType\": \"nested-metric\",\n                \"warningThreshold\": 5,\n                \"errorThreshold\": 5,\n                \"unit\": \"K\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True\n            }],\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertRuleType\": \"aggregated\",\n            \"isPublic\": False\n        }\n    )\n\n    # Creating scale in alert OR\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"aggregationMethod\": \"or\",\n            \"producerType\": \"ssg\",\n            \"name\": env.SSG_NAME + \"-device-scale-in\",\n            \"alertTypeId\": \"ssg-scale-in-recommendation\",\n            \"includeInternalAlerts\": True,\n            \"alertRuleReferences\": [{\n                \"name\": env.SSG_NAME + \"-device-scale-in\",\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-device-scale-in\"\n            }],\n            \"external\": True,\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertContext\": \"scale-in-recommendation\",\n            \"alertRuleType\": \"aggregated\",\n            \"alertType\": \"active\",\n            \"isDefault\": False,\n            \"isPublic\": False\n        }\n    )\n\n    # Create scale in workflow rule\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/workflow-rules\",\n        {\n            \"workflowRuleName\": env.SSG_NAME + \"-scale-in\",\n            \"workflowParameters\": {\n                \"parameters\": {\n                    \"ssgName\": env.SSG_NAME,\n                    \"scalingPolicyName\": \"scale-in\"\n                }\n            },\n            \"targetWorkflowUri\": \"https://localhost/mgmt/cm/cloud/tasks/handle-scaling-alert\",\n            \"alertRuleReference\": {\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-ssg-scale-in\"\n            },\n            \"sendEmail\": False,\n            \"sendEmailContacts\": None,\n            \"sendSNMP\": False\n        },\n        identifier_name=\"workflowRuleName\"\n    )\n\n    # Creating scale out alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"aggregationMethod\": \"or\",\n            \"producerType\": \"device\",\n            \"name\": env.SSG_NAME + \"-device-scale-out\",\n            \"alertTypeId\": \"device-scale-out-recommendation\",\n            \"includeInternalAlerts\": False,\n            \"nestedRules\": [{\n                \"alertRuleType\": \"nested-metric\",\n                \"alertTypeId\": \"device-cpu\",\n                \"warningThreshold\": 75,\n                \"errorThreshold\": 75,\n                \"unit\": \"percent\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True\n            },\n            {\n                \"alertRuleType\": \"nested-metric\",\n                \"alertTypeId\": \"device-throughput-in\",\n                \"warningThreshold\": 20,\n                \"errorThreshold\": 20,\n                \"unit\": \"K\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True\n            }],\n            \"external\": True,\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertContext\": \"scale-out-recommendation\",\n            \"alertRuleType\": \"aggregated\",\n            \"alertType\": \"active\",\n            \"isDefault\": False,\n            \"isPublic\": False\n        }\n    )\n\n    # Create scale in alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"aggregationMethod\": \"or\",\n            \"producerType\": \"ssg\",\n            \"name\": env.SSG_NAME + \"-ssg-scale-out\",\n            \"alertTypeId\": \"ssg-scale-out-recommendation\",\n            \"includeInternalAlerts\": True,\n            \"alertRuleReferences\": [{\n                \"name\": env.SSG_NAME + \"-device-scale-out\",\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-device-scale-out\"\n            }],\n            \"external\": True,\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertContext\": \"scale-out-recommendation\",\n            \"alertRuleType\": \"aggregated\",\n            \"alertType\": \"active\",\n            \"isDefault\": False,\n            \"isPublic\": False\n        }\n    )\n\n    # Create scale in workflow rule\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/workflow-rules\",\n        {\n            \"workflowRuleName\": env.SSG_NAME + \"-scale-out\",\n            \"workflowParameters\": {\n                \"parameters\": {\n                    \"ssgName\": env.SSG_NAME,\n                    \"scalingPolicyName\": \"scale-out\"\n                }\n            },\n            \"targetWorkflowUri\": \"https://localhost/mgmt/cm/cloud/tasks/handle-scaling-alert\",\n            \"alertRuleReference\": {\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-ssg-scale-out\"\n            },\n            \"sendEmail\": False,\n            \"sendEmailContacts\": None,\n            \"sendSNMP\": False\n        },\n        identifier_name=\"workflowRuleName\"\n    )\n\n    # Create scale out alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"name\": env.SSG_NAME + \"-active-device-health\",\n            \"alertTypeId\": \"device-health\",\n            \"isDefault\": False,\n            \"isPublic\": False,\n            \"producerType\": \"device\",\n            \"alertType\": \"active\",\n            \"alertContext\": \"health\",\n            \"includeInternalAlerts\": True,\n            \"aggregationMethod\": \"or\",\n            \"alertRuleType\": \"aggregated\",\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"external\": True,\n            \"nestedRules\": [{\n                \"alertRuleType\": \"nested-metric\",\n                \"alertTypeId\": \"device-cpu\",\n                \"unit\": \"percent\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True,\n                \"warningThreshold\": 75,\n                \"errorThreshold\": 90\n            }]\n        }\n    )\n\n    # Create scale out workflow rule\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/workflow-rules\",\n        {\n            \"workflowRuleName\": env.SSG_NAME + \"-health\",\n            \"workflowParameters\": {\n                \"parameters\": {\n                    \"ssgName\": env.SSG_NAME\n                }\n            },\n            \"alertRuleReference\": {\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-active-device-health\"\n            },\n            \"sendEmail\": False,\n            \"sendEmailContacts\": None,\n            \"sendSNMP\": False\n        },\n        identifier_name=\"workflowRuleName\"\n    )\n\n    # Create scale out alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"name\": env.SSG_NAME + \"-active-ssg-health\",\n            \"alertTypeId\": \"ssg-health\",\n            \"isDefault\": False,\n            \"producerType\": \"ssg\",\n            \"alertType\": \"active\",\n            \"alertContext\": \"health\",\n            \"includeInternalAlerts\": True,\n            \"aggregationMethod\": \"or\",\n            \"external\": True,\n            \"alertRuleType\": \"aggregated\",\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertRuleReferences\": [{\n                \"name\": env.SSG_NAME + \"-active-device-health\",\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-active-device-health\"\n            }]\n        }\n    )\n\ndef main():\n    print(\"Parsing arguments...\")\n    env = parse_args()\n    print(\"Fetching device template...\")\n    device_template_result = create_device_template(env)\n    print(\"Creating cloud resources...\")\n    cloud_environment_result = create_cloud_resources(env, device_template_result)\n    print(\"Launching SSG...\")\n    ssg_result = create_ssg(env, cloud_environment_result)\n    print(\"Creating scale workflows and rules...\")\n    create_scale_rules_and_alerts(env, ssg_result)\n\nif __name__ == '__main__':\n    main()\n",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/deploy-application.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport argparse\nimport time\nimport util\nimport sys\n\ndef parse_args ():\n    # Ugly but expedient conversion of ansible-playbook to a parameterized python script\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--NODE_IP\", type=str, required=True)\n    parser.add_argument(\"--ELB_NAME\", type=str, required=True)\n    parser.add_argument(\"--ELB_DNS_NAME\", type=str, required=True)\n    return parser.parse_args()\n\n\ndef get_ssg_reference ():\n    return util.req(\n        \"http://localhost:8100/cm/cloud/service-scaling-groups/\",\n        None\n    ).json()\n\ndef poll_for_ssg_present (timeout=1200):\n    count = 0\n    while True:\n        result = get_ssg_reference()\n\n        if count >= timeout:\n            sys.exit(-1)\n            break\n\n        if not result[\"items\"]:\n            time.sleep(1)\n        else:\n            break\n        util.print_partial(\".\")\n        count += 1\n\ndef poll_for_ssg_ready (ssg_id, timeout=1200):\n    url = \"http://localhost:8100/cm/cloud/service-scaling-groups/\" + ssg_id\n    count = 0\n    while True:\n        if count >= timeout:\n            sys.exit(-1)\n            break\n\n        result = util.req(url, None)\n        status = result.json()[\"status\"]\n\n        if status == \"READY\":\n            break\n        else:\n            time.sleep(1)\n        util.print_partial(\".\")\n        count += 1\n\ndef deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):\n    util.req(\n        \"http://localhost:8100/cm/global/tasks/apply-template\",\n        None,\n        method=\"POST\",\n        json={\n            \"resources\": {\n                \"ltm:virtual:90735960bf4b\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"default_vs\"\n                        },\n                        \"parametersToRemove\": [],\n                        \"subcollectionResources\": {\n                            \"profiles:78b1bcfdafad\": [\n                                {\n                                    \"parameters\": {},\n                                    \"parametersToRemove\": []\n                                }\n                            ],\n                            \"profiles:2f52acac9fde\": [\n                                {\n                                    \"parameters\": {},\n                                    \"parametersToRemove\": []\n                                }\n                            ],\n                            \"profiles:9448fe71611e\": [\n                                {\n                                    \"parameters\": {},\n                                    \"parametersToRemove\": []\n                                }\n                            ]\n                        }\n                    }\n                ],\n                \"ltm:pool:8bc5b256f9d1\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"pool_0\"\n                        },\n                        \"parametersToRemove\": [],\n                        \"subcollectionResources\": {\n                            \"members:dec6d24dc625\": [\n                                {\n                                    \"parameters\": {\n                                        \"port\": \"80\",\n                                        \"nodeReference\": {\n                                            \"link\": \"#/resources/ltm:node:c072248f8e6a/\" + node_ip,\n                                            \"fullPath\": \"# \" + node_ip\n                                        }\n                                    },\n                                    \"parametersToRemove\": []\n                                },\n                                {\n                                    \"parameters\": {\n                                        \"port\": \"443\",\n                                        \"nodeReference\": {\n                                            \"link\": \"#/resources/ltm:node:c072248f8e6a/\" + node_ip,\n                                            \"fullPath\": \"# \" + node_ip\n                                        }\n                                    },\n                                    \"parametersToRemove\": []\n                                }\n                            ]\n                        }\n                    }\n                ],\n                \"ltm:node:c072248f8e6a\": [\n                    {\n                        \"parameters\": {\n                            \"name\": node_ip,\n                            \"address\": node_ip\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ],\n                \"ltm:monitor:http:18765a198150\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"monitor-http\"\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ],\n                \"ltm:profile:client-ssl:78b1bcfdafad\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"clientssl\"\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ],\n                \"ltm:profile:http:2f52acac9fde\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"profile_http\"\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ]\n            },\n            \"addAnalytics\": True,\n            \"domains\": [\n                {\n                    \"domainName\": elb_dns_name\n                }\n            ],\n            \"configSetName\": \"apache-test-application\",\n            \"ssgReference\": {\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_id\n            },\n            \"awsLoadBalancer\": {\n                \"name\": elb_name,\n                \"description\": \"\",\n                \"listeners\": [\n                    {\n                        \"loadBalancerPort\": 80,\n                        \"loadBalancerProtocol\": \"TCP\",\n                        \"instancePort\": 80,\n                        \"instanceProtocol\": \"TCP\"\n                    },\n                    {\n                        \"loadBalancerPort\": 443,\n                        \"loadBalancerProtocol\": \"TCP\",\n                        \"instancePort\": 443,\n                        \"instanceProtocol\": \"TCP\"\n                    }\n                ]\n            },\n            \"subPath\": \"apache-test-application\",\n            \"templateReference\": {\n                \"link\": \"https://localhost/mgmt/cm/global/templates/10e8d657-ed1c-3cc9-962d-f291ef02512e\"\n            },\n            \"mode\": \"CREATE\"\n        }\n    )\n\n\ndef main():\n    args = parse_args()\n    util.print_partial(\"Waiting for SSG to be present...\")\n    poll_for_ssg_present()\n    util.complete()\n\n    util.print_partial(\"Getting SSG reference...\")\n    ssgs = get_ssg_reference()\n    util.complete()\n\n    # Let this reference be unsafe and tacky so that this fails loudly if the SSG is not present\n    ssg_id = ssgs[\"items\"][0][\"id\"]\n    util.print_partial(\"Waiting for SSG to be ready...\")\n    poll_for_ssg_ready(ssg_id)\n    util.complete()\n\n    time.sleep(180) # Three minute wait for SSG to settle down\n\n    util.print_partial(\"Deploying application...\")\n    deploy_application(ssg_id, args.NODE_IP, args.ELB_NAME, args.ELB_DNS_NAME)\n    util.complete()\n\nif __name__ == '__main__':\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/post.yml": {
+                                "content": "---\n# Gracefully accept 400 Duplicate key responses\n# Treat a duplicate key as an indication that tthe resource was already created\n# This is intended only as a handler for POST requests\n- uri:\n    url: \"{{item.url}}\"\n    method: GET\n  register: get_response\n- debug: msg={{item.body}}\n- set_fact:\n    item_name: \"{{item.body.name}}\"\n  when: item.identifier_name is not defined\n\n- set_fact:\n    item_name: \"{{item.body[item.identifier_name]}}\"\n  when: item.identifier_name is defined\n\n- set_fact:\n    jq_command: \"json.items[?name=='{{item_name}}']\"\n\n- set_fact:\n    duplicates: \"{{get_response|json_query(jq_command)}}\"\n\n- block:\n    - uri:\n        url: \"{{item.url}}\"\n        method: POST\n        body_format: json\n        body: \"{{item.body}}\"\n        status_code: 200,400\n      register: response\n\n    - name: Fail when not 200 and not duplicate\n      fail:\n        msg: Something went wrong with this {{response}}\n      when: response.status != 200 and 'Duplicate item' not in response.msg\n  when: duplicates|length == 0\n\n- set_fact: \"{{item.var_name}}={{duplicates[0]}}\"\n  when: item.var_name is defined and duplicates|length > 0\n\n- set_fact: \"{{item.var_name}}={{response.json}}\"\n  when: item.var_name is defined and duplicates|length == 0\n\n...",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-cm.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
+                                            "echo ''",
+                                            "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
+                                            "echo ''",
+                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
+                                            "echo ''",
+                                            "read -s -p 'BIG-IP Password: ' BIG_IP_PWD",
+                                            "echo ''",
+                                            "mount -o remount,rw /usr",
+                                            "/usr/local/bin/pip install awscli",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        " AWS_DEFAULT_REGION=",
+                                                        {
+                                                            "Ref": "AWS::Region"
+                                                        },
+                                                        " AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY",
+                                                        " AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY",
+                                                        " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
+                                                        " ELB-",
+                                                        {
+                                                            "Ref": "AWS::StackName"
+                                                        },
+                                                        " --load-balancer-ports 80 80"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                                                        {
+                                                            "Ref": "licenseKey1"
+                                                        },
+                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                                                        "--TIMEOUT_SEC 1200"
+                                                    ]
+                                                ]
+                                            },
+                                            "sleep 10",
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "BigIqDcdEth0",
+                                                                "PrimaryPrivateIpAddress"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Fn::Join": [
+                                                                " ",
+                                                                [
+                                                                    "--DCD_PWD $BIG_IQ_PWD",
+                                                                    "--DCD_USERNAME admin"
+                                                                ]
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "tmsh modify auth user admin",
+                                                        " password $BIG_IQ_PWD",
+                                                        " && tmsh save sys config"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/activate-dcd-services.py --SERVICES asm",
+                                                        "--DCD_IP_ADDRESS",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "BigIqDcdEth0",
+                                                                "PrimaryPrivateIpAddress"
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "/config/cloud/create-auto-scaling.py ",
+                                                        "--AWS_SUBNET_1A ",
+                                                        {
+                                                            "Ref": "Subnet1"
+                                                        },
+                                                        " ",
+                                                        "--AWS_SUBNET_1B ",
+                                                        {
+                                                            "Ref": "Subnet2"
+                                                        },
+                                                        " ",
+                                                        "--AWS_US_EAST_1A ",
+                                                        {
+                                                            "Ref": "subnet1Az"
+                                                        },
+                                                        " ",
+                                                        "--AWS_US_EAST_1B ",
+                                                        {
+                                                            "Ref": "subnet1Az"
+                                                        },
+                                                        " ",
+                                                        "--AWS_SSH_KEY ",
+                                                        {
+                                                            "Ref": "sshKey"
+                                                        },
+                                                        " ",
+                                                        "--AWS_VPC ",
+                                                        {
+                                                            "Ref": "VPC"
+                                                        },
+                                                        " ",
+                                                        "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
+                                                        "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
+                                                        "--BIGIP_AMI ",
+                                                        {
+                                                            "Ref": "bigIpAmi"
+                                                        },
+                                                        " --BIGIQ_URI http://localhost:8100 ",
+                                                        "--BIGIP_USER admin",
+                                                        " --BIGIP_PWD $BIG_IP_PWD",
+                                                        " --CLOUD_PROVIDER_NAME aws ",
+                                                        "--CLOUD_ENVIRONMENT_NAME aws-env ",
+                                                        "--DEFAULT_REGION ",
+                                                        {
+                                                            "Ref": "AWS::Region"
+                                                        },
+                                                        " ",
+                                                        "--DEVICE_TEMPLATE_NAME default-ssg-template ",
+                                                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
+                                                        "--NTP_SERVER time.nist.gov ",
+                                                        "--SSG_NAME ",
+                                                        {
+                                                            "Ref": "ssgName"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/deploy-application.py --NODE_IP",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "UbuntuExampleApplicationStack",
+                                                                "Outputs.HTTPServerIP"
+                                                            ]
+                                                        },
+                                                        "--ELB_NAME",
+                                                        {
+                                                            "Fn::Join": [
+                                                                "",
+                                                                [
+                                                                    "ELB-",
+                                                                    {
+                                                                        "Ref": "AWS::StackName"
+                                                                    }
+                                                                ]
+                                                            ]
+                                                        },
+                                                        "--ELB_DNS_NAME",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "ClassicELB",
+                                                                "DNSName"
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-dcd.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
+                                            "echo ''",
+                                            "/config/cloud/wait-for-rjd.py",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "tmsh modify auth user admin",
+                                                        " password $BIG_IQ_PWD",
+                                                        " && tmsh save sys config && set-basic-auth on"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                                                        {
+                                                            "Ref": "licenseKey2"
+                                                        },
+                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                                                        "--TIMEOUT_SEC 1200",
+                                                        "--NODE_TYPE DCD"
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/util.py": {
+                                "content": "import requests\nfrom requests import ConnectionError\nimport sys\nimport time\n\n\ndef req (url, auth, json=None, method=\"GET\", verify=True):\n    response = requests.request(method, url, json=json, auth=auth, verify=False)\n    if verify:\n        verify_success(response)\n\n    return response\n\ndef print_partial (msg):\n    sys.stdout.write(msg)\n    sys.stdout.flush()\n\ndef complete ():\n    print(\" done!\\n\")\n\ndef verify_success (response):\n    try:\n        if not response.ok:\n            print(\n                \"Request to \" + str(response.url) + \" failed with \" +\n                str(response.status_code)\n            )\n            print(\" and response body \\n\" + str(response.json()))\n            sys.exit(1)\n    except ValueError:\n        sys.exit(1)\n\ndef _get_poll_addr (addr):\n    return  \"https://localhost/info/system\" if \"localhost\" in addr else \"https://\" + addr + \"/info/system\"\n\ndef poll_for_system_down (address, auth=None,  timeout=60):\n    print_partial(\"Waiting for system to go down...\")\n    i = 0\n    url = _get_poll_addr(address)\n    while True:\n        print_partial(\".\")\n        i += 1\n        conn_failed = False\n        try:\n            status_res = req(url, auth, verify=False)\n        except ConnectionError: # Errors when connection refused\n            conn_failed = True\n            print_partial(\"x\")\n            return True\n        if i > timeout:\n            return False # System failed to go down I guess\n        if conn_failed or not status_res:\n            return True\n        elif status_res.ok and safe_access(status_res.json(), 'available'):\n            time.sleep(1)\n        else: # available was False\n            return True\n\ndef safe_access (d, prop):\n    value = None\n    try:\n        value = d[prop]\n    except KeyError:\n        pass\n    return value\n\n\n\n# True response indicates a succesful service bring up\ndef poll_for_services_available (address, auth=None,  timeout=60):\n    print_partial(\"Waiting for service availablity...\")\n    i = 0\n    url = _get_poll_addr(address)\n    while True:\n        print_partial(\".\")\n        i += 1\n        conn_failed = False\n        try:\n            status_res = req(url, auth, verify=False)\n        except ConnectionError: # Errors when connection refused\n            conn_failed = True\n            print_partial(\"x\")\n\n        if i > timeout:\n            return False\n        if conn_failed or not status_res:\n            time.sleep(1)\n        elif status_res.ok and safe_access(status_res.json(), 'available'):\n            time.sleep(1)\n            return True\n        else:\n            time.sleep(1)\n\n    verify_success(status_res)\n    return status_res.json()['available']\n\ndef poll_for_system_setup (address, auth=None,  timeout=60):\n    print_partial(\"Waiting for system setup to complete...\")\n    i = 0\n    url = \"http://localhost:8100/shared/system/setup\" if \"localhost\" in address else \"https://\" + address + \"/mgmt/shared/system/setup\"\n    while True:\n        print_partial(\".\")\n        i += 1\n        conn_failed = False\n        try:\n            status_res = req(url, auth, verify=False)\n        except ConnectionError: # Errors when connection refused\n            conn_failed = True\n            print_partial(\"x\")\n\n        if i > timeout:\n            return False\n        if conn_failed or not status_res:\n            time.sleep(1)\n        elif status_res.ok and safe_access(status_res.json(), 'isSystemSetup'):\n            time.sleep(1)\n            return True\n        else:\n            time.sleep(1)\n\n    verify_success(status_res)\n    return status_res.json()['available']\n\ndef kill_ssl_warnings (logging, urllib3):\n    # Set log leve for requests module\n    logging.getLogger(\"requests\").setLevel(logging.CRITICAL)\n    # Demo machines will not have valid signed certificate\n    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)\n\ndef get_environment (address, username=None, pwd=None):\n    local = \"localhost\" in address\n\n    return {\n        \"base_url\": \"http://localhost:8100/\" if local else \"https://\" + address + \"/mgmt/\",\n        \"address\": address,\n        \"auth\": None if local else requests.auth.HTTPBasicAuth(username, pwd)\n    }",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/wait-for-rjd.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport util\n\ndef main():\n    util.poll_for_services_available(\"localhost\", None, timeout=1200)\n\nif __name__ == '__main__':\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "ImageId": {
+                    "Ref": "bigIqAmi"
+                },
+                "InstanceType": {
+                    "Ref": "instanceType"
+                },
+                "KeyName": {
+                    "Ref": "sshKey"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "NetworkInterfaceId": {
+                            "Ref": "BigIqCmEth0"
+                        }
+                    },
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "BIG-IQ CM Instance Management IP",
+                        "DeviceIndex": "1",
+                        "GroupSet": [
+                            {
+                                "Ref": "SecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "Subnet1"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "Big-IQ CM:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "/opt/aws/apitools/cfn-init-1.4-0.amzn1/bin/cfn-init -v -s ",
+                                {
+                                    "Ref": "AWS::StackId"
+                                },
+                                " -r ",
+                                "BigIqCm",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "BigIqCmEth0": {
+            "Properties": {
+                "Description": "BIG-IQ CM Instance Management IP",
+                "GroupSet": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "Subnet1"
+                }
+            },
+            "Type": "AWS::EC2::NetworkInterface"
+        },
+        "BigIqDcd": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "/config/cloud/activate-dcd-services.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport argparse\nimport logging\nimport requests\nimport string\nimport sys\nimport urllib3\nimport util\n\nSERVICES = [ \"access\", \"dos\", \"websafe\", \"ipsec\", \"afm\", \"asm\" ]\n\n# Key is front end representation\n# Value is backend representation\n# This will be used to print a message helpful in navigating our confused domain\nSERVICE_TRANSLATION = {\n    \"Access\":                   \"access\",\n    \"DoS Protection\":           \"dos\",\n    \"Fraud Protection Service\": \"websafe\",\n    \"IPsec\":                    \"ipsec\",\n    \"Network Security\":         \"afm\",\n    \"Web Application Security\": \"asm\",\n}\n\nSERVICE_NAME_TO_URL = {\n    \"access\":  \"cm/access/event-logs/listener/add-listener-task/\",\n    \"dos\":     \"cm/security-shared/tasks/add-dos-listener\",\n    \"websafe\": \"cm/websafe/tasks/add-listener/\",\n    \"ipsec\":   \"cm/adc-core/tasks/add-listener/\",\n    \"afm\":     \"cm/firewall/tasks/add-afm-listener\",\n    \"asm\":     \"cm/asm/tasks/add-syslog-listener\"\n}\n\ndef parse_args ():\n    parser = argparse.ArgumentParser()\n    services_help = (\"Specify the list of services you wish to be activated on the DCD.\\n\"\n                     \"Available options are: \"\n                    )\n\n    services_help += string.join(SERVICES, \", \")\n\n    parser.add_argument(\n        \"--SERVICES\",\n        nargs=\"+\",\n        type=str,\n        default=[],\n        help=services_help\n\n    )\n    parser.add_argument(\"--LIST_SERVICES\", type=bool, default=False)\n    parser.add_argument(\"--DCD_IP_ADDRESS\", type=str, required=True)\n    parser.add_argument(\"--BIGIQ_ADDR\", type=str, default=\"localhost\")\n    parser.add_argument(\"--BIGIQ_USERNAME\", type=str, default=None)\n    parser.add_argument(\"--BIGIQ_PWD\", type=str, default=None)\n\n    return parser.parse_args()\n\n# Transform the service name from the the front end representation to the\n# backend representation.\ndef print_service_name_translation ():\n    print(\"Translation of service names to keys: \")\n    for ui_name, backend_name in SERVICE_TRANSLATION.iteritems():\n        print(ui_name + \" = \" + backend_name)\n\n\ndef activate_service (env, service, dcd_self_link, listener_interface_address):\n    json_body = {\n                \"module\": service,\n                \"listenerInterfaceAddress\": listener_interface_address,\n                \"deviceReference\": {\n                    \"link\": dcd_self_link\n                }\n            }\n    # ASM has a special property\n    if service == \"asm\":\n        json_body[\"indexName\"] = \"asmindex\"\n\n    util.req(\n        env[\"base_url\"] + SERVICE_NAME_TO_URL[service],\n        env[\"auth\"],\n        method=\"POST\",\n        json=json_body\n    )\n\ndef activate_services (env, dcd_ip, dcd_self_link, services):\n    for service in services:\n        activate_service(env, service, dcd_self_link, dcd_ip)\n        util.print_partial(\".\")\n        # ASM has a different JSON body\n\n# Get the self link for the data collection device. This is necessary for any\n# service activation request\ndef get_dcd_device_reference (env, dcd_ip):\n    devices_res = util.req(\n        env[\"base_url\"] + \"shared/resolver/device-groups/cm-esmgmt-logging-group/devices/\",\n        env[\"auth\"]\n    )\n\n    # Suppose just let this fail if any of these steps puke\n    # Distill the response down into just the data collection device on which\n    # we are activating services\n    devices = devices_res.json()\n    devices = devices[\"items\"]\n    devices = [device for device in devices if device[\"address\"] == dcd_ip]\n    device = devices[0]\n\n    return device[\"selfLink\"]\n\n# Check that every service the user specified exists in the services list\ndef verify_services_are_valid (user_specified_services):\n    for service in user_specified_services:\n        if not service in SERVICES:\n            print(\"Invalid service specified: \" + service)\n            print(\"Refer to the following list for valid service names:\")\n            print_service_name_translation()\n            sys.exit(1)\n\n\ndef main ():\n    util.kill_ssl_warnings(logging, urllib3)\n    args = parse_args()\n    verify_services_are_valid(args.SERVICES)\n    if args.LIST_SERVICES:\n        print_service_name_translation()\n        sys.exit(0)\n        return\n\n    if not args.SERVICES:\n        print(\"No services specified\")\n        sys.exit(0)\n        return\n\n    env = util.get_environment(args.BIGIQ_ADDR, username=args.BIGIQ_USERNAME, pwd=args.BIGIQ_PWD)\n\n    util.poll_for_services_available(env[\"address\"], auth=env[\"auth\"],  timeout=360)\n    util.complete()\n\n    util.print_partial(\"Retrieving DCD identifier...\")\n    dcd_self_link = get_dcd_device_reference(env, args.DCD_IP_ADDRESS)\n    util.complete()\n\n    util.print_partial(\"Activating services: \" + string.join(args.SERVICES, \", \") + \"...\")\n    activate_services(env, args.DCD_IP_ADDRESS, dcd_self_link, args.SERVICES)\n    util.complete()\n\n\nif __name__ == '__main__':\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/add-dcd.py": {
+                                "content": "#! /usr/local/bin/python2.7\n\nimport argparse\nimport requests\nimport sys\nimport time\nimport util\nimport logging\nimport urllib3\n# Add a data collection device to a BIG IQ CM device\nutil.kill_ssl_warnings(logging, urllib3)\n\n# Return an object representing the arguments passed in to this program\ndef parse_args ():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\n        \"--BIGIQ_ADDR\",\n        type=str,\n        default=\"localhost\",\n        help=\"Address of BIG-IQ CM instance to which a data collection device will be added. Optional: defaults to localhost\"\n    )\n    parser.add_argument(\n        \"--DCD_IP_ADDRESS\",\n        type=str,\n        required=True,\n        help=\"IP of the BIG-IQ DCD instance. This must already be configured with the logging_node personality\"\n    )\n    parser.add_argument(\n        \"--DCD_USERNAME\",\n        type=str,\n        required=True,\n        help=\"Username to use for the DCD\"\n    )\n    parser.add_argument(\n        \"--DCD_PWD\",\n        type=str,\n        required=True,\n        help=\"Password to use for the DCD\"\n    )\n    parser.add_argument(\n        \"--BIGIQ_USERNAME\",\n        type=str,\n        help=\"Username to use for the BIG-IQ CM instance. This is not necessary when running against localhost\"\n    )\n    parser.add_argument(\n        \"--BIGIQ_PWD\",\n        type=str,\n        help=\"Password to use for the BIG-IQ CM instance. This is not necessary when running against localhost\"\n    )\n    parser.add_argument(\n        \"--TIMEOUT_SEC\",\n        type=str,\n        help=\"Time to wait in seconds for the services to come available. This is approximate. Total wait time will be strictly greater than or equal to the time specified.\",\n        default=60\n    )\n    args = parser.parse_args()\n    return args\n\n# Determine the environment from url, either localhost or remote\ndef get_environment (address, username=None, pwd=None):\n    return util.get_environment(address, username, pwd)\n\n# Returns UUID of new node\ndef add_node (env, ip_address, username, password):\n    # POST\n    # https://18.232.246.131/mgmt/cm/shared/esmgmt/add-node\n    # {\"address\":\"35.173.117.194\",\"bigIqUsername\":\"admin\",\"bigIqPassword\":\"P@$$Word!\",\"httpPort\":9200,\"transportAddress\":\"10.1.1.230\",\"transportPort\":9300,\"zone\":\"default\"}\n    # Returns something like\n    # {\"address\":\"35.173.117.194\",\"transportAddress\":\"10.1.1.230\",\"httpPort\":\"9200\",\"transportPort\":\"9300\",\"zone\":\"default\",\"bigIqUsername\":\"admin\",\"bigIqPassword\":\"P@$$Word!\",\"id\":\"0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"status\":\"STARTED\",\"userReference\":{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"},\"identityReferences\":[{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"}],\"ownerMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"taskWorkerGeneration\":1,\"generation\":1,\"lastUpdateMicros\":1525977026342300,\"kind\":\"cm:shared:esmgmt:add-node:esaddnodetaskstate\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\"}\n    node_res = util.req(\n        env['base_url'] + \"cm/shared/esmgmt/add-node\",\n        env['auth'],\n        method=\"POST\",\n        json={\n            \"address\": ip_address,\n            \"bigIqUsername\": username,\n            \"bigIqPassword\": password,\n            \"httpPort\": 9200,\n            \"transportAddress\": ip_address,\n            \"transportPort\":9300,\n            \"zone\":\"default\"\n        }\n    )\n    # Won't reach this point w/o 200 OK\n    return node_res.json()['id']\n\n\ndef poll_for_result (env, uuid):\n    # Based on a the UUID returned from add_node poll this endpoint until something happens\n    # GET\n    # https://18.232.246.131/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\n    # Returns something like this in progress\n    # {\"address\":\"35.173.117.194\",\"bigIqPassword\":\"\",\"bigIqUsername\":\"admin\",\"cluster\":{\"clusterName\":\"39d30597-4d09-419b-ad64-450e5ba01edf\",\"primaryMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"clusterIndexCollectionReference\":{\"link\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e/indices\",\"isSubcollection\":true},\"nodes\":[{\"machineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"allowData\":false,\"allowMaster\":true,\"httpAddress\":\"127.0.0.1\",\"httpPort\":\"9200\",\"transportAddress\":\"10.1.1.169/24\",\"transportPort\":\"9300\",\"zone\":\"default\",\"mlockall\":false,\"repo\":\"/var/config/rest/elasticsearch/data\",\"generation\":0,\"lastUpdateMicros\":0}],\"numberOfDataNodes\":0,\"id\":\"3fa8567f-b10d-49d1-8e50-09d8741ada4e\",\"generation\":1,\"lastUpdateMicros\":1525976702076194,\"kind\":\"cm:shared:esmgmt:cluster:esclusterinstancestate\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e\"},\"currentStep\":\"CHECK_DEVICE_STATUS_ADD\",\"deviceReference\":{\"link\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"deviceState\":{\"uuid\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"deviceUri\":\"https://35.173.117.194:443\",\"machineId\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"state\":\"PENDING\",\"address\":\"35.173.117.194\",\"httpsPort\":443,\"properties\":{\"isLoggingNode\":true},\"groupName\":\"cm-esmgmt-logging-group\",\"generation\":1,\"lastUpdateMicros\":1525977026535394,\"kind\":\"shared:resolver:device-groups:restdeviceresolverdevicestate\",\"selfLink\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"generation\":5,\"httpPort\":\"9200\",\"id\":\"0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"identityReferences\":[{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"}],\"kind\":\"cm:shared:esmgmt:add-node:esaddnodetaskstate\",\"lastUpdateMicros\":1525977028708833,\"ownerMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"startDateTime\":\"2018-05-10T11:30:26.360-0700\",\"status\":\"STARTED\",\"transportAddress\":\"10.1.1.230\",\"transportPort\":\"9300\",\"userReference\":{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"},\"username\":\"admin\",\"zone\":\"default\"}\n    i = 0\n    while i < 120:\n        add_node_res = util.req(env['base_url'] + \"cm/shared/esmgmt/add-node/\" + uuid, env['auth'])\n        status = add_node_res.json()['status']\n        if status == \"FINISHED\":\n            break\n        elif status == \"FAILED\":\n            print(\"\")\n            print(\"Node addition failed with:\")\n            print(add_node_res.json()['errorMessage'])\n            sys.exit(1)\n\n        util.print_partial(\".\")\n        time.sleep(2)\n        i += 2\n\n    # Returns something like this on failure\n    # {\"address\":\"35.173.117.194\",\"bigIqPassword\":\"\",\"bigIqUsername\":\"admin\",\"cluster\":{\"clusterName\":\"39d30597-4d09-419b-ad64-450e5ba01edf\",\"primaryMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"clusterIndexCollectionReference\":{\"link\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e/indices\",\"isSubcollection\":true},\"nodes\":[{\"machineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"allowData\":false,\"allowMaster\":true,\"httpAddress\":\"127.0.0.1\",\"httpPort\":\"9200\",\"transportAddress\":\"10.1.1.169/24\",\"transportPort\":\"9300\",\"zone\":\"default\",\"mlockall\":false,\"repo\":\"/var/config/rest/elasticsearch/data\",\"generation\":0,\"lastUpdateMicros\":0}],\"numberOfDataNodes\":0,\"id\":\"3fa8567f-b10d-49d1-8e50-09d8741ada4e\",\"generation\":1,\"lastUpdateMicros\":1525976702076194,\"kind\":\"cm:shared:esmgmt:cluster:esclusterinstancestate\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/cluster/3fa8567f-b10d-49d1-8e50-09d8741ada4e\"},\"currentStep\":\"POST_DEVICE_ES\",\"deviceReference\":{\"link\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"deviceState\":{\"uuid\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"deviceUri\":\"https://35.173.117.194:443\",\"machineId\":\"f5258bfe-b583-439e-ab92-1d063e3366d1\",\"state\":\"ACTIVE\",\"address\":\"35.173.117.194\",\"httpsPort\":443,\"hostname\":\"bigiq1\",\"version\":\"6.0.0\",\"product\":\"BIG-IQ\",\"edition\":\"Final\",\"build\":\"0.0.1490\",\"restFrameworkVersion\":\"6.0.0-0.0.1490\",\"managementAddress\":\"10.1.1.230\",\"mcpDeviceName\":\"/Common/localhost\",\"properties\":{\"shared:resolver:device-groups:discoverer\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"isLoggingNode\":true},\"isClustered\":false,\"isVirtual\":true,\"groupName\":\"cm-esmgmt-logging-group\",\"slots\":[{\"volume\":\"HD1.1\",\"product\":\"BIG-IQ\",\"version\":\"6.0.0\",\"build\":\"0.0.1490\",\"isActive\":true}],\"generation\":3,\"lastUpdateMicros\":1525977031900228,\"kind\":\"shared:resolver:device-groups:restdeviceresolverdevicestate\",\"selfLink\":\"https://localhost/mgmt/shared/resolver/device-groups/cm-esmgmt-logging-group/devices/f5258bfe-b583-439e-ab92-1d063e3366d1\"},\"endDateTime\":\"2018-05-10T11:30:33.773-0700\",\"errorMessage\":\"Unable to add Data Collection Device 35.173.117.194 to logging cluster with error 'invalid\\r\\ntransportAddress: 10.1.1.169/24'\",\"generation\":7,\"httpPort\":\"9200\",\"id\":\"0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"identityReferences\":[{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"}],\"kind\":\"cm:shared:esmgmt:add-node:esaddnodetaskstate\",\"lastUpdateMicros\":1525977033823047,\"ownerMachineId\":\"1f7b1aa0-8fa6-498a-bae6-9c7bb9318435\",\"selfLink\":\"https://localhost/mgmt/cm/shared/esmgmt/add-node/0d043d33-7619-404b-b184-58aa5c8ef0cf\",\"startDateTime\":\"2018-05-10T11:30:26.360-0700\",\"status\":\"FAILED\",\"transportAddress\":\"10.1.1.230\",\"transportPort\":\"9300\",\"userReference\":{\"link\":\"https://localhost/mgmt/shared/authz/users/admin\"},\"username\":\"admin\",\"zone\":\"default\"}\n\n    # Success response includes \"FINISHED\" in the \"status\" property\n\ndef check_that_device_not_already_registered (env, dcd_ip):\n    res = util.req(\n        env[\"base_url\"] + \"shared/resolver/device-groups/cm-esmgmt-logging-group/devices\",\n        env[\"auth\"]\n    )\n    devices = res.json()[\"items\"]\n\n    if any(device[\"address\"] == dcd_ip for device in devices):\n        print(\"\")\n        print(\"Device is already registered.\")\n        sys.exit(0)\n\n\ndef main ():\n    # load vars from parser\n    args = parse_args()\n    # Determine local or remote\n    environment = get_environment(args.BIGIQ_ADDR, username=args.DCD_USERNAME, pwd=args.DCD_PWD)\n    # Test authentication?\n    util.poll_for_services_available(environment['address'], auth=environment['auth'])\n    util.complete()\n\n    # Wait for DCD available and assume basic auth is enabled\n    util.poll_for_system_setup(\n        args.DCD_IP_ADDRESS,\n        auth=requests.auth.HTTPBasicAuth(args.DCD_USERNAME,\n        args.DCD_PWD),\n        timeout=args.TIMEOUT_SEC\n    )\n    util.complete()\n\n    # Verify that device is not added already\n    util.print_partial(\"Checking that device is not already registered...\")\n    check_that_device_not_already_registered(environment, args.DCD_IP_ADDRESS)\n    util.complete()\n\n    # post to add node\n    util.print_partial(\"Adding node...\")\n    node_uuid = add_node(environment, args.DCD_IP_ADDRESS, args.DCD_USERNAME, args.DCD_PWD)\n    util.complete()\n\n    # poll add until success or failure\n    util.print_partial(\"Waiting for result...\")\n    poll_for_result(environment, node_uuid)\n    util.complete()\n\n\nif __name__ == \"__main__\":\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/configure-bigiq.py": {
+                                "content": "#! /usr/local/bin/python2.7\n# Run a BIG IQ through the licensing and configuration wizard without any user interaction\n# Return control when the BIG IQ is fully configured\nimport sys\nimport argparse\nimport requests\nfrom requests.auth import HTTPBasicAuth\nimport time\nimport logging\nimport urllib3\nimport util\nfrom util import print_partial, complete\n\nutil.kill_ssl_warnings(logging, urllib3)\n\n# Enter the license key into the BIQ\ndef enter_license_info (license_key):\n    req(\n        BIGIQ_REST_URL + \"tm/shared/licensing/activation\",\n        method=\"POST\",\n        json={\"baseRegKey\":LICENSE_KEY,\"addOnKeys\":[],\"activationMethod\":\"AUTOMATIC\"},\n        auth=AUTH\n    )\n    # assume that a dossier is enclosed in the response which should be\n    # submitted with the next request\n\n\n# The dossier is retrievable from this endpoint always\n# Register the return dossier\ndef poll_for_licensing_complete ():\n    sys.stdout.write(\"Waiting for license activation...\")\n    sys.stdout.flush()\n    i = 0\n    while True:\n        i += 1\n        activation_res = req(BIGIQ_REST_URL + \"tm/shared/licensing/activation\")\n        res_json = activation_res.json()\n        if res_json['status'] == \"LICENSING_COMPLETE\" or i > TIMEOUT_SEC:\n            # Break when licensing is complete or the operation has timed out\n            break\n        elif activation_res.json()['status'] == \"LICENSING_FAILED\":\n            print(\"\")\n            print(\"Licensing failure, reason given: \")\n            print(activation_res.json()['errorText'])\n            sys.exit(1)\n            break\n        elif res_json['status'] == \"NEED_EULA_ACCEPT\":\n            req(\n                BIGIQ_REST_URL + \"tm/shared/licensing/activation\",\n                method=\"POST\",\n                json={\n                    \"baseRegKey\": LICENSE_KEY,\n                    \"addOnKeys\": [],\n                    \"activationMethod\": \"AUTOMATIC\",\n                    \"eulaText\": res_json['eulaText']\n                }\n\n            )\n            # Reset timeout\n            i = 0\n        else:\n            time.sleep(1)\n        sys.stdout.write(\".\")\n        sys.stdout.flush()\n\n    licenseText = \"\"\n    try:\n        licenseText = activation_res.json()['licenseText']\n    except KeyError:\n        pass\n\n    # License text could be set but be empty\n    if not licenseText:\n        print(\" Licensing failed\")\n        sys.exit(1)\n\n    req(\n        BIGIQ_REST_URL + \"tm/shared/licensing/registration\",\n        json={ 'licenseText': licenseText },\n        method=\"PUT\"\n    )\n\n    return activation_res.json()\n\n# Configure as CM or DCD node\ndef configure_big_iq_type (dcd=False):\n    if dcd:\n        req(\n            BIGIQ_REST_URL + \"cm/system/provisioning\",\n            json={\"systemPersonality\":\"logging_node\"},\n            method=\"POST\"\n        )\n\n# Step 3 configure managment address\ndef set_management_address ():\n    default_config_res = req(BIGIQ_REST_URL + \"shared/system/easy-setup\")\n    cfg = default_config_res.json()\n    # I guess just post back what is set, TODO is this required then?\n    management_addr = cfg[\"managementIpAddress\"]\n    # Turn it from cidr to ip\n    management_addr = management_addr[:-3]\n    req(\n        BIGIQ_REST_URL + \"shared/system/easy-setup\",\n        json={\n                \"hostname\": cfg[\"hostname\"],\n                \"managementIpAddress\": cfg[\"managementIpAddress\"],\n                \"managementRouteAddress\": cfg[\"managementRouteAddress\"]\n            },\n        method=\"PATCH\"\n    )\n\n\n    time.sleep(2)\n    print(\"Setting discovery address to \" + management_addr)\n    req(\n        BIGIQ_REST_URL + \"shared/identified-devices/config/discovery\",\n        json={\"discoveryAddress\":management_addr},\n        method=\"PUT\"\n    )\n\n    # Suspicious of BIQ/TMOS interaction being fully atomic when this previous request returns\n    time.sleep(2)\n    disco_addr_res = req(\n        BIGIQ_REST_URL + \"shared/identified-devices/config/discovery\"\n    )\n\n    try:\n        if not disco_addr_res.json()['discoveryAddress'] == management_addr:\n            print(\"Discovery address could not be set\")\n            sys.exit(1)\n    except KeyError:\n        print(\"Discovery address could not be set\")\n        sys.exit(1)\n\n\n\n# Step 4 set the ntp and dns servers\ndef configure_services ():\n    req(\n        BIGIQ_REST_URL + \"tm/sys/dns\",\n        json={\"nameServers\":[\"8.8.8.8\"],\"search\":[\"localhost\"]},\n        method=\"PATCH\"\n    )\n\n    req(\n        BIGIQ_REST_URL + \"tm/sys/ntp\",\n        json={\"servers\":[\"time.nist.gov\"],\"timezone\":\"America/Los_Angeles\"},\n        method=\"PATCH\"\n    )\n\n\n# Step 5 set the master key. This can only be done once. This function is aware of that\ndef set_master_key ():\n    mk_res = req(\n        BIGIQ_REST_URL + \"cm/shared/secure-storage/masterkey\",\n        json={\"passphrase\": MASTER_PASSPHRASE},\n        method=\"POST\",\n        verify=False\n    )\n\n    if (not mk_res.ok and\n            mk_res.json()['message'] == 'The Master Key has already been set on this system and cannot be reset'):\n        return\n\n    util.verify_success(mk_res)\n\n# Step 6 Passwords are set using tmsh, this function marks the admin and root password as having been changed\ndef set_passwords ():\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\"\n    ).json()\n\n    # This doesn't work, suspect there is some weird encoding issue between client and server\n    # Suffice to change the pwd using tmsh\n    # Saving this code because it's correct, and if I can ever figure out why the service is sending me a 400\n    # Then it would be better to have this working\n\n    # print(\"Changing root password\")\n    # time.sleep(5)\n    # root_res = req(\n    #     BIGIQ_REST_URL + \"shared/authn/root\",\n    #     json={\n    #         \"oldPassword\":\"default\",\n    #         \"newPassword\":ROOT_PWD\n    #     },\n    #     method=\"POST\",\n    #     verify=False\n    # )\n    # # Something isn't working right with the password setting\n    # # Pausing might make it happier\n    # time.sleep(5)\n    # # verify_success(root_res)\n    # # TODO verify that root pwd changed special case here\n    # print(\"Changing pwd from\" + AUTH.password + \" to \" + NEW_AUTH.password)\n    # res = req(\n    #     BIGIQ_REST_URL + \"shared/authz/users\",\n    #     json={\n    #             \"name\":\"admin\",\n    #             \"displayName\":\"Admin User\",\n    #             \"kind\":\"shared:authz:users:usersworkerstate\",\n    #             \"selfLink\":\"https://localhost/mgmt/shared/authz/users/admin\",\n    #             \"oldPassword\": unicode(AUTH.password, \"utf-8\"),\n    #             \"password\":  unicode(NEW_AUTH.password, \"utf-8\"),\n    #             \"password2\": unicode(NEW_AUTH.password, \"utf-8\")\n    #         },\n    #     method=\"PUT\",\n    #     verify=False\n    # )\n    # print(str(res.json()))\n\n\n\n    # # Poll for authentication change persisting properly\n    # i = 0\n    # while i < TIMEOUT_SEC:\n    #     time.sleep(10)\n    #     res = req(BIGIQ_REST_URL + \"shared/echo\", verify=False, auth=NEW_AUTH)\n    #     if res.status_code == 200:\n    #         break\n    #     # Wait 10 in order to not freak out the password limit\n    #     i += 9\n\n    # if not res.ok:\n    #     print(\"\")\n    #     print(\"Setting password failed\")\n\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\",\n        json={\"isRootPasswordChanged\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\",\n        json={\"isAdminPasswordChanged\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n\n\n# Step 7 Set a flag to true indicating that the setup wizard is complete\ndef set_system_setup ():\n    req(\n        BIGIQ_REST_URL + \"shared/system/setup\",\n        json={\"isSystemSetup\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n# Step 8 Restart the system\ndef do_restart ():\n    req(\n        BIGIQ_REST_URL + \"shared/failover-state\",\n        json={\"restart\":True},\n        method=\"PATCH\",\n        auth=AUTH\n    )\n\n# True response indicates a succesful service bring up\n# Wrap the util function which was extracted from this file originally\ndef poll_for_services_available ():\n    return util.poll_for_services_available(BIGIQ_ADDR, AUTH, timeout=TIMEOUT_SEC)\n\n# Okay wrapper for requests which encapsulates with defaults some of the repetitive stuff that makes my eyes bleed\ndef req (url, json=None, method=\"GET\", auth=None, verify=True):\n    return util.req(url, auth or AUTH, json=json, method=method, verify=verify)\n\n# Test that the authentication is working correctly. In a remote context, this will verify that basic auth is correct and the username\n# password combination is correct. When run local to the BIQ, this proves nothing, because it doesn't need to.\ndef test_auth ():\n    global AUTH\n    res = req(BIGIQ_REST_URL + \"shared/echo\", verify=False)\n\n    if res.ok:\n        return\n    else:\n        print(\"Authentication failed, ensure that basic auth is enabled and your username password combinations are correct\")\n        sys.exit(1)\n\n# Run through the steps of the setup wizard in order\ndef main():\n    if not poll_for_services_available():\n        print(\" Timed out\")\n        sys.exit(1)\n    else:\n        complete()\n\n    print_partial(\"Verifying authentication information...\")\n    test_auth()\n    complete()\n\n    if not SKIP_LICENSING:\n        print_partial(\"Adding license key...\")\n        enter_license_info(LICENSE_KEY)\n        complete()\n        poll_for_licensing_complete()\n        complete()\n\n\n    print_partial(\"Configuring role...\")\n    configure_big_iq_type(dcd=(NODE_TYPE==\"DCD\"))\n    complete()\n\n    print_partial(\"Setting management address...\")\n    set_management_address()\n    complete()\n\n    poll_for_services_available()\n    complete()\n\n    print_partial(\"Configuring NTP/DNS services...\")\n    configure_services()\n    complete()\n\n    print_partial(\"Setting masterkey...\")\n    set_master_key()\n    complete()\n\n    if not poll_for_services_available():\n        print(\" Timed out\")\n        sys.exit(1)\n    else:\n        complete()\n\n    print_partial(\"Setting password status to updated...\")\n    set_passwords()\n    complete()\n\n    print_partial(\"Configuration complete, restarting services\")\n    # Wait for toku to flush everything to disk? Maybe?\n    time.sleep(10)\n    do_restart()\n    complete()\n    util.poll_for_system_down(BIGIQ_ADDR, timeout=TIMEOUT_SEC)\n    complete()\n    poll_for_services_available()\n    set_system_setup()\n    complete()\n\n\n# Generate the CLI argument parser\ndef generate_parser ():\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\n        \"--BIGIQ_ADDR\",\n        type=str,\n        help=\"The IPv4 address of the BIG-IQ on which the setup will be run. If not specified, the script runs against localhost.\"\n    )\n    parser.add_argument(\n        \"--BIGIQ_REST_URL\",\n        type=str,\n        help=\"This should probably always be omitted. Read the source to figure out if you want to set this.\"\n    )\n    parser.add_argument(\n        \"--LICENSE_KEY\",\n        type=str,\n        help=\"The license key to use for this setup. Can be omitted if you want to manually license your BIG-IQ\"\n    )\n    parser.add_argument(\n        \"--MASTER_PASSPHRASE\",\n        type=str,\n        default=\"ValidPasswordValidPassword12341234!\",\n        help=\"The passphrase to use for the BIG-IQ\"\n    )\n    parser.add_argument(\n        \"--SKIP_LICENSING\",\n        type=bool,\n        default=False,\n        help=\"Set this if your wish to skip the licensing process when your BIG-IQ has already been licensed manually for instance.\"\n    )\n    parser.add_argument(\n        \"--ADMIN_USERNAME\",\n        type=str,\n        default=\"admin\",\n        help=\"Username for the administrative account\"\n    )\n    parser.add_argument(\n        \"--ADMIN_PWD\",\n        type=str,\n        default=\"f5site02\",\n        help=\"The admin password for the BIG-IQ\"\n    )\n    parser.add_argument(\n        \"--TIMEOUT_SEC\",\n        type=int,\n        default=120, help=\"The time in seconds to wait for the asynchronous polling operations in the setup process\"\n    )\n    parser.add_argument(\n        \"--NODE_TYPE\",\n        type=str,\n        default=\"CM\", help=\"Either 'CM' for central management or 'DCD' for data collection device\"\n    )\n\n    args = parser.parse_args()\n\n    global BIGIQ_ADDR\n    global BIGIQ_REST_URL\n    global LICENSE_KEY\n    global MASTER_PASSPHRASE\n    global SKIP_LICENSING\n    global ADMIN_PWD\n    global NODE_TYPE\n    global TIMEOUT_SEC\n\n    BIGIQ_ADDR = args.BIGIQ_ADDR\n    # Remember DeMorgan...\n    if not BIGIQ_ADDR and not BIGIQ_REST_URL:\n        BIGIQ_REST_URL = \"http://localhost:8100/\"\n        BIGIQ_ADDR = \"localhost:8100\"\n    else:\n        BIGIQ_REST_URL = args.BIGIQ_REST_URL or \"https://\" + BIGIQ_ADDR + \"/mgmt/\"\n\n    LICENSE_KEY = args.LICENSE_KEY\n    MASTER_PASSPHRASE = args.MASTER_PASSPHRASE\n    SKIP_LICENSING = args.SKIP_LICENSING\n    ADMIN_PWD = args.ADMIN_PWD\n    NODE_TYPE = args.NODE_TYPE\n    TIMEOUT_SEC = args.TIMEOUT_SEC\n\n    return args\n\n# Configured global\nBIGIQ_ADDR = None\nBIGIQ_REST_URL = None\nLICENSE_KEY = None\nMASTER_PASSPHRASE = None\nSKIP_LICENSING = None\nADMIN_PWD = None\nNODE_TYPE = None\n\nTIMEOUT_SEC = 120\n# Declare these globals in a global scope, ie, not main\n\nif __name__ == \"__main__\":\n    args = generate_parser()\n    AUTH = HTTPBasicAuth(args.ADMIN_USERNAME, ADMIN_PWD)\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/create-auto-scaling.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport sys\nimport argparse\nimport requests\nfrom requests.auth import HTTPBasicAuth\nimport time\nimport logging\nimport urllib3\n\nfrom util import print_partial, complete, req\n\n# Creates auto scaling resources on BIG-IQ\n\n# Vars which must exist in the env variable\ndef parse_args ():\n    # Ugly but expedient conversion of ansible-playbook to a parameterized python script\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--AWS_SUBNET_1A\", type=str, required=True)\n    parser.add_argument(\"--AWS_SUBNET_1B\", type=str, required=True)\n    parser.add_argument(\"--AWS_US_EAST_1A\", type=str, required=True)\n    parser.add_argument(\"--AWS_US_EAST_1B\", type=str, required=True)\n    parser.add_argument(\"--AWS_SSH_KEY\", type=str, required=True)\n    parser.add_argument(\"--AWS_VPC\", type=str, required=True)\n    parser.add_argument(\"--AWS_ACCESS_KEY_ID\", type=str, required=True)\n    parser.add_argument(\"--AWS_SECRET_ACCESS_KEY\", type=str, required=True)\n    parser.add_argument(\"--BIGIP_AMI\", type=str, required=True)\n    parser.add_argument(\"--BIGIQ_URI\", type=str, required=True)\n    parser.add_argument(\"--BIGIP_PWD\", type=str, required=True)\n    parser.add_argument(\"--BIGIP_USER\", type=str, required=True)\n    parser.add_argument(\"--CLOUD_PROVIDER_NAME\", type=str, required=True)\n    parser.add_argument(\"--CLOUD_ENVIRONMENT_NAME\", type=str, required=True)\n    parser.add_argument(\"--DEFAULT_REGION\", type=str, required=True)\n    parser.add_argument(\"--DEVICE_TEMPLATE_NAME\", type=str, required=True)\n    parser.add_argument(\"--LOOKUP_SERVER_LIST\", type=str, required=True)\n    parser.add_argument(\"--NTP_SERVER\", type=str, required=True)\n    parser.add_argument(\"--SSG_NAME\", type=str, required=True)\n    return parser.parse_args()\n\n\ndef post(url, json, identifier_name=None):\n    # Set the id name by which duplicates will be detected\n    identifier_name = \"name\" if not identifier_name else identifier_name\n\n    # Check for duplicate by 'identifier_name'\n    response = req(url, None)\n    duplicates = [ item for item in response.json()[\"items\"] if item[identifier_name] == json[identifier_name] ]\n    # if duplicates return that duplicate entry\n    if duplicates:\n        return duplicates[0]\n\n    # else post and return the response body\n    response = req(url, None, json=json, method=\"POST\")\n\n    return response.json()\n\n\ndef create_device_template(env):\n    return post(\n        env.BIGIQ_URI + \"/cm/device/templates\",\n        {\n            \"name\": env.DEVICE_TEMPLATE_NAME,\n            \"timeZone\": \"UTC\",\n            \"ntpServerList\": [env.NTP_SERVER],\n            \"lookupServerList\": [env.LOOKUP_SERVER_LIST],\n            # \"provisionedModuleList\": [{\n            #     \"module\": \"LTM\",\n            #     \"level\": \"NOMINAL\"\n            # }],\n            \"userAccountList\": [{\n                \"username\": env.BIGIP_USER,\n                \"password\": env.BIGIP_PWD,\n                \"role\": \"admin\"\n            }]\n        }\n    )\n    # var_name: device_template_result\n\n\ndef create_cloud_resources(env, device_template_result):\n    cloud_provider_result = post(\n        env.BIGIQ_URI + \"/cm/cloud/providers\",\n        {\n            \"providerType\": \"AWS\",\n            \"name\": env.CLOUD_PROVIDER_NAME,\n            \"description\": \"AWS cloud provider\",\n            \"awsProperties\": {\n                \"accessKeyId\": env.AWS_ACCESS_KEY_ID,\n                \"secretAccessKey\": env.AWS_SECRET_ACCESS_KEY\n            }\n        }\n    )\n\n    # Creating cloud environment\n    return post(\n        env.BIGIQ_URI + \"/cm/cloud/environments\",\n        {\n            \"name\": env.CLOUD_ENVIRONMENT_NAME,\n            \"description\": \"AWS cloud environment\",\n            \"providerReference\": {\n                \"link\": \"https://localhost/mgmt/cm/cloud/providers/\" + cloud_provider_result[\"id\"]\n            },\n            \"deviceTemplateReference\": {\n                \"link\": \"https://localhost/mgmt/cm/device/templates/\" + device_template_result[\"id\"]\n            },\n            \"awsProperties\": {\n                \"region\": env.DEFAULT_REGION,\n                \"vpc\": env.AWS_VPC,\n                \"availabilityZones\": [env.AWS_US_EAST_1A, env.AWS_US_EAST_1B],\n                \"subnets\": [env.AWS_SUBNET_1A, env.AWS_SUBNET_1B],\n                \"restrictedSourceAddress\": \"0.0.0.0/0\",\n                \"sshKeyName\": env.AWS_SSH_KEY,\n                \"moduleSelection\": \"WAF\",\n                \"licenseType\": \"Utility\",\n                \"imageId\": env.BIGIP_AMI,\n                \"instanceType\": \"m4.xlarge\"\n            },\n            \"isVmwCluster\": True\n        }\n    )\n\n\ndef create_ssg(env, cloud_environment_result):\n    # Create service scaling group\n    return post(\n        env.BIGIQ_URI + \"/cm/cloud/service-scaling-groups\",\n        {\n            \"name\": env.SSG_NAME,\n            \"description\": \"AWS scaling group\",\n            \"environmentReference\": {\n                \"link\": \"https://localhost/mgmt/cm/cloud/environments/\" + cloud_environment_result[\"id\"]\n            },\n            \"minSize\": 1,\n            \"maxSize\": 5,\n            \"maxSupportedApplications\": 3,\n            \"desiredSize\": 1,\n            \"postDeviceCreationUserScriptReference\": None,\n            \"preDeviceDeletionUserScriptReference\": None,\n            \"scalingPolicies\": [{\n                \"name\": \"scale-out\",\n                \"cooldown\": 15,\n                \"direction\": \"ADD\",\n                \"type\": \"ChangeCount\",\n                \"value\": 1\n            },\n            {\n                \"name\": \"scale-in\",\n                \"cooldown\": 15,\n                \"direction\": \"REMOVE\",\n                \"type\": \"ChangeCount\",\n                \"value\": 1\n            }]\n        }\n    )\n# TODO Verify=False ???\n\n\ndef create_scale_rules_and_alerts(env, ssg_result):\n    # Creating scale in alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"name\": env.SSG_NAME + \"-device-scale-in\",\n            \"alertTypeId\": \"device-scale-in-recommendation\",\n            \"isDefault\": False,\n            \"producerType\": \"device\",\n            \"alertType\": \"active\",\n            \"alertContext\": \"scale-in-recommendation\",\n            \"includeInternalAlerts\": False,\n            \"aggregationMethod\": \"and\",\n            \"external\": \"true\",\n            \"nestedRules\": [{\n                \"alertTypeId\": \"device-cpu\",\n                \"alertRuleType\": \"nested-metric\",\n                \"warningThreshold\": 5,\n                \"errorThreshold\": 5,\n                \"unit\": \"percent\",\n                \"operator\": \"less-than\",\n                \"enabled\": True\n            },\n            {\n                \"alertTypeId\": \"device-throughput-in\",\n                \"alertRuleType\": \"nested-metric\",\n                \"warningThreshold\": 5,\n                \"errorThreshold\": 5,\n                \"unit\": \"K\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True\n            }],\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertRuleType\": \"aggregated\",\n            \"isPublic\": False\n        }\n    )\n\n    # Creating scale in alert OR\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"aggregationMethod\": \"or\",\n            \"producerType\": \"ssg\",\n            \"name\": env.SSG_NAME + \"-device-scale-in\",\n            \"alertTypeId\": \"ssg-scale-in-recommendation\",\n            \"includeInternalAlerts\": True,\n            \"alertRuleReferences\": [{\n                \"name\": env.SSG_NAME + \"-device-scale-in\",\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-device-scale-in\"\n            }],\n            \"external\": True,\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertContext\": \"scale-in-recommendation\",\n            \"alertRuleType\": \"aggregated\",\n            \"alertType\": \"active\",\n            \"isDefault\": False,\n            \"isPublic\": False\n        }\n    )\n\n    # Create scale in workflow rule\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/workflow-rules\",\n        {\n            \"workflowRuleName\": env.SSG_NAME + \"-scale-in\",\n            \"workflowParameters\": {\n                \"parameters\": {\n                    \"ssgName\": env.SSG_NAME,\n                    \"scalingPolicyName\": \"scale-in\"\n                }\n            },\n            \"targetWorkflowUri\": \"https://localhost/mgmt/cm/cloud/tasks/handle-scaling-alert\",\n            \"alertRuleReference\": {\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-ssg-scale-in\"\n            },\n            \"sendEmail\": False,\n            \"sendEmailContacts\": None,\n            \"sendSNMP\": False\n        },\n        identifier_name=\"workflowRuleName\"\n    )\n\n    # Creating scale out alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"aggregationMethod\": \"or\",\n            \"producerType\": \"device\",\n            \"name\": env.SSG_NAME + \"-device-scale-out\",\n            \"alertTypeId\": \"device-scale-out-recommendation\",\n            \"includeInternalAlerts\": False,\n            \"nestedRules\": [{\n                \"alertRuleType\": \"nested-metric\",\n                \"alertTypeId\": \"device-cpu\",\n                \"warningThreshold\": 75,\n                \"errorThreshold\": 75,\n                \"unit\": \"percent\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True\n            },\n            {\n                \"alertRuleType\": \"nested-metric\",\n                \"alertTypeId\": \"device-throughput-in\",\n                \"warningThreshold\": 20,\n                \"errorThreshold\": 20,\n                \"unit\": \"K\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True\n            }],\n            \"external\": True,\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertContext\": \"scale-out-recommendation\",\n            \"alertRuleType\": \"aggregated\",\n            \"alertType\": \"active\",\n            \"isDefault\": False,\n            \"isPublic\": False\n        }\n    )\n\n    # Create scale in alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"aggregationMethod\": \"or\",\n            \"producerType\": \"ssg\",\n            \"name\": env.SSG_NAME + \"-ssg-scale-out\",\n            \"alertTypeId\": \"ssg-scale-out-recommendation\",\n            \"includeInternalAlerts\": True,\n            \"alertRuleReferences\": [{\n                \"name\": env.SSG_NAME + \"-device-scale-out\",\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-device-scale-out\"\n            }],\n            \"external\": True,\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertContext\": \"scale-out-recommendation\",\n            \"alertRuleType\": \"aggregated\",\n            \"alertType\": \"active\",\n            \"isDefault\": False,\n            \"isPublic\": False\n        }\n    )\n\n    # Create scale in workflow rule\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/workflow-rules\",\n        {\n            \"workflowRuleName\": env.SSG_NAME + \"-scale-out\",\n            \"workflowParameters\": {\n                \"parameters\": {\n                    \"ssgName\": env.SSG_NAME,\n                    \"scalingPolicyName\": \"scale-out\"\n                }\n            },\n            \"targetWorkflowUri\": \"https://localhost/mgmt/cm/cloud/tasks/handle-scaling-alert\",\n            \"alertRuleReference\": {\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-ssg-scale-out\"\n            },\n            \"sendEmail\": False,\n            \"sendEmailContacts\": None,\n            \"sendSNMP\": False\n        },\n        identifier_name=\"workflowRuleName\"\n    )\n\n    # Create scale out alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"name\": env.SSG_NAME + \"-active-device-health\",\n            \"alertTypeId\": \"device-health\",\n            \"isDefault\": False,\n            \"isPublic\": False,\n            \"producerType\": \"device\",\n            \"alertType\": \"active\",\n            \"alertContext\": \"health\",\n            \"includeInternalAlerts\": True,\n            \"aggregationMethod\": \"or\",\n            \"alertRuleType\": \"aggregated\",\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"external\": True,\n            \"nestedRules\": [{\n                \"alertRuleType\": \"nested-metric\",\n                \"alertTypeId\": \"device-cpu\",\n                \"unit\": \"percent\",\n                \"operator\": \"greater-than\",\n                \"enabled\": True,\n                \"warningThreshold\": 75,\n                \"errorThreshold\": 90\n            }]\n        }\n    )\n\n    # Create scale out workflow rule\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/workflow-rules\",\n        {\n            \"workflowRuleName\": env.SSG_NAME + \"-health\",\n            \"workflowParameters\": {\n                \"parameters\": {\n                    \"ssgName\": env.SSG_NAME\n                }\n            },\n            \"alertRuleReference\": {\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-active-device-health\"\n            },\n            \"sendEmail\": False,\n            \"sendEmailContacts\": None,\n            \"sendSNMP\": False\n        },\n        identifier_name=\"workflowRuleName\"\n    )\n\n    # Create scale out alert\n    post(\n        env.BIGIQ_URI + \"/cm/shared/policymgmt/alert-rules\",\n        {\n            \"name\": env.SSG_NAME + \"-active-ssg-health\",\n            \"alertTypeId\": \"ssg-health\",\n            \"isDefault\": False,\n            \"producerType\": \"ssg\",\n            \"alertType\": \"active\",\n            \"alertContext\": \"health\",\n            \"includeInternalAlerts\": True,\n            \"aggregationMethod\": \"or\",\n            \"external\": True,\n            \"alertRuleType\": \"aggregated\",\n            \"ssgReferences\": [{\n                \"name\": env.SSG_NAME,\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_result[\"id\"]\n            }],\n            \"alertRuleReferences\": [{\n                \"name\": env.SSG_NAME + \"-active-device-health\",\n                \"link\": \"https://localhost/mgmt/cm/shared/policymgmt/alert-rules/\" + env.SSG_NAME + \"-active-device-health\"\n            }]\n        }\n    )\n\ndef main():\n    print(\"Parsing arguments...\")\n    env = parse_args()\n    print(\"Fetching device template...\")\n    device_template_result = create_device_template(env)\n    print(\"Creating cloud resources...\")\n    cloud_environment_result = create_cloud_resources(env, device_template_result)\n    print(\"Launching SSG...\")\n    ssg_result = create_ssg(env, cloud_environment_result)\n    print(\"Creating scale workflows and rules...\")\n    create_scale_rules_and_alerts(env, ssg_result)\n\nif __name__ == '__main__':\n    main()\n",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/deploy-application.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport argparse\nimport time\nimport util\nimport sys\n\ndef parse_args ():\n    # Ugly but expedient conversion of ansible-playbook to a parameterized python script\n    parser = argparse.ArgumentParser()\n    parser.add_argument(\"--NODE_IP\", type=str, required=True)\n    parser.add_argument(\"--ELB_NAME\", type=str, required=True)\n    parser.add_argument(\"--ELB_DNS_NAME\", type=str, required=True)\n    return parser.parse_args()\n\n\ndef get_ssg_reference ():\n    return util.req(\n        \"http://localhost:8100/cm/cloud/service-scaling-groups/\",\n        None\n    ).json()\n\ndef poll_for_ssg_present (timeout=1200):\n    count = 0\n    while True:\n        result = get_ssg_reference()\n\n        if count >= timeout:\n            sys.exit(-1)\n            break\n\n        if not result[\"items\"]:\n            time.sleep(1)\n        else:\n            break\n        util.print_partial(\".\")\n        count += 1\n\ndef poll_for_ssg_ready (ssg_id, timeout=1200):\n    url = \"http://localhost:8100/cm/cloud/service-scaling-groups/\" + ssg_id\n    count = 0\n    while True:\n        if count >= timeout:\n            sys.exit(-1)\n            break\n\n        result = util.req(url, None)\n        status = result.json()[\"status\"]\n\n        if status == \"READY\":\n            break\n        else:\n            time.sleep(1)\n        util.print_partial(\".\")\n        count += 1\n\ndef deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):\n    util.req(\n        \"http://localhost:8100/cm/global/tasks/apply-template\",\n        None,\n        method=\"POST\",\n        json={\n            \"resources\": {\n                \"ltm:virtual:90735960bf4b\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"default_vs\"\n                        },\n                        \"parametersToRemove\": [],\n                        \"subcollectionResources\": {\n                            \"profiles:78b1bcfdafad\": [\n                                {\n                                    \"parameters\": {},\n                                    \"parametersToRemove\": []\n                                }\n                            ],\n                            \"profiles:2f52acac9fde\": [\n                                {\n                                    \"parameters\": {},\n                                    \"parametersToRemove\": []\n                                }\n                            ],\n                            \"profiles:9448fe71611e\": [\n                                {\n                                    \"parameters\": {},\n                                    \"parametersToRemove\": []\n                                }\n                            ]\n                        }\n                    }\n                ],\n                \"ltm:pool:8bc5b256f9d1\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"pool_0\"\n                        },\n                        \"parametersToRemove\": [],\n                        \"subcollectionResources\": {\n                            \"members:dec6d24dc625\": [\n                                {\n                                    \"parameters\": {\n                                        \"port\": \"80\",\n                                        \"nodeReference\": {\n                                            \"link\": \"#/resources/ltm:node:c072248f8e6a/\" + node_ip,\n                                            \"fullPath\": \"# \" + node_ip\n                                        }\n                                    },\n                                    \"parametersToRemove\": []\n                                },\n                                {\n                                    \"parameters\": {\n                                        \"port\": \"443\",\n                                        \"nodeReference\": {\n                                            \"link\": \"#/resources/ltm:node:c072248f8e6a/\" + node_ip,\n                                            \"fullPath\": \"# \" + node_ip\n                                        }\n                                    },\n                                    \"parametersToRemove\": []\n                                }\n                            ]\n                        }\n                    }\n                ],\n                \"ltm:node:c072248f8e6a\": [\n                    {\n                        \"parameters\": {\n                            \"name\": node_ip,\n                            \"address\": node_ip\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ],\n                \"ltm:monitor:http:18765a198150\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"monitor-http\"\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ],\n                \"ltm:profile:client-ssl:78b1bcfdafad\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"clientssl\"\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ],\n                \"ltm:profile:http:2f52acac9fde\": [\n                    {\n                        \"parameters\": {\n                            \"name\": \"profile_http\"\n                        },\n                        \"parametersToRemove\": []\n                    }\n                ]\n            },\n            \"addAnalytics\": True,\n            \"domains\": [\n                {\n                    \"domainName\": elb_dns_name\n                }\n            ],\n            \"configSetName\": \"apache-test-application\",\n            \"ssgReference\": {\n                \"link\": \"https://localhost/mgmt/cm/cloud/service-scaling-groups/\" + ssg_id\n            },\n            \"awsLoadBalancer\": {\n                \"name\": elb_name,\n                \"description\": \"\",\n                \"listeners\": [\n                    {\n                        \"loadBalancerPort\": 80,\n                        \"loadBalancerProtocol\": \"TCP\",\n                        \"instancePort\": 80,\n                        \"instanceProtocol\": \"TCP\"\n                    },\n                    {\n                        \"loadBalancerPort\": 443,\n                        \"loadBalancerProtocol\": \"TCP\",\n                        \"instancePort\": 443,\n                        \"instanceProtocol\": \"TCP\"\n                    }\n                ]\n            },\n            \"subPath\": \"apache-test-application\",\n            \"templateReference\": {\n                \"link\": \"https://localhost/mgmt/cm/global/templates/10e8d657-ed1c-3cc9-962d-f291ef02512e\"\n            },\n            \"mode\": \"CREATE\"\n        }\n    )\n\n\ndef main():\n    args = parse_args()\n    util.print_partial(\"Waiting for SSG to be present...\")\n    poll_for_ssg_present()\n    util.complete()\n\n    util.print_partial(\"Getting SSG reference...\")\n    ssgs = get_ssg_reference()\n    util.complete()\n\n    # Let this reference be unsafe and tacky so that this fails loudly if the SSG is not present\n    ssg_id = ssgs[\"items\"][0][\"id\"]\n    util.print_partial(\"Waiting for SSG to be ready...\")\n    poll_for_ssg_ready(ssg_id)\n    util.complete()\n\n    time.sleep(180) # Three minute wait for SSG to settle down\n\n    util.print_partial(\"Deploying application...\")\n    deploy_application(ssg_id, args.NODE_IP, args.ELB_NAME, args.ELB_DNS_NAME)\n    util.complete()\n\nif __name__ == '__main__':\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/post.yml": {
+                                "content": "---\n# Gracefully accept 400 Duplicate key responses\n# Treat a duplicate key as an indication that tthe resource was already created\n# This is intended only as a handler for POST requests\n- uri:\n    url: \"{{item.url}}\"\n    method: GET\n  register: get_response\n- debug: msg={{item.body}}\n- set_fact:\n    item_name: \"{{item.body.name}}\"\n  when: item.identifier_name is not defined\n\n- set_fact:\n    item_name: \"{{item.body[item.identifier_name]}}\"\n  when: item.identifier_name is defined\n\n- set_fact:\n    jq_command: \"json.items[?name=='{{item_name}}']\"\n\n- set_fact:\n    duplicates: \"{{get_response|json_query(jq_command)}}\"\n\n- block:\n    - uri:\n        url: \"{{item.url}}\"\n        method: POST\n        body_format: json\n        body: \"{{item.body}}\"\n        status_code: 200,400\n      register: response\n\n    - name: Fail when not 200 and not duplicate\n      fail:\n        msg: Something went wrong with this {{response}}\n      when: response.status != 200 and 'Duplicate item' not in response.msg\n  when: duplicates|length == 0\n\n- set_fact: \"{{item.var_name}}={{duplicates[0]}}\"\n  when: item.var_name is defined and duplicates|length > 0\n\n- set_fact: \"{{item.var_name}}={{response.json}}\"\n  when: item.var_name is defined and duplicates|length == 0\n\n...",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-cm.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
+                                            "echo ''",
+                                            "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
+                                            "echo ''",
+                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
+                                            "echo ''",
+                                            "read -s -p 'BIG-IP Password: ' BIG_IP_PWD",
+                                            "echo ''",
+                                            "mount -o remount,rw /usr",
+                                            "/usr/local/bin/pip install awscli",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        " AWS_DEFAULT_REGION=",
+                                                        {
+                                                            "Ref": "AWS::Region"
+                                                        },
+                                                        " AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY",
+                                                        " AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY",
+                                                        " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
+                                                        " ELB-",
+                                                        {
+                                                            "Ref": "AWS::StackName"
+                                                        },
+                                                        " --load-balancer-ports 80 80"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                                                        {
+                                                            "Ref": "licenseKey1"
+                                                        },
+                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                                                        "--TIMEOUT_SEC 1200"
+                                                    ]
+                                                ]
+                                            },
+                                            "sleep 10",
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "BigIqDcdEth0",
+                                                                "PrimaryPrivateIpAddress"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Fn::Join": [
+                                                                " ",
+                                                                [
+                                                                    "--DCD_PWD $BIG_IQ_PWD",
+                                                                    "--DCD_USERNAME admin"
+                                                                ]
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "tmsh modify auth user admin",
+                                                        " password $BIG_IQ_PWD",
+                                                        " && tmsh save sys config"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/activate-dcd-services.py --SERVICES asm",
+                                                        "--DCD_IP_ADDRESS",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "BigIqDcdEth0",
+                                                                "PrimaryPrivateIpAddress"
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "/config/cloud/create-auto-scaling.py ",
+                                                        "--AWS_SUBNET_1A ",
+                                                        {
+                                                            "Ref": "Subnet1"
+                                                        },
+                                                        " ",
+                                                        "--AWS_SUBNET_1B ",
+                                                        {
+                                                            "Ref": "Subnet2"
+                                                        },
+                                                        " ",
+                                                        "--AWS_US_EAST_1A ",
+                                                        {
+                                                            "Ref": "subnet1Az"
+                                                        },
+                                                        " ",
+                                                        "--AWS_US_EAST_1B ",
+                                                        {
+                                                            "Ref": "subnet1Az"
+                                                        },
+                                                        " ",
+                                                        "--AWS_SSH_KEY ",
+                                                        {
+                                                            "Ref": "sshKey"
+                                                        },
+                                                        " ",
+                                                        "--AWS_VPC ",
+                                                        {
+                                                            "Ref": "VPC"
+                                                        },
+                                                        " ",
+                                                        "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
+                                                        "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
+                                                        "--BIGIP_AMI ",
+                                                        {
+                                                            "Ref": "bigIpAmi"
+                                                        },
+                                                        " --BIGIQ_URI http://localhost:8100 ",
+                                                        "--BIGIP_USER admin",
+                                                        " --BIGIP_PWD $BIG_IP_PWD",
+                                                        " --CLOUD_PROVIDER_NAME aws ",
+                                                        "--CLOUD_ENVIRONMENT_NAME aws-env ",
+                                                        "--DEFAULT_REGION ",
+                                                        {
+                                                            "Ref": "AWS::Region"
+                                                        },
+                                                        " ",
+                                                        "--DEVICE_TEMPLATE_NAME default-ssg-template ",
+                                                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
+                                                        "--NTP_SERVER time.nist.gov ",
+                                                        "--SSG_NAME ",
+                                                        {
+                                                            "Ref": "ssgName"
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/deploy-application.py --NODE_IP",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "UbuntuExampleApplicationStack",
+                                                                "Outputs.HTTPServerIP"
+                                                            ]
+                                                        },
+                                                        "--ELB_NAME",
+                                                        {
+                                                            "Fn::Join": [
+                                                                "",
+                                                                [
+                                                                    "ELB-",
+                                                                    {
+                                                                        "Ref": "AWS::StackName"
+                                                                    }
+                                                                ]
+                                                            ]
+                                                        },
+                                                        "--ELB_DNS_NAME",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "ClassicELB",
+                                                                "DNSName"
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-dcd.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
+                                            "echo ''",
+                                            "/config/cloud/wait-for-rjd.py",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "tmsh modify auth user admin",
+                                                        " password $BIG_IQ_PWD",
+                                                        " && tmsh save sys config && set-basic-auth on"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                                                        {
+                                                            "Ref": "licenseKey2"
+                                                        },
+                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                                                        "--TIMEOUT_SEC 1200",
+                                                        "--NODE_TYPE DCD"
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/util.py": {
+                                "content": "import requests\nfrom requests import ConnectionError\nimport sys\nimport time\n\n\ndef req (url, auth, json=None, method=\"GET\", verify=True):\n    response = requests.request(method, url, json=json, auth=auth, verify=False)\n    if verify:\n        verify_success(response)\n\n    return response\n\ndef print_partial (msg):\n    sys.stdout.write(msg)\n    sys.stdout.flush()\n\ndef complete ():\n    print(\" done!\\n\")\n\ndef verify_success (response):\n    try:\n        if not response.ok:\n            print(\n                \"Request to \" + str(response.url) + \" failed with \" +\n                str(response.status_code)\n            )\n            print(\" and response body \\n\" + str(response.json()))\n            sys.exit(1)\n    except ValueError:\n        sys.exit(1)\n\ndef _get_poll_addr (addr):\n    return  \"https://localhost/info/system\" if \"localhost\" in addr else \"https://\" + addr + \"/info/system\"\n\ndef poll_for_system_down (address, auth=None,  timeout=60):\n    print_partial(\"Waiting for system to go down...\")\n    i = 0\n    url = _get_poll_addr(address)\n    while True:\n        print_partial(\".\")\n        i += 1\n        conn_failed = False\n        try:\n            status_res = req(url, auth, verify=False)\n        except ConnectionError: # Errors when connection refused\n            conn_failed = True\n            print_partial(\"x\")\n            return True\n        if i > timeout:\n            return False # System failed to go down I guess\n        if conn_failed or not status_res:\n            return True\n        elif status_res.ok and safe_access(status_res.json(), 'available'):\n            time.sleep(1)\n        else: # available was False\n            return True\n\ndef safe_access (d, prop):\n    value = None\n    try:\n        value = d[prop]\n    except KeyError:\n        pass\n    return value\n\n\n\n# True response indicates a succesful service bring up\ndef poll_for_services_available (address, auth=None,  timeout=60):\n    print_partial(\"Waiting for service availablity...\")\n    i = 0\n    url = _get_poll_addr(address)\n    while True:\n        print_partial(\".\")\n        i += 1\n        conn_failed = False\n        try:\n            status_res = req(url, auth, verify=False)\n        except ConnectionError: # Errors when connection refused\n            conn_failed = True\n            print_partial(\"x\")\n\n        if i > timeout:\n            return False\n        if conn_failed or not status_res:\n            time.sleep(1)\n        elif status_res.ok and safe_access(status_res.json(), 'available'):\n            time.sleep(1)\n            return True\n        else:\n            time.sleep(1)\n\n    verify_success(status_res)\n    return status_res.json()['available']\n\ndef poll_for_system_setup (address, auth=None,  timeout=60):\n    print_partial(\"Waiting for system setup to complete...\")\n    i = 0\n    url = \"http://localhost:8100/shared/system/setup\" if \"localhost\" in address else \"https://\" + address + \"/mgmt/shared/system/setup\"\n    while True:\n        print_partial(\".\")\n        i += 1\n        conn_failed = False\n        try:\n            status_res = req(url, auth, verify=False)\n        except ConnectionError: # Errors when connection refused\n            conn_failed = True\n            print_partial(\"x\")\n\n        if i > timeout:\n            return False\n        if conn_failed or not status_res:\n            time.sleep(1)\n        elif status_res.ok and safe_access(status_res.json(), 'isSystemSetup'):\n            time.sleep(1)\n            return True\n        else:\n            time.sleep(1)\n\n    verify_success(status_res)\n    return status_res.json()['available']\n\ndef kill_ssl_warnings (logging, urllib3):\n    # Set log leve for requests module\n    logging.getLogger(\"requests\").setLevel(logging.CRITICAL)\n    # Demo machines will not have valid signed certificate\n    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)\n\ndef get_environment (address, username=None, pwd=None):\n    local = \"localhost\" in address\n\n    return {\n        \"base_url\": \"http://localhost:8100/\" if local else \"https://\" + address + \"/mgmt/\",\n        \"address\": address,\n        \"auth\": None if local else requests.auth.HTTPBasicAuth(username, pwd)\n    }",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/wait-for-rjd.py": {
+                                "content": "#! /usr/local/bin/python2.7\nimport util\n\ndef main():\n    util.poll_for_services_available(\"localhost\", None, timeout=1200)\n\nif __name__ == '__main__':\n    main()",
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "ImageId": {
+                    "Ref": "bigIqAmi"
+                },
+                "InstanceType": {
+                    "Ref": "instanceType"
+                },
+                "KeyName": {
+                    "Ref": "sshKey"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "NetworkInterfaceId": {
+                            "Ref": "BigIqDcdEth0"
+                        }
+                    },
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "BIG-IQ DCD Instance Management IP",
+                        "DeviceIndex": "1",
+                        "GroupSet": [
+                            {
+                                "Ref": "SecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "Subnet1"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "Big-IQ DCD:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "/opt/aws/apitools/cfn-init-1.4-0.amzn1/bin/cfn-init -v -s ",
+                                {
+                                    "Ref": "AWS::StackId"
+                                },
+                                " -r ",
+                                "BigIqDcd",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "BigIqDcdEth0": {
+            "Properties": {
+                "Description": "BIG-IQ DCD Instance Management IP",
+                "GroupSet": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "Subnet1"
+                }
+            },
+            "Type": "AWS::EC2::NetworkInterface"
+        },
+        "ClassicELB": {
+            "Properties": {
+                "HealthCheck": {
+                    "HealthyThreshold": "10",
+                    "Interval": "30",
+                    "Target": "TCP:22",
+                    "Timeout": "5",
+                    "UnhealthyThreshold": "2"
+                },
+                "Listeners": [
+                    {
+                        "InstancePort": "80",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "80",
+                        "Protocol": "TCP"
+                    }
+                ],
+                "LoadBalancerName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "ELB-",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "Scheme": "internet-facing",
+                "SecurityGroups": [
+                    {
+                        "Ref": "ElbSecurityGroup"
+                    }
+                ],
+                "Subnets": [
+                    {
+                        "Ref": "Subnet1"
+                    },
+                    {
+                        "Ref": "Subnet2"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "CmEipAssociation": {
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "CmElasticIp",
+                        "AllocationId"
+                    ]
+                },
+                "NetworkInterfaceId": {
+                    "Ref": "BigIqCmEth0"
+                }
+            },
+            "Type": "AWS::EC2::EIPAssociation"
+        },
+        "CmElasticIp": {
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Type": "AWS::EC2::EIP"
+        },
+        "DcdEipAssociation": {
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "DcdElasticIp",
+                        "AllocationId"
+                    ]
+                },
+                "NetworkInterfaceId": {
+                    "Ref": "BigIqDcdEth0"
+                }
+            },
+            "Type": "AWS::EC2::EIPAssociation"
+        },
+        "DcdElasticIp": {
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Type": "AWS::EC2::EIP"
+        },
+        "ElbSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "vpc-sg",
+                "GroupName": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "ELB-SG-",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "SecurityGroupIngress": [],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "IGW": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "BIG-IQ Internet Gateway:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::InternetGateway"
+        },
+        "IGWAttachment": {
+            "Properties": {
+                "InternetGatewayId": {
+                    "Ref": "IGW"
+                },
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::VPCGatewayAttachment"
+        },
+        "Route1Default": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "IGW"
+                },
+                "RouteTableId": {
+                    "Ref": "RouteTable1"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "Route2Default": {
+            "Properties": {
+                "DestinationCidrBlock": "0.0.0.0/0",
+                "GatewayId": {
+                    "Ref": "IGW"
+                },
+                "RouteTableId": {
+                    "Ref": "RouteTable2"
+                }
+            },
+            "Type": "AWS::EC2::Route"
+        },
+        "RouteTable1": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "BIG-IQ Route Table 1:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "RouteTable2": {
+            "Properties": {
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "BIG-IQ Route Table 2:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::RouteTable"
+        },
+        "SecurityGroup": {
+            "Properties": {
+                "GroupDescription": "vpc-sg",
+                "GroupName": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "BIG-IQ SG:",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "443",
+                        "IpProtocol": "tcp",
+                        "ToPort": "443"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "80",
+                        "IpProtocol": "tcp",
+                        "ToPort": "80"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    },
+                    {
+                        "CidrIp": {
+                            "Ref": "vpcCidrBlock"
+                        },
+                        "FromPort": "1",
+                        "IpProtocol": "tcp",
+                        "ToPort": "65356"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "Subnet1": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "subnet1Az"
+                },
+                "CidrBlock": {
+                    "Ref": "subnet1CidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "BIG-IQ Subnet 1:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "Subnet1RouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable1"
+                },
+                "SubnetId": {
+                    "Ref": "Subnet1"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "Subnet2": {
+            "Properties": {
+                "AvailabilityZone": {
+                    "Ref": "subnet2Az"
+                },
+                "CidrBlock": {
+                    "Ref": "subnet2CidrBlock"
+                },
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "Big-IQ Subnet 2:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::Subnet"
+        },
+        "Subnet2RouteTableAssociation": {
+            "Properties": {
+                "RouteTableId": {
+                    "Ref": "RouteTable2"
+                },
+                "SubnetId": {
+                    "Ref": "Subnet2"
+                }
+            },
+            "Type": "AWS::EC2::SubnetRouteTableAssociation"
+        },
+        "UbuntuExampleApplicationStack": {
+            "Properties": {
+                "Parameters": {
+                    "ebsVolumeSize": "40",
+                    "ec2Name": "apache-demo-server",
+                    "instanceType": "t2.small",
+                    "loadBalancerDnsName": {
+                        "Fn::GetAtt": [
+                            "ClassicELB",
+                            "DNSName"
+                        ]
+                    },
+                    "region": {
+                        "Ref": "AWS::Region"
+                    },
+                    "sshKey": {
+                        "Ref": "sshKey"
+                    },
+                    "subnet": {
+                        "Ref": "Subnet1"
+                    },
+                    "vpcId": {
+                        "Ref": "VPC"
+                    }
+                },
+                "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/Setup-Ubuntu-Trial.template"
+            },
+            "Type": "AWS::CloudFormation::Stack"
+        },
+        "VPC": {
+            "Properties": {
+                "CidrBlock": {
+                    "Ref": "vpcCidrBlock"
+                },
+                "EnableDnsHostnames": "false",
+                "EnableDnsSupport": "true",
+                "InstanceTenancy": "default",
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "BIG-IQ VPC:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ]
+            },
+            "Type": "AWS::EC2::VPC"
+        },
+        "VPCAcl": {
+            "Properties": {
+                "VpcId": {
+                    "Ref": "VPC"
+                }
+            },
+            "Type": "AWS::EC2::NetworkAcl"
+        }
+    }
+}
