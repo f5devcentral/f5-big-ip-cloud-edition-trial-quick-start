@@ -167,7 +167,7 @@ def deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):
                     {
                         "loadBalancerPort": 443,
                         "loadBalancerProtocol": "TCP",
-                        "instancePort": 80,
+                        "instancePort": 443,
                         "instanceProtocol": "TCP"
                     }
                 ]

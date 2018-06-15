@@ -32,8 +32,8 @@ def define_instance_init_files (t, args):
     download_and_extract_scripts = (
         "mkdir -p /config/cloud \n"
         "cd /config/cloud \n"
-        "wget https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/" + args.branch + "/aws/built/scripts.tar.gz \n"
-        "tar xvzf scripts.tar.gz \n"
+        "curl https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/" + args.branch + "/aws/built/scripts.tar.gz > scripts.tar.gz \n"
+        "tar --strip-components=1 -xvzf scripts.tar.gz \n"
     )
 
     init_files_map["/config/cloud/setup-cm.sh"] = InitFile(
@@ -43,7 +43,7 @@ def define_instance_init_files (t, args):
         content = Join("\n", [
             # This script is run in root context
             "#!/usr/bin/env bash",
-            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
+            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY", 
             "echo ''",
             "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
             "echo ''",
@@ -694,7 +694,7 @@ def define_ec2_instances (t, args):
                 "loadBalancerDnsName": GetAtt("ClassicELB", "DNSName")
             },
             # TODO use a different S3 account to host this template
-            TemplateURL = "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/Setup-Ubuntu-Trial.template"
+            TemplateURL = "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/" + args.branch + "/Setup-Ubuntu-Trial.template"
         )
     )
 
