@@ -105,16 +105,6 @@ def deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):
                                         }
                                     },
                                     "parametersToRemove": []
-                                },
-                                {
-                                    "parameters": {
-                                        "port": "443",
-                                        "nodeReference": {
-                                            "link": "#/resources/ltm:node:c072248f8e6a/" + node_ip,
-                                            "fullPath": "# " + node_ip
-                                        }
-                                    },
-                                    "parametersToRemove": []
                                 }
                             ]
                         }
@@ -177,7 +167,7 @@ def deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):
                     {
                         "loadBalancerPort": 443,
                         "loadBalancerProtocol": "TCP",
-                        "instancePort": 443,
+                        "instancePort": 80,
                         "instanceProtocol": "TCP"
                     }
                 ]

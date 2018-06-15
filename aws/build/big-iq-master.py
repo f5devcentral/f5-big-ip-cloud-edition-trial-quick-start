@@ -1,33 +1,40 @@
 #! /usr/bin/env python3
-import troposphere
-from troposphere.elasticloadbalancing import LoadBalancer, HealthCheck, Listener
-from troposphere.cloudformation import *
-from troposphere.ec2 import *
-from troposphere import Base64, cloudformation, Ref, GetAtt, Parameter, Output, Join #Alphabetize imports pls
 import argparse
-from pathlib import Path
 from os import listdir
 from os.path import isfile, join
+from pathlib import Path
+
+import troposphere
+from troposphere import (Base64, GetAtt, Join,
+                         Output, Parameter, Ref, cloudformation)
+from troposphere.cloudformation import *
+from troposphere.ec2 import *
+from troposphere.elasticloadbalancing import (HealthCheck, Listener,
+                                              LoadBalancer)
+
+def parse_args ():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--branch",
+        required=True,
+        help="Please provide output of `git rev-parse --abbrev-ref HEAD`"
+    )
+
+    return parser.parse_args()
 
 SCRIPT_PATH = "../scripts/"
 # Files which configure the BIG-IQ instances
 
-def define_instance_init_files (t):
-    # get list of scripts in SCRIPT_PATH
-    configuration_scripts = [
-        f
-        for f in listdir(SCRIPT_PATH)
-        if isfile(join(SCRIPT_PATH, f))
-    ]
-    # for each script, load into memory and add to init files
+def define_instance_init_files (t, args):
     init_files_map = {}
-    for script in configuration_scripts:
-        init_files_map["/config/cloud/" + script] = InitFile(
-                content=Path(SCRIPT_PATH + script).read_text(),
-                mode="000755",
-                owner="root",
-                group="root"
-            )
+
+    # Download scripts archive from raw.gh and extract
+    download_and_extract_scripts = (
+        "mkdir -p /config/cloud \n"
+        "cd /config/cloud \n"
+        "wget https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/" + args.branch + "/aws/built/scripts.tar.gz \n"
+        "tar xvzf scripts.tar.gz \n"
+    )
 
     init_files_map["/config/cloud/setup-cm.sh"] = InitFile(
         mode = "000755",
@@ -45,6 +52,7 @@ def define_instance_init_files (t):
             "read -s -p 'BIG-IP Password: ' BIG_IP_PWD",
             "echo ''",
             "mount -o remount,rw /usr",
+            download_and_extract_scripts,
             "/usr/local/bin/pip install awscli",
             # Delete default listener on ELB
             Join("", [
@@ -124,6 +132,7 @@ def define_instance_init_files (t):
             "#!/usr/bin/env bash",
             "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
             "echo ''",
+            download_and_extract_scripts,
             "/config/cloud/wait-for-rjd.py",
             Join("", [
                 "tmsh modify auth user admin",
@@ -144,7 +153,7 @@ def define_instance_init_files (t):
 
     return init_files
 
-def define_instance_metadata (t, is_cm_instance=True):
+def define_instance_metadata (t, args, is_cm_instance=True):
     if is_cm_instance:
         commands = {
                 "000-run-setup": {
@@ -162,7 +171,7 @@ def define_instance_metadata (t, is_cm_instance=True):
         Init({
             "config": InitConfig(
                 # commands = commands,
-                files = define_instance_init_files(t)
+                files = define_instance_init_files(t, args)
             )
         })
     )
@@ -302,40 +311,6 @@ def define_parameters (t):
         MinLength = 1,
         Type = "String"
     ))
-    # t.add_parameter(Parameter("bigIqPassword",
-    #     ConstraintDescription = "Verify that your BIG-IQ password is at least 8 character long",
-    #     Description = "BIG-IQ Password",
-    #     MaxLength = 255,
-    #     MinLength = 8,
-    #     NoEcho = True,
-    #     Type = "String"
-    # ))
-    # t.add_parameter(Parameter("bigIpPassword",
-    #     ConstraintDescription = "Verify that your BIG-IP password is at least 8 character long",
-    #     Description = "BIG-IP Password",
-    #     MaxLength = 255,
-    #     MinLength = 8,
-    #     NoEcho = True,
-    #     Type = "String"
-    # ))
-    # t.add_parameter(Parameter("iamAccessKey",
-    #     AllowedPattern = "[\\w]*",
-    #     ConstraintDescription = "Can contain only ASCII characters.",
-    #     Description = "IAM Access key ID",
-    #     MaxLength = 32,
-    #     MinLength = 16,
-    #     NoEcho = True,
-    #     Type = "String"
-    # ))
-    # t.add_parameter(Parameter("iamSecretKey",
-    #     AllowedPattern = "[\\x20-\\x7E]*",
-    #     ConstraintDescription = "Can contain only ASCII characters.",
-    #     Description = "IAM Secret access key",
-    #     MaxLength = 255,
-    #     MinLength = 1,
-    #     NoEcho = True,
-    #     Type = "String"
-    # ))
     t.add_parameter(Parameter("instanceType",
         AllowedValues = [
             "t2.medium",
@@ -469,36 +444,6 @@ def define_networking (t):
         )
     )
 
-    # t.add_resource(
-    #     EIP(
-    #         "Subnet1EIP",
-    #         Domain = "vpc"
-    #     )
-    # )
-
-    # t.add_resource(
-    #     NatGateway(
-    #         "Subnet1NATGateway",
-    #         AllocationId = Ref(t.resources["Subnet1EIP"]),
-    #         SubnetId = Ref(t.resources["Subnet1"])
-    #     )
-    # )
-
-    # t.add_resource(
-    #     EIP(
-    #         "Subnet2EIP",
-    #         Domain = "vpc"
-    #     )
-    # )
-
-    # t.add_resource(
-    #     NatGateway(
-    #         "Subnet2NATGateway",
-    #         AllocationId = Ref(t.resources["Subnet2EIP"]),
-    #         SubnetId = Ref(t.resources["Subnet2"])
-    #     )
-    # )
-
     t.add_resource(RouteTable(
         "RouteTable1",
         VpcId = Ref(t.resources["VPC"]),
@@ -624,7 +569,7 @@ def define_networking (t):
     ))
 
 # Define the BIQ ec2 instances, there is a centralized management and data collection device
-def define_ec2_instances (t):
+def define_ec2_instances (t, args):
     t.add_resource(NetworkInterface(
         "BigIqCmEth0",
         Description = "BIG-IQ CM Instance Management IP",
@@ -651,7 +596,7 @@ def define_ec2_instances (t):
                 "\n"
             ]
         )),
-        Metadata = define_instance_metadata(t),
+        Metadata = define_instance_metadata(t, args),
         ImageId = Ref(t.parameters["bigIqAmi"]),
         InstanceType =  Ref(t.parameters["instanceType"]),
         KeyName = Ref(t.parameters["sshKey"]),
@@ -688,7 +633,7 @@ def define_ec2_instances (t):
                 "\n"
             ]
         )),
-        Metadata = define_instance_metadata(t, is_cm_instance=False),
+        Metadata = define_instance_metadata(t, args, is_cm_instance=False),
         ImageId = Ref(t.parameters["bigIqAmi"]),
         InstanceType =  Ref(t.parameters["instanceType"]),
         KeyName = Ref(t.parameters["sshKey"]),
@@ -754,9 +699,9 @@ def define_ec2_instances (t):
     )
 
 # Define all the resources for this stack
-def define_resources (t):
+def define_resources (t, args):
     define_networking(t)
-    define_ec2_instances(t)
+    define_ec2_instances(t, args)
 
 # Define the stack outputs
 def define_outputs (t):
@@ -791,11 +736,12 @@ def define_outputs (t):
 
 # Build the template in logical order (hopefully) by just the top level tags
 def main ():
+    args = parse_args()
     t = troposphere.Template()
     define_mappings(t)
     define_metadata(t)
     define_parameters(t)
-    define_resources(t)
+    define_resources(t, args)
     define_outputs(t)
 
     print(t.to_json())
