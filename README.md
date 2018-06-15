@@ -44,7 +44,7 @@ Instructions for AWS
 
 7. Open BIG-IQ CM using the Public IP: ``https://<public_ip>``
 
-  * Click on the Applications tab, then APPLICATIONS, you should see a demo application protected with a Web Application Firewall.
+  * Click on the Applications tab > APPLICATIONS, you should see an application demo protected with an F5 Web Application Firewall.
   * The Service Scaling Group is managed under the Application tab > ENVIRONMENTS > Service Scaling Groups.
 
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition)
