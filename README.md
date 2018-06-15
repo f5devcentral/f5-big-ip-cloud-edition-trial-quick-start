@@ -11,7 +11,7 @@ Instructions for AWS
 
 2. Connect to your AWS console and open [Cloud Formation](https://console.aws.amazon.com/cloudformation)
 
-3. Create stack, Select Upload template to Amazon S3 and load the latest  ``bigiq-cm-dcd-pair-with-ssg-genv0.x.template``.
+3. Create Stack, Select Upload template to Amazon S3 and load the latest  ``bigiq-cm-dcd-pair-with-ssg-genv0.x.template`` (under aws/experimental). Fill all requested information:
 
   * Stack name (e.g. demo-bigiq6-trial)
   * Subnets AZ1 and AZ2 (make sure both are different)
@@ -20,19 +20,19 @@ Instructions for AWS
   * SSH Key (you AWS Key Pair Name)
   * SSG CloudFormation Stack Name (e.g. demo-ssg-trial)
 
-4. Open the EC2 console and wait until the BIG_IQ CM and DCD fully up
+4. Open the [EC2 console](https://console.aws.amazon.com/ec2/v2/home) and wait until the BIG_IQ CM and DCD fully up
 
   * Instance State: running
   * Status Checks: 2/2 checks passed
 
-5. SSH into BIG-IQ DCD instance and run the following script:
+5. SSH into BIG-IQ DCD instance and execute the following:
 ```
     # bash
     # /config/cloud/setup-dcd.sh
 ```
 Enter BIG-IQ password as prompted. This must match the password used on the BIG-IQ CM instance (next step).
 
-6.	SSH into BIG-IQ CM instance:
+6.	SSH into BIG-IQ CM instance and execute the following:
 ```
     # bash
     # /config/cloud/setup-cm.sh
@@ -46,3 +46,7 @@ The Service Scaling Group is managed under the Application tab > ENVIRONEMENTS >
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition)
 
 Note: in case the application deployment fails, click on Retry.
+
+Abbreviation:
+- BIG-IQ CM: Configuration Management (configure and orchestrate BIG-IP)
+- BIG-IQ DCD: Data Collection Device (storing the Analytics data)
