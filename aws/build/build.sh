@@ -13,5 +13,5 @@ branch_name=$(git rev-parse --abbrev-ref HEAD)
 
 # Copy templates
 for f in ../experimental/*.template; do
-    aws s3 cp "$f" "s3://big-iq-quickstart-cf-templates/$branch_name/$bname"
+    aws s3 cp --acl public-read "$f" "s3://big-iq-quickstart-cf-templates/$branch_name/$bname"
 done
