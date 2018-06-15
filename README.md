@@ -47,6 +47,6 @@ For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://
 
 Note: in case the application deployment fails, click on Retry.
 
-Abbreviation:
+Abbreviations:
 - BIG-IQ CM: Configuration Management (configure and orchestrate BIG-IP)
 - BIG-IQ DCD: Data Collection Device (storing the Analytics data)
