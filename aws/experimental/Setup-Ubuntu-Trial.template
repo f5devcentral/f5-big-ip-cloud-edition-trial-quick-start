@@ -226,7 +226,7 @@
             ],
             "Description": "Server:Internal",
             "DeviceIndex": "0",
-            "AssociatePublicIpAddress": "false",
+            "AssociatePublicIpAddress": "true",
             "DeleteOnTermination": "true",
             "SubnetId": {
               "Ref": "subnet"
