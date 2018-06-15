@@ -41,7 +41,9 @@ Enter access key id/secret key (used for the Service Scaling Group object creati
 
 This must match the password used on the BIG-IQ DCD instance (previous step).
 
-7. Open BIG-IQ CM using the Public IP: ``https://<public_ip>``, click on the Applications tab, then APPLICATIONS. You should see a demo application protected with a Web Application Firewall.
+7. Open BIG-IQ CM using the Public IP: ``https://<public_ip>``, click on the Applications tab, then APPLICATIONS.
+
+You should see a demo application protected with a Web Application Firewall.
 
 The Service Scaling Group is managed under the Application tab > ENVIRONEMENTS > Service Scaling Groups.
 
