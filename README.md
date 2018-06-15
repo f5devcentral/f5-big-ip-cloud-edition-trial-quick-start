@@ -80,7 +80,7 @@ Teardown instructions
   
   *Expected time: ~10 min*
   
-2. Open the (Cloud Formation Console](https://console.aws.amazon.com/cloudformation/) and delete the stack BIG-IP-Cloud-Edition-Demo.
+2. Open the [Cloud Formation Console](https://console.aws.amazon.com/cloudformation/) and delete the stack BIG-IP-Cloud-Edition-Demo.
 
   *Expected time: ~5 min*
   
