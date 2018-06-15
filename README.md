@@ -82,6 +82,8 @@ Teardown instructions
   
 2. Open the (Cloud Formation Console](https://console.aws.amazon.com/cloudformation/) and delete the stack BIG-IQ-Demo.
 
+  *Expected time: ~5 min*
+  
 
 Abbreviations:
 - BIG-IQ CM: Configuration Management (configure and orchestrate BIG-IP)
