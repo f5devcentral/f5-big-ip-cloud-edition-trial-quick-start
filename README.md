@@ -9,10 +9,10 @@ Instructions for AWS
  * [F5 BIG-IQ 6.0 for AWS (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
  * [F5 BIG-IP Virtual Edition - BEST - (PAYG, 25Mbps)](https://aws.amazon.com/marketplace/pp/B079C4WR32)
 
-2. Launch the *trial stack* template:  <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=BIG-IQ-Demo&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.0%2Frefit-for-public-urls%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank">  
+2. Launch the *trial stack* template (click right, open new tab/window):  <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=BIG-IQ-Demo&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.0%2Frefit-for-public-urls%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank">  
    <img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
 
-  * Stack name (e.g. demo-bigiq6-trial)
+  * Stack name
   * Subnets AZ1 and AZ2 (make sure both are different)
   * BIG-IQ AMI and BIG-IP AMI (default: Virginia us-east-1, update if different region used)
   * License Key 1 and 2 (used for BIG-IQ CM and DCD, given by F5 Networks)
