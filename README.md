@@ -30,7 +30,7 @@ Instructions for AWS
 # bash
 # /config/cloud/setup-dcd.sh
 ```
-Enter BIG-IQ password as prompted. This must match the password used on the BIG-IQ CM instance (next step).
+  * Enter BIG-IQ password as prompted. This must match the password used on the BIG-IQ CM instance (next step).
 
 6.	SSH into BIG-IQ CM instance and execute the following:
 ```
