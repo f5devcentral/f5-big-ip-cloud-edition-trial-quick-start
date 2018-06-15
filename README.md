@@ -37,7 +37,9 @@ Enter BIG-IQ password as prompted. This must match the password used on the BIG-
     # bash
     # /config/cloud/setup-cm.sh
 ```
-Enter access key id/secret key (used for the Service Scaling Group object creation) and BIG-IQ password as prompted. This must match the password used on the BIG-IQ DCD instance (previous step).
+Enter access key id/secret key (used for the Service Scaling Group object creation) and BIG-IQ password as prompted.
+
+This must match the password used on the BIG-IQ DCD instance (previous step).
 
 7. Open BIG-IQ CM using the Public IP: ``https://<public_ip>``, click on the Applications tab, then APPLICATIONS. You should see a demo application protected with a Web Application Firewall.
 
