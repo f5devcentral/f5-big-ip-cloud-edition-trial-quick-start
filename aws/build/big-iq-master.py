@@ -32,7 +32,7 @@ def define_instance_init_files (t, args):
     download_and_extract_scripts = (
         "mkdir -p /config/cloud \n"
         "cd /config/cloud \n"
-        "curl https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/" + args.branch + "/aws/built/scripts.tar.gz > scripts.tar.gz \n"
+        "curl https://raw.githubusercontent.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/" + args.branch + "/aws/built/scripts.tar.gz > scripts.tar.gz \n"
         "tar --strip-components=1 -xvzf scripts.tar.gz \n"
     )
 
@@ -43,7 +43,7 @@ def define_instance_init_files (t, args):
         content = Join("\n", [
             # This script is run in root context
             "#!/usr/bin/env bash",
-            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY", 
+            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
             "echo ''",
             "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
             "echo ''",
