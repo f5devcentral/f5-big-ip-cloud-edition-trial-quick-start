@@ -27,25 +27,23 @@ Instructions for AWS
 
 5. SSH into BIG-IQ DCD instance and execute the following:
 ```
-    # bash
-    # /config/cloud/setup-dcd.sh
+# bash
+# /config/cloud/setup-dcd.sh
 ```
 Enter BIG-IQ password as prompted. This must match the password used on the BIG-IQ CM instance (next step).
 
 6.	SSH into BIG-IQ CM instance and execute the following:
 ```
-    # bash
-    # /config/cloud/setup-cm.sh
+# bash
+# /config/cloud/setup-cm.sh
 ```
-Enter access key id/secret key (used for the Service Scaling Group object creation) and BIG-IQ password as prompted.
+  * Enter access key id/secret key (used for the Service Scaling Group object creation) and BIG-IQ password as prompted.
+  * This must match the password used on the BIG-IQ DCD instance (previous step).
 
-This must match the password used on the BIG-IQ DCD instance (previous step).
+7. Open BIG-IQ CM using the Public IP: ``https://<public_ip>``
 
-7. Open BIG-IQ CM using the Public IP: ``https://<public_ip>``, click on the Applications tab, then APPLICATIONS.
-
-You should see a demo application protected with a Web Application Firewall.
-
-The Service Scaling Group is managed under the Application tab > ENVIRONEMENTS > Service Scaling Groups.
+  * Click on the Applications tab, then APPLICATIONS, you should see a demo application protected with a Web Application Firewall.
+  * The Service Scaling Group is managed under the Application tab > ENVIRONEMENTS > Service Scaling Groups.
 
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition)
 
