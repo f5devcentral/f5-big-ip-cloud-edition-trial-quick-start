@@ -24,8 +24,8 @@ Instructions for AWS
 
   * Stack name (needs to be less than 25 characters)
   * Subnets AZ1 and AZ2 (make sure both are different)
-  * BIG-IQ® AMI (default: Virginia us-east-1, update if different region used)
-  * BIG-IP® AMI (default: Virginia us-east-1, update if different region used, use https://github.com/F5Networks/f5-aws-cloudformation/tree/master/AMI%20Maps release 13.1.0.5)
+  * BIG-IQ® AMI (default: Virginia us-east-1, update if different region)
+  * BIG-IP® AMI (default: Virginia us-east-1, update if different region [release 13.1.0.5](https://github.com/F5Networks/f5-aws-cloudformation/tree/master/AMI%20Maps))
   * License Key 1 and 2 (used for BIG-IQ® CM and DCD, given by F5 Networks)
   * SSH Key (you AWS Key Pair Name)
   * SSG CloudFormation Stack Name (e.g. demo-ssg-trial)
