@@ -44,7 +44,7 @@ Instructions for AWS
 # bash
 # /config/cloud/setup-dcd.sh
 ```
-  * Enter BIG-IQ® password as prompted. This must match the password used on the BIG-IQ® CM instance (next step).
+  * Enter BIG-IQ® [password](https://support.f5.com/csp/article/K2873) as prompted. This must match the password used on the BIG-IQ® CM instance (next step).
   * Let the script scripts run to completion before moving to the next step.
 
   *Expected time: ~2 min*
