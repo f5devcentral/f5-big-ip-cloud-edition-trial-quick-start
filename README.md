@@ -60,7 +60,7 @@ Instructions for AWS
 
   *Expected time: ~25 min*
 
-7. Open BIG-IQ® CM using the Public IP: ``https://<public_ip>``
+7. Open BIG-IQ® CM using the Public IP: ``https://<public_ip>`` (user admin, password previously set)
 
   * Click on the Applications tab > APPLICATIONS, you should see an application demo protected with an F5 Web Application Firewall.
   * The Service Scaling Group is managed under the Application tab > ENVIRONMENTS > Service Scaling Groups.
@@ -71,7 +71,7 @@ Note: in case the application deployment fails, click on Retry.
 
 Teardown instructions
 ---------------------
-1. Open BIG-IQ® CM using the Public IP: ``https://<public_ip>``
+1. Open BIG-IQ® CM using the Public IP: ``https://<public_ip>`` (user admin, password previously set)
 
   * Delete the application, under Applications tab > APPLICATIONS, select the application(s), then Delete.
 
