@@ -33,7 +33,6 @@ To deploy this CFT in AWS, complete the following steps.
    * Stack name (must be fewer than 25 characters)
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
    * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified, clicking **Continue to Subscribe**, and accepting terms
-   * BIG-IQ Amazon Machine Image (AMI) IDs
    * License Key 1 and 2 (license keys from F5, used for the BIG-IQ CM and DCD instances)
    * SSH Key (your AWS key pair name)
    * SSG CloudFormation Stack Name
