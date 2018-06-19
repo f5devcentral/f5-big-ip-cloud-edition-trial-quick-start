@@ -187,9 +187,10 @@
                 {
                   "Ref": "loadBalancerDnsName"
                 },
-                "/' >> /var/spool/cron/crontabs/ubuntu\n",
-                "chown ubuntu:ubuntu /var/spool/cron/crontabs/ubuntu\n",
-                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                "/\n' >> /var/spool/cron/crontabs/ubuntu \n",
+                "chown ubuntu:ubuntu /var/spool/cron/crontabs/ubuntu \n",
+                "crontab -u ubuntu /var/spool/cron/crontabs/ubuntu \n",
+                "easy_install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz \n",
                 "cfn-init -v ",
                 "         --stack ",
                 {

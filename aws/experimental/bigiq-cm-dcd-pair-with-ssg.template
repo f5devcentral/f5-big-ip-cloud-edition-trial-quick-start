@@ -1,4 +1,64 @@
 {
+    "Mappings": {
+        "AmiRegionMap": {
+            "ap-northeast-1": {
+                "bigip": "ami-1ca2b060",
+                "bigiq": "ami-5fcc0a20"
+            },
+            "ap-northeast-2": {
+                "bigip": "ami-6acd6304",
+                "bigiq": "ami-ce3c97a0"
+            },
+            "ap-south-1": {
+                "bigip": "ami-35ceea5a",
+                "bigiq": "ami-e07c558f"
+            },
+            "ap-southeast-1": {
+                "bigip": "ami-1723056b",
+                "bigiq": "ami-af82bad3"
+            },
+            "ap-southeast-2": {
+                "bigip": "ami-1d32fb7f",
+                "bigiq": "ami-d1eb36b3"
+            },
+            "ca-central-1": {
+                "bigip": "ami-b32aacd7",
+                "bigiq": "ami-2aad2e4e"
+            },
+            "eu-central-1": {
+                "bigip": "ami-164119fd",
+                "bigiq": "ami-4cc5f2a7"
+            },
+            "eu-west-1": {
+                "bigip": "ami-c16e34b8",
+                "bigiq": "ami-ce6f69b7"
+            },
+            "eu-west-2": {
+                "bigip": "ami-32f81855",
+                "bigiq": "ami-f8e30c9f"
+            },
+            "sa-east-1": {
+                "bigip": "ami-65421309",
+                "bigiq": "ami-4ae1b826"
+            },
+            "us-east-1": {
+                "bigip": "ami-030fd17c",
+                "bigiq": "ami-8f9bebf0"
+            },
+            "us-east-2": {
+                "bigip": "ami-b3ad9dd6",
+                "bigiq": "ami-c0d9e6a5"
+            },
+            "us-west-1": {
+                "bigip": "ami-880b18e8",
+                "bigiq": "ami-5ba64338"
+            },
+            "us-west-2": {
+                "bigip": "ami-12a3c36a",
+                "bigiq": "ami-370d4a4f"
+            }
+        }
+    },
     "Metadata": {
         "AWS::CloudFormation::Interface": {
             "ParameterGroups": [
@@ -161,22 +221,6 @@
         }
     },
     "Parameters": {
-        "bigIpAmi": {
-            "ConstraintDescription": "Must be a valid AMI ID",
-            "Default": "ami-030fd17c",
-            "Description": "If you would like to deploy using a custom BIG-IP image, provide the AMI **Note**: Unless specifically required, leave the default value. Must use a Utility AMI",
-            "MaxLength": 255,
-            "MinLength": 1,
-            "Type": "String"
-        },
-        "bigIqAmi": {
-            "ConstraintDescription": "Must be a valid AMI ID",
-            "Default": "ami-8f9bebf0",
-            "Description": "If you would like to deploy using a custom BIG-IQ image, provide the AMI **Note**: Unless specifically required, leave the default value.",
-            "MaxLength": 255,
-            "MinLength": 1,
-            "Type": "String"
-        },
         "instanceType": {
             "AllowedValues": [
                 "t2.medium",
@@ -225,6 +269,7 @@
         "ssgName": {
             "AllowedPattern": "[\\da-zA-Z\\-]{1,25}",
             "ConstraintDescription": "SSG Name must contain only alphanumerics and hyphens and be less than 25 characters long",
+            "Default": "demo-ssg-trial",
             "Description": "A unique CloudFormation StackName within your AWS account",
             "MaxLength": 25,
             "MinLength": 1,
@@ -282,16 +327,12 @@
                                         "\n",
                                         [
                                             "#!/usr/bin/env bash",
-                                            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
-                                            "echo ''",
-                                            "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
-                                            "echo ''",
-                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
-                                            "echo ''",
-                                            "read -s -p 'BIG-IP Password: ' BIG_IP_PWD",
-                                            "echo ''",
+                                            "read -s -p \"AWS Access Key ID: \" v1 \necho \nread -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \nwhile [ \"$v1\" != \"$AWS_ACCESS_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Access Key ID: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \ndone \necho",
+                                            "read -s -p \"AWS Secret Access Key: \" v1 \necho \nread -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \nwhile [ \"$v1\" != \"$AWS_SECRET_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Secret Access Key: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \ndone \necho",
+                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
+                                            "read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \nwhile [ \"$v1\" != \"$BIG_IP_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \ndone \necho",
                                             "mount -o remount,rw /usr",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/6.0.0/refit-for-public-urls/aws/built/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/refit-for-public-urls/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
                                             "/usr/local/bin/pip install awscli",
                                             {
                                                 "Fn::Join": [
@@ -301,8 +342,8 @@
                                                         {
                                                             "Ref": "AWS::Region"
                                                         },
-                                                        " AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY",
-                                                        " AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY",
+                                                        " AWS_ACCESS_KEY_ID=\"$AWS_ACCESS_KEY\"",
+                                                        " AWS_SECRET_ACCESS_KEY=\"$AWS_SECRET_KEY\"",
                                                         " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
                                                         " ELB-",
                                                         {
@@ -341,7 +382,7 @@
                                                             "Fn::Join": [
                                                                 " ",
                                                                 [
-                                                                    "--DCD_PWD $BIG_IQ_PWD",
+                                                                    "--DCD_PWD \"$BIG_IQ_PWD\"",
                                                                     "--DCD_USERNAME admin"
                                                                 ]
                                                             ]
@@ -354,7 +395,7 @@
                                                     "",
                                                     [
                                                         "tmsh modify auth user admin",
-                                                        " password $BIG_IQ_PWD",
+                                                        " password \"$BIG_IQ_PWD\"",
                                                         " && tmsh save sys config"
                                                     ]
                                                 ]
@@ -413,11 +454,17 @@
                                                         "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
                                                         "--BIGIP_AMI ",
                                                         {
-                                                            "Ref": "bigIpAmi"
+                                                            "Fn::FindInMap": [
+                                                                "AmiRegionMap",
+                                                                {
+                                                                    "Ref": "AWS::Region"
+                                                                },
+                                                                "bigip"
+                                                            ]
                                                         },
                                                         " --BIGIQ_URI http://localhost:8100 ",
                                                         "--BIGIP_USER admin",
-                                                        " --BIGIP_PWD $BIG_IP_PWD",
+                                                        " --BIGIP_PWD '$BIG_IP_PWD'",
                                                         " --CLOUD_PROVIDER_NAME aws ",
                                                         "--CLOUD_ENVIRONMENT_NAME aws-env ",
                                                         "--DEFAULT_REGION ",
@@ -474,47 +521,6 @@
                                 "group": "root",
                                 "mode": "000755",
                                 "owner": "root"
-                            },
-                            "/config/cloud/setup-dcd.sh": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "\n",
-                                        [
-                                            "#!/usr/bin/env bash",
-                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
-                                            "echo ''",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/6.0.0/refit-for-public-urls/aws/built/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
-                                            "/config/cloud/wait-for-rjd.py",
-                                            {
-                                                "Fn::Join": [
-                                                    "",
-                                                    [
-                                                        "tmsh modify auth user admin",
-                                                        " password $BIG_IQ_PWD",
-                                                        " && tmsh save sys config && set-basic-auth on"
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    " ",
-                                                    [
-                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
-                                                        {
-                                                            "Ref": "licenseKey2"
-                                                        },
-                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
-                                                        "--TIMEOUT_SEC 1200",
-                                                        "--NODE_TYPE DCD"
-                                                    ]
-                                                ]
-                                            }
-                                        ]
-                                    ]
-                                },
-                                "group": "root",
-                                "mode": "000755",
-                                "owner": "root"
                             }
                         }
                     }
@@ -522,7 +528,13 @@
             },
             "Properties": {
                 "ImageId": {
-                    "Ref": "bigIqAmi"
+                    "Fn::FindInMap": [
+                        "AmiRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "bigiq"
+                    ]
                 },
                 "InstanceType": {
                     "Ref": "instanceType"
@@ -610,221 +622,21 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "/config/cloud/setup-cm.sh": {
-                                "content": {
-                                    "Fn::Join": [
-                                        "\n",
-                                        [
-                                            "#!/usr/bin/env bash",
-                                            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
-                                            "echo ''",
-                                            "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
-                                            "echo ''",
-                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
-                                            "echo ''",
-                                            "read -s -p 'BIG-IP Password: ' BIG_IP_PWD",
-                                            "echo ''",
-                                            "mount -o remount,rw /usr",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/6.0.0/refit-for-public-urls/aws/built/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
-                                            "/usr/local/bin/pip install awscli",
-                                            {
-                                                "Fn::Join": [
-                                                    "",
-                                                    [
-                                                        " AWS_DEFAULT_REGION=",
-                                                        {
-                                                            "Ref": "AWS::Region"
-                                                        },
-                                                        " AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY",
-                                                        " AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY",
-                                                        " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
-                                                        " ELB-",
-                                                        {
-                                                            "Ref": "AWS::StackName"
-                                                        },
-                                                        " --load-balancer-ports 80 80"
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    " ",
-                                                    [
-                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
-                                                        {
-                                                            "Ref": "licenseKey1"
-                                                        },
-                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
-                                                        "--TIMEOUT_SEC 1200"
-                                                    ]
-                                                ]
-                                            },
-                                            "sleep 10",
-                                            {
-                                                "Fn::Join": [
-                                                    " ",
-                                                    [
-                                                        "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
-                                                        {
-                                                            "Fn::GetAtt": [
-                                                                "BigIqDcdEth0",
-                                                                "PrimaryPrivateIpAddress"
-                                                            ]
-                                                        },
-                                                        {
-                                                            "Fn::Join": [
-                                                                " ",
-                                                                [
-                                                                    "--DCD_PWD $BIG_IQ_PWD",
-                                                                    "--DCD_USERNAME admin"
-                                                                ]
-                                                            ]
-                                                        }
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    "",
-                                                    [
-                                                        "tmsh modify auth user admin",
-                                                        " password $BIG_IQ_PWD",
-                                                        " && tmsh save sys config"
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    " ",
-                                                    [
-                                                        "/config/cloud/activate-dcd-services.py --SERVICES asm",
-                                                        "--DCD_IP_ADDRESS",
-                                                        {
-                                                            "Fn::GetAtt": [
-                                                                "BigIqDcdEth0",
-                                                                "PrimaryPrivateIpAddress"
-                                                            ]
-                                                        }
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    "",
-                                                    [
-                                                        "/config/cloud/create-auto-scaling.py ",
-                                                        "--AWS_SUBNET_1A ",
-                                                        {
-                                                            "Ref": "Subnet1"
-                                                        },
-                                                        " ",
-                                                        "--AWS_SUBNET_1B ",
-                                                        {
-                                                            "Ref": "Subnet2"
-                                                        },
-                                                        " ",
-                                                        "--AWS_US_EAST_1A ",
-                                                        {
-                                                            "Ref": "subnet1Az"
-                                                        },
-                                                        " ",
-                                                        "--AWS_US_EAST_1B ",
-                                                        {
-                                                            "Ref": "subnet1Az"
-                                                        },
-                                                        " ",
-                                                        "--AWS_SSH_KEY ",
-                                                        {
-                                                            "Ref": "sshKey"
-                                                        },
-                                                        " ",
-                                                        "--AWS_VPC ",
-                                                        {
-                                                            "Ref": "VPC"
-                                                        },
-                                                        " ",
-                                                        "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
-                                                        "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
-                                                        "--BIGIP_AMI ",
-                                                        {
-                                                            "Ref": "bigIpAmi"
-                                                        },
-                                                        " --BIGIQ_URI http://localhost:8100 ",
-                                                        "--BIGIP_USER admin",
-                                                        " --BIGIP_PWD $BIG_IP_PWD",
-                                                        " --CLOUD_PROVIDER_NAME aws ",
-                                                        "--CLOUD_ENVIRONMENT_NAME aws-env ",
-                                                        "--DEFAULT_REGION ",
-                                                        {
-                                                            "Ref": "AWS::Region"
-                                                        },
-                                                        " ",
-                                                        "--DEVICE_TEMPLATE_NAME default-ssg-template ",
-                                                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
-                                                        "--NTP_SERVER time.nist.gov ",
-                                                        "--SSG_NAME ",
-                                                        {
-                                                            "Ref": "ssgName"
-                                                        }
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    " ",
-                                                    [
-                                                        "/config/cloud/deploy-application.py --NODE_IP",
-                                                        {
-                                                            "Fn::GetAtt": [
-                                                                "UbuntuExampleApplicationStack",
-                                                                "Outputs.HTTPServerIP"
-                                                            ]
-                                                        },
-                                                        "--ELB_NAME",
-                                                        {
-                                                            "Fn::Join": [
-                                                                "",
-                                                                [
-                                                                    "ELB-",
-                                                                    {
-                                                                        "Ref": "AWS::StackName"
-                                                                    }
-                                                                ]
-                                                            ]
-                                                        },
-                                                        "--ELB_DNS_NAME",
-                                                        {
-                                                            "Fn::GetAtt": [
-                                                                "ClassicELB",
-                                                                "DNSName"
-                                                            ]
-                                                        }
-                                                    ]
-                                                ]
-                                            }
-                                        ]
-                                    ]
-                                },
-                                "group": "root",
-                                "mode": "000755",
-                                "owner": "root"
-                            },
                             "/config/cloud/setup-dcd.sh": {
                                 "content": {
                                     "Fn::Join": [
                                         "\n",
                                         [
                                             "#!/usr/bin/env bash",
-                                            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
-                                            "echo ''",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://raw.githubusercontent.com/f5devcentral/f5-big-iq-trial/6.0.0/refit-for-public-urls/aws/built/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/refit-for-public-urls/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
                                             "/config/cloud/wait-for-rjd.py",
                                             {
                                                 "Fn::Join": [
                                                     "",
                                                     [
                                                         "tmsh modify auth user admin",
-                                                        " password $BIG_IQ_PWD",
+                                                        " password \"$BIG_IQ_PWD\"",
                                                         " && tmsh save sys config && set-basic-auth on"
                                                     ]
                                                 ]
@@ -856,7 +668,13 @@
             },
             "Properties": {
                 "ImageId": {
-                    "Ref": "bigIqAmi"
+                    "Fn::FindInMap": [
+                        "AmiRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "bigiq"
+                    ]
                 },
                 "InstanceType": {
                     "Ref": "instanceType"
