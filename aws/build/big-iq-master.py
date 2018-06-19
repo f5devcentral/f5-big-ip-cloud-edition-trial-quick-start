@@ -52,137 +52,125 @@ def define_instance_init_files (t, args):
         "tar --strip-components=1 -xvzf scripts.tar.gz \n"
     )
 
-    init_files_map["/config/cloud/setup-cm.sh"] = InitFile(
-        mode = "000755",
-        owner = "root",
-        group = "root",
-        content = Join("\n", [
-            # This script is run in root context
-            "#!/usr/bin/env bash",
-            generate_pwd_prompt('AWS Access Key ID: ', 'AWS_ACCESS_KEY'),
-            generate_pwd_prompt('AWS Secret Access Key: ', 'AWS_SECRET_KEY'),
-            generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
-            generate_pwd_prompt('BIG-IP Password [Alphanumerics only]: ', 'BIG_IP_PWD'),
-            "mount -o remount,rw /usr",
-            download_and_extract_scripts,
-            "/usr/local/bin/pip install awscli",
-            # Delete default listener on ELB
-            Join("", [
-                " AWS_DEFAULT_REGION=", Ref("AWS::Region"),
-                ' AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY"',
-                ' AWS_SECRET_ACCESS_KEY="$AWS_SECRET_KEY"',
-                # Root doesn't have /u/l/bin in path
-                " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
-                " ELB-", Ref("AWS::StackName"),
-                " --load-balancer-ports 80 80"
-            ]),
-            # Run configuration
-            Join(" ", [
-                "/config/cloud/configure-bigiq.py --LICENSE_KEY",
-                Ref(t.parameters["licenseKey1"]),
-                "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
-                "--TIMEOUT_SEC 1200"
-            ]),
-            # Wait for restart to take effect, should be unnecessary since the setup wizard has resequenced to
-            # only set startup true after the restart has taken place
-            "sleep 10",
-            Join(" ", [
-                "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
-                GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress"),
-                Join(" ", [
-                    '--DCD_PWD "$BIG_IQ_PWD"',
-                    "--DCD_USERNAME admin"
+    return {
+        "cm": InitFiles({
+            "/config/cloud/setup-cm.sh": InitFile(
+                mode = "000755",
+                owner = "root",
+                group = "root",
+                content = Join("\n", [
+                    # This script is run in root context
+                    "#!/usr/bin/env bash",
+                    generate_pwd_prompt('AWS Access Key ID: ', 'AWS_ACCESS_KEY'),
+                    generate_pwd_prompt('AWS Secret Access Key: ', 'AWS_SECRET_KEY'),
+                    generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
+                    generate_pwd_prompt('BIG-IP Password [Alphanumerics only]: ', 'BIG_IP_PWD'),
+                    "mount -o remount,rw /usr",
+                    download_and_extract_scripts,
+                    "/usr/local/bin/pip install awscli",
+                    # Delete default listener on ELB
+                    Join("", [
+                        " AWS_DEFAULT_REGION=", Ref("AWS::Region"),
+                        ' AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY"',
+                        ' AWS_SECRET_ACCESS_KEY="$AWS_SECRET_KEY"',
+                        # Root doesn't have /u/l/bin in path
+                        " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
+                        " ELB-", Ref("AWS::StackName"),
+                        " --load-balancer-ports 80 80"
+                    ]),
+                    # Run configuration
+                    Join(" ", [
+                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                        Ref(t.parameters["licenseKey1"]),
+                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                        "--TIMEOUT_SEC 1200"
+                    ]),
+                    # Wait for restart to take effect, should be unnecessary since the setup wizard has resequenced to
+                    # only set startup true after the restart has taken place
+                    "sleep 10",
+                    Join(" ", [
+                        "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
+                        GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress"),
+                        Join(" ", [
+                            '--DCD_PWD "$BIG_IQ_PWD"',
+                            "--DCD_USERNAME admin"
+                        ])
+                    ]),
+                    Join("", [
+                        "tmsh modify auth user admin",
+                        ' password "$BIG_IQ_PWD"',
+                        " && tmsh save sys config"
+                    ]),
+                    Join(" ", [
+                        "/config/cloud/activate-dcd-services.py --SERVICES asm",
+                        "--DCD_IP_ADDRESS",
+                        GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress")
+                    ]),
+                    Join("", [
+                        "/config/cloud/create-auto-scaling.py ",
+                        "--AWS_SUBNET_1A ", Ref(t.resources["Subnet1"]), " ",
+                        "--AWS_SUBNET_1B ", Ref(t.resources["Subnet2"]), " ",
+                        "--AWS_US_EAST_1A ", Ref(t.parameters["subnet1Az"]), " ",
+                        "--AWS_US_EAST_1B ", Ref(t.parameters["subnet1Az"]), " ",
+                        "--AWS_SSH_KEY ", Ref(t.parameters["sshKey"]), " ",
+                        "--AWS_VPC ", Ref(t.resources["VPC"]), " ",
+                        "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
+                        "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
+                        "--BIGIP_AMI ", FindInMap("AmiRegionMap", Ref("AWS::Region"), "bigip"),
+                        " --BIGIQ_URI http://localhost:8100 ",
+                        "--BIGIP_USER admin",
+                        " --BIGIP_PWD '$BIG_IP_PWD'",
+                        " --CLOUD_PROVIDER_NAME aws ",
+                        "--CLOUD_ENVIRONMENT_NAME aws-env ",
+                        "--DEFAULT_REGION ", Ref("AWS::Region"), " ",
+                        "--DEVICE_TEMPLATE_NAME default-ssg-template ",
+                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
+                        "--NTP_SERVER time.nist.gov ",
+                        # Though I would like to, I cannot substring the stackname and concat something here,
+                        # there are no aws intrinsic functions which can do this
+                        "--SSG_NAME ", Ref(t.parameters["ssgName"])
+                    ]),
+                    Join(" ", [
+                        "/config/cloud/deploy-application.py --NODE_IP", GetAtt("UbuntuExampleApplicationStack", "Outputs.HTTPServerIP"),
+                        "--ELB_NAME", Join("", [ "ELB-", Ref("AWS::StackName") ] ),
+                        "--ELB_DNS_NAME", GetAtt("ClassicELB", "DNSName")
+                    ])
                 ])
-            ]),
-            Join("", [
-                "tmsh modify auth user admin",
-                ' password "$BIG_IQ_PWD"',
-                " && tmsh save sys config"
-            ]),
-            Join(" ", [
-                "/config/cloud/activate-dcd-services.py --SERVICES asm",
-                "--DCD_IP_ADDRESS",
-                GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress")
-            ]),
-            Join("", [
-                "/config/cloud/create-auto-scaling.py ",
-                "--AWS_SUBNET_1A ", Ref(t.resources["Subnet1"]), " ",
-                "--AWS_SUBNET_1B ", Ref(t.resources["Subnet2"]), " ",
-                "--AWS_US_EAST_1A ", Ref(t.parameters["subnet1Az"]), " ",
-                "--AWS_US_EAST_1B ", Ref(t.parameters["subnet1Az"]), " ",
-                "--AWS_SSH_KEY ", Ref(t.parameters["sshKey"]), " ",
-                "--AWS_VPC ", Ref(t.resources["VPC"]), " ",
-                "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
-                "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
-                "--BIGIP_AMI ", FindInMap("AmiRegionMap", Ref("AWS::Region"), "bigip"),
-                " --BIGIQ_URI http://localhost:8100 ",
-                "--BIGIP_USER admin",
-                " --BIGIP_PWD '$BIG_IP_PWD'",
-                " --CLOUD_PROVIDER_NAME aws ",
-                "--CLOUD_ENVIRONMENT_NAME aws-env ",
-                "--DEFAULT_REGION ", Ref("AWS::Region"), " ",
-                "--DEVICE_TEMPLATE_NAME default-ssg-template ",
-                "--LOOKUP_SERVER_LIST 8.8.8.8 ",
-                "--NTP_SERVER time.nist.gov ",
-                # Though I would like to, I cannot substring the stackname and concat something here,
-                # there are no aws intrinsic functions which can do this
-                "--SSG_NAME ", Ref(t.parameters["ssgName"])
-            ]),
-            Join(" ", [
-                "/config/cloud/deploy-application.py --NODE_IP", GetAtt("UbuntuExampleApplicationStack", "Outputs.HTTPServerIP"),
-                "--ELB_NAME", Join("", [ "ELB-", Ref("AWS::StackName") ] ),
-                "--ELB_DNS_NAME", GetAtt("ClassicELB", "DNSName")
-            ])
-        ])
-    )
-
-    init_files_map["/config/cloud/setup-dcd.sh"] = InitFile(
-        mode = "000755",
-        owner = "root",
-        group = "root",
-        content = Join("\n", [
-            "#!/usr/bin/env bash",
-            generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
-            download_and_extract_scripts,
-            "/config/cloud/wait-for-rjd.py",
-            Join("", [
-                "tmsh modify auth user admin",
-                ' password "$BIG_IQ_PWD"',
-                " && tmsh save sys config && set-basic-auth on"
-            ]),
-            Join(" ", [
-                "/config/cloud/configure-bigiq.py --LICENSE_KEY",
-                Ref(t.parameters["licenseKey2"]),
-                "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!", # TODO HC hardcoded pf is okay maybe?
-                "--TIMEOUT_SEC 1200",
-                "--NODE_TYPE DCD"
-            ])
-        ])
-    )
-
-    init_files = InitFiles(init_files_map)
-
-    return init_files
+            )
+        }),
+        "dcd": InitFiles({
+            "/config/cloud/setup-dcd.sh": InitFile(
+                mode = "000755",
+                owner = "root",
+                group = "root",
+                content = Join("\n", [
+                    "#!/usr/bin/env bash",
+                    generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
+                    download_and_extract_scripts,
+                    "/config/cloud/wait-for-rjd.py",
+                    Join("", [
+                        "tmsh modify auth user admin",
+                        ' password "$BIG_IQ_PWD"',
+                        " && tmsh save sys config && set-basic-auth on"
+                    ]),
+                    Join(" ", [
+                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                        Ref(t.parameters["licenseKey2"]),
+                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!", # TODO HC hardcoded pf is okay maybe?
+                        "--TIMEOUT_SEC 1200",
+                        "--NODE_TYPE DCD"
+                    ])
+                ])
+            )
+        })
+    }
 
 def define_instance_metadata (t, args, is_cm_instance=True):
-    if is_cm_instance:
-        commands = {
-                "000-run-setup": {
-                    "command": "nohup /config/cloud/setup-cm.sh &> /var/log/setup.log &"
-                }
-            }
-    else: # It's the DCD instance
-        commands = {
-                "000-run-setup": {
-                    "command": "nohup /config/cloud/setup-dcd.sh &> /var/log/setup.log &"
-                }
-            }
-
+    init_files_map = define_instance_init_files(t, args)
     return Metadata(
         Init({
             "config": InitConfig(
-                # commands = commands,
-                files = define_instance_init_files(t, args)
+                files = init_files_map["cm"] if is_cm_instance else init_files_map["dcd"]
             )
         })
     )
