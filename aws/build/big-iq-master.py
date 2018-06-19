@@ -69,8 +69,8 @@ def define_instance_init_files (t, args):
             # Delete default listener on ELB
             Join("", [
                 " AWS_DEFAULT_REGION=", Ref("AWS::Region"),
-                " AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY",
-                " AWS_SECRET_ACCESS_KEY=$AWS_SECRET_KEY",
+                ' AWS_ACCESS_KEY_ID="$AWS_ACCESS_KEY"',
+                ' AWS_SECRET_ACCESS_KEY="$AWS_SECRET_KEY"',
                 # Root doesn't have /u/l/bin in path
                 " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
                 " ELB-", Ref("AWS::StackName"),
@@ -81,8 +81,7 @@ def define_instance_init_files (t, args):
                 "/config/cloud/configure-bigiq.py --LICENSE_KEY",
                 Ref(t.parameters["licenseKey1"]),
                 "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
-                "--TIMEOUT_SEC 1200",
-                "--ADMIN_PWD '$BIG_IQ_PWD'"
+                "--TIMEOUT_SEC 1200"
             ]),
             # Wait for restart to take effect, should be unnecessary since the setup wizard has resequenced to
             # only set startup true after the restart has taken place
@@ -91,13 +90,13 @@ def define_instance_init_files (t, args):
                 "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
                 GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress"),
                 Join(" ", [
-                    "--DCD_PWD '$BIG_IQ_PWD'",
+                    '--DCD_PWD "$BIG_IQ_PWD"',
                     "--DCD_USERNAME admin"
                 ])
             ]),
             Join("", [
                 "tmsh modify auth user admin",
-                " password '$BIG_IQ_PWD'",
+                ' password "$BIG_IQ_PWD"',
                 " && tmsh save sys config"
             ]),
             Join(" ", [
@@ -148,7 +147,7 @@ def define_instance_init_files (t, args):
             "/config/cloud/wait-for-rjd.py",
             Join("", [
                 "tmsh modify auth user admin",
-                " password '$BIG_IQ_PWD'",
+                ' password "$BIG_IQ_PWD"',
                 " && tmsh save sys config && set-basic-auth on"
             ]),
             Join(" ", [
