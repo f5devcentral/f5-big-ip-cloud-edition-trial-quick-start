@@ -48,27 +48,31 @@ To deploy this CFT in AWS, complete the following steps.
    *Expected time: ~5 min*
 
 6. Use your key to SSH into the BIG-IQ DCD instance and execute the following commands:
-```
-# bash
-# /config/cloud/setup-dcd.sh
-```
+
+   ```
+   # bash
+   # /config/cloud/setup-dcd.sh
+   ```
+
    * When prompted, enter a password for BIG-IQ. You will use this same password again on the BIG-IQ CM instance.[Details on prohibited characters](https://support.f5.com/csp/article/K2873).
    * Let the scripts finish before moving to the next step.
 
    *Expected time: ~2 min*
 
-6. Use your key to SSH into the BIG-IQ CM instance and execute the following commands:
-```
-# bash
-# /config/cloud/setup-cm.sh
-```
+7. Use your key to SSH into the BIG-IQ CM instance and execute the following commands:
+
+   ```
+   # bash
+   # /config/cloud/setup-cm.sh
+   ```
+
    * Enter the [AWS access key ID/secret key](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) (used for the Service Scaling Group object creation) and BIG-IQ password.
    * The password must match the password you used on the BIG-IQ DCD instance in the previous step.
    * Let the scripts finish before moving to the next step.
 
    *Expected time: ~25 min*
 
-7. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+8. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
    * Use the username `admin`.
    * Click the Applications tab > APPLICATIONS. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
