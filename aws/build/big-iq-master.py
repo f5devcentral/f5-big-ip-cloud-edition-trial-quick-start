@@ -5,7 +5,7 @@ from os.path import isfile, join
 from pathlib import Path
 
 import troposphere
-from troposphere import (Base64, GetAtt, Join,
+from troposphere import (Base64, FindInMap, GetAtt, Join,
                          Output, Parameter, Ref, cloudformation)
 from troposphere.cloudformation import *
 from troposphere.ec2 import *
@@ -25,6 +25,22 @@ def parse_args ():
 SCRIPT_PATH = "../scripts/"
 # Files which configure the BIG-IQ instances
 
+def generate_pwd_prompt (prompt_text, var_name):
+    return (
+        'read -s -p "' + prompt_text + '" v1 \n'
+        'echo \n'
+        'read -s -p "Re-enter ' + prompt_text + '" ' + var_name + ' \n'
+        'while [ "$v1" != "$' + var_name + '" ]; do \n'
+        '    echo \n'
+        '    echo "Entries did not match, try again" \n'
+        '    echo \n'
+        '    read -s -p "' + prompt_text + '" v1 \n'
+        '    echo \n'
+        '    read -s -p "Re-enter ' + prompt_text + '" ' + var_name + ' \n'
+        'done \n'
+        'echo'
+    )
+
 def define_instance_init_files (t, args):
     init_files_map = {}
 
@@ -32,7 +48,7 @@ def define_instance_init_files (t, args):
     download_and_extract_scripts = (
         "mkdir -p /config/cloud \n"
         "cd /config/cloud \n"
-        "curl https://raw.githubusercontent.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/" + args.branch + "/aws/built/scripts.tar.gz > scripts.tar.gz \n"
+        "curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/" + args.branch + "/scripts.tar.gz > scripts.tar.gz \n"
         "tar --strip-components=1 -xvzf scripts.tar.gz \n"
     )
 
@@ -43,14 +59,10 @@ def define_instance_init_files (t, args):
         content = Join("\n", [
             # This script is run in root context
             "#!/usr/bin/env bash",
-            "read -s -p 'AWS Access Key ID: ' AWS_ACCESS_KEY",
-            "echo ''",
-            "read -s -p 'AWS Secret Access Key: ' AWS_SECRET_KEY",
-            "echo ''",
-            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
-            "echo ''",
-            "read -s -p 'BIG-IP Password: ' BIG_IP_PWD",
-            "echo ''",
+            generate_pwd_prompt('AWS Access Key ID: ', 'AWS_ACCESS_KEY'),
+            generate_pwd_prompt('AWS Secret Access Key: ', 'AWS_SECRET_KEY'),
+            generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
+            generate_pwd_prompt('BIG-IP Password [Alphanumerics only]: ', 'BIG_IP_PWD'),
             "mount -o remount,rw /usr",
             download_and_extract_scripts,
             "/usr/local/bin/pip install awscli",
@@ -78,13 +90,13 @@ def define_instance_init_files (t, args):
                 "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
                 GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress"),
                 Join(" ", [
-                    "--DCD_PWD $BIG_IQ_PWD",
+                    "--DCD_PWD '$BIG_IQ_PWD'",
                     "--DCD_USERNAME admin"
                 ])
             ]),
             Join("", [
                 "tmsh modify auth user admin",
-                " password $BIG_IQ_PWD",
+                " password '$BIG_IQ_PWD'",
                 " && tmsh save sys config"
             ]),
             Join(" ", [
@@ -102,10 +114,10 @@ def define_instance_init_files (t, args):
                 "--AWS_VPC ", Ref(t.resources["VPC"]), " ",
                 "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
                 "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
-                "--BIGIP_AMI ", Ref(t.parameters["bigIpAmi"]),
+                "--BIGIP_AMI ", FindInMap("AmiRegionMap", Ref("AWS::Region"), "bigip"),
                 " --BIGIQ_URI http://localhost:8100 ",
                 "--BIGIP_USER admin",
-                " --BIGIP_PWD $BIG_IP_PWD",
+                " --BIGIP_PWD '$BIG_IP_PWD'",
                 " --CLOUD_PROVIDER_NAME aws ",
                 "--CLOUD_ENVIRONMENT_NAME aws-env ",
                 "--DEFAULT_REGION ", Ref("AWS::Region"), " ",
@@ -130,13 +142,12 @@ def define_instance_init_files (t, args):
         group = "root",
         content = Join("\n", [
             "#!/usr/bin/env bash",
-            "read -s -p 'BIG-IQ Password: ' BIG_IQ_PWD",
-            "echo ''",
+            generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
             download_and_extract_scripts,
             "/config/cloud/wait-for-rjd.py",
             Join("", [
                 "tmsh modify auth user admin",
-                " password $BIG_IQ_PWD",
+                " password '$BIG_IQ_PWD'",
                 " && tmsh save sys config && set-basic-auth on"
             ]),
             Join(" ", [
@@ -232,7 +243,66 @@ def define_interface ():
 
 # Define the AMI mappings per region for BIG-IQ
 def define_mappings (t):
-    pass
+    t.add_mapping("AmiRegionMap", {
+        "ap-northeast-1": {
+            "bigiq": "ami-5fcc0a20",
+            "bigip": "ami-1ca2b060"
+        },
+        "ap-northeast-2": {
+            "bigiq": "ami-ce3c97a0",
+            "bigip": "ami-6acd6304"
+        },
+        "ap-south-1": {
+            "bigiq": "ami-e07c558f",
+            "bigip": "ami-35ceea5a"
+        },
+        "ap-southeast-1": {
+            "bigiq": "ami-af82bad3",
+            "bigip": "ami-1723056b"
+        },
+        "ap-southeast-2": {
+            "bigiq": "ami-d1eb36b3",
+            "bigip": "ami-1d32fb7f"
+        },
+        "ca-central-1": {
+            "bigiq": "ami-2aad2e4e",
+            "bigip": "ami-b32aacd7"
+        },
+        "eu-central-1": {
+            "bigiq": "ami-4cc5f2a7",
+            "bigip": "ami-164119fd"
+        },
+        "eu-west-1": {
+            "bigiq": "ami-ce6f69b7",
+            "bigip": "ami-c16e34b8"
+        },
+        "eu-west-2": {
+            "bigiq": "ami-f8e30c9f",
+            "bigip": "ami-32f81855"
+        },
+        "sa-east-1": {
+            "bigiq": "ami-4ae1b826",
+            "bigip": "ami-65421309"
+        },
+        "us-east-1": {
+            "bigiq": "ami-8f9bebf0",
+            "bigip": "ami-030fd17c"
+        },
+        "us-east-2": {
+            "bigiq": "ami-c0d9e6a5",
+            "bigip": "ami-b3ad9dd6"
+        },
+
+        "us-west-1": {
+            "bigiq": "ami-5ba64338",
+            "bigip": "ami-880b18e8"
+        },
+        "us-west-2": {
+            "bigiq": "ami-370d4a4f",
+            "bigip": "ami-12a3c36a"
+        }
+    })
+
 
 # Define the parameter labels for the AWS::CloudFormation::Interface
 def define_param_labels ():
@@ -295,22 +365,6 @@ def define_param_labels ():
 
 # Define the template parameters and constraints
 def define_parameters (t):
-    t.add_parameter(Parameter("bigIqAmi",
-        ConstraintDescription = "Must be a valid AMI ID",
-        Default = "ami-8f9bebf0",
-        Description = "If you would like to deploy using a custom BIG-IQ image, provide the AMI **Note**: Unless specifically required, leave the default value.",
-        MaxLength = 255,
-        MinLength = 1,
-        Type = "String"
-    ))
-    t.add_parameter(Parameter("bigIpAmi",
-        ConstraintDescription = "Must be a valid AMI ID",
-        Default = "ami-030fd17c",
-        Description = "If you would like to deploy using a custom BIG-IP image, provide the AMI **Note**: Unless specifically required, leave the default value. Must use a Utility AMI",
-        MaxLength = 255,
-        MinLength = 1,
-        Type = "String"
-    ))
     t.add_parameter(Parameter("instanceType",
         AllowedValues = [
             "t2.medium",
@@ -597,7 +651,7 @@ def define_ec2_instances (t, args):
             ]
         )),
         Metadata = define_instance_metadata(t, args),
-        ImageId = Ref(t.parameters["bigIqAmi"]),
+        ImageId = FindInMap("AmiRegionMap", Ref("AWS::Region"), "bigiq"),
         InstanceType =  Ref(t.parameters["instanceType"]),
         KeyName = Ref(t.parameters["sshKey"]),
         NetworkInterfaces =  [
@@ -634,7 +688,7 @@ def define_ec2_instances (t, args):
             ]
         )),
         Metadata = define_instance_metadata(t, args, is_cm_instance=False),
-        ImageId = Ref(t.parameters["bigIqAmi"]),
+        ImageId = FindInMap("AmiRegionMap", Ref("AWS::Region"), "bigiq"),
         InstanceType =  Ref(t.parameters["instanceType"]),
         KeyName = Ref(t.parameters["sshKey"]),
         NetworkInterfaces =  [
