@@ -27,7 +27,7 @@ Instructions for AWS
   * BIG-IQ® and BIG-IP® AMI will be mapped by default (Paris and Government regions not supported)
   * License Key 1 and 2 (used for BIG-IQ® CM and DCD, given by F5 Networks)
   * SSH Key (your AWS Key Pair Name)
-  * SSG CloudFormation Stack Name (e.g. demo-ssg-trial)
+  * SSG CloudFormation Stack Name
 
   *Expected time: ~5 min*
 
