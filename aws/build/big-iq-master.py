@@ -81,7 +81,8 @@ def define_instance_init_files (t, args):
                 "/config/cloud/configure-bigiq.py --LICENSE_KEY",
                 Ref(t.parameters["licenseKey1"]),
                 "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
-                "--TIMEOUT_SEC 1200"
+                "--TIMEOUT_SEC 1200",
+                "--ADMIN_PWD '$BIG_IQ_PWD'"
             ]),
             # Wait for restart to take effect, should be unnecessary since the setup wizard has resequenced to
             # only set startup true after the restart has taken place
