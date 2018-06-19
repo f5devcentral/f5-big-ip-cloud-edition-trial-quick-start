@@ -19,15 +19,14 @@ Instructions for AWS
  * [F5 BIG-IQ 6.0 for AWS (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
  * [F5 BIG-IP Virtual Edition - BEST - (PAYG, 25Mbps)](https://aws.amazon.com/marketplace/pp/B079C4WR32)
 
-3. Launch the *trial stack* template (click right, open new tab/window):  <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=BIG-IP-CE-Demo&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.0%2Frefit-for-public-urls%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank">  
+3. Launch the *trial stack* template (click right, open new tab/window):  <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=BIG-IP-CE-Trial&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.0%2Frefit-for-public-urls%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank">  
    <img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
 
-  * Stack name (needs to be less than 25 characters)
+  * Stack name (needs to be less than 25 characters total)
   * Subnets AZ1 and AZ2 (make sure both are different)
-  * BIG-IQ® AMI (default: Virginia us-east-1, update if different region)
-  * BIG-IP® AMI (default: Virginia us-east-1, update if different region [release 13.1.0.5](https://github.com/F5Networks/f5-aws-cloudformation/tree/master/AMI%20Maps))
+  * BIG-IQ® and BIG-IP® AMI will be mapped by default (Paris and Gov Region not supported)
   * License Key 1 and 2 (used for BIG-IQ® CM and DCD, given by F5 Networks)
-  * SSH Key (you AWS Key Pair Name)
+  * SSH Key (your AWS Key Pair Name)
   * SSG CloudFormation Stack Name (e.g. demo-ssg-trial)
 
   *Expected time: ~5 min*
@@ -44,7 +43,7 @@ Instructions for AWS
 # bash
 # /config/cloud/setup-dcd.sh
 ```
-  * Enter BIG-IQ® [password](https://support.f5.com/csp/article/K2873) as prompted. This must match the password used on the BIG-IQ® CM instance (next step).
+  * Enter BIG-IQ® [password](https://support.f5.com/csp/article/K2873) as prompted. Alphabetic characters only. This must match the password used on the BIG-IQ® CM instance (next step).
   * Let the script scripts run to completion before moving to the next step.
 
   *Expected time: ~2 min*
