@@ -453,6 +453,7 @@ def define_parameters (t):
         AllowedPattern = "[\\da-zA-Z\\-]{1,25}",
         Description = "A unique CloudFormation StackName within your AWS account",
         ConstraintDescription = "SSG Name must contain only alphanumerics and hyphens and be less than 25 characters long",
+        Default = "demo-ssg-trial",
         MaxLength = 25,
         MinLength = 1,
         Type = "String"
