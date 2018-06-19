@@ -24,7 +24,7 @@ Instructions for AWS
 
   * Stack name (needs to be less than 25 characters total)
   * Subnets AZ1 and AZ2 (make sure both are different)
-  * BIG-IQ® and BIG-IP® AMI will be mapped by default (Paris and Gov Region not supported)
+  * BIG-IQ® and BIG-IP® AMI will be mapped by default (Paris and Government regions not supported)
   * License Key 1 and 2 (used for BIG-IQ® CM and DCD, given by F5 Networks)
   * SSH Key (your AWS Key Pair Name)
   * SSG CloudFormation Stack Name (e.g. demo-ssg-trial)
@@ -43,7 +43,7 @@ Instructions for AWS
 # bash
 # /config/cloud/setup-dcd.sh
 ```
-  * Enter BIG-IQ® [password](https://support.f5.com/csp/article/K2873) as prompted. Alphabetic characters only. This must match the password used on the BIG-IQ® CM instance (next step).
+  * Enter BIG-IQ® password as prompted. [Alphabetic characters only](https://support.f5.com/csp/article/K2873). This must match the password used on the BIG-IQ® CM instance (next step).
   * Let the script scripts run to completion before moving to the next step.
 
   *Expected time: ~2 min*
