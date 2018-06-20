@@ -25,7 +25,7 @@ To deploy this CFT in AWS, complete the following steps.
    * [F5 BIG-IQ 6.0 for AWS (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
    * [F5 BIG-IP Virtual Edition - BEST - (PAYG, 25Mbps)](https://aws.amazon.com/marketplace/pp/B079C4WR32)
 
-3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**: <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=BIG-IP-Cloud-Edition-Demo&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.0%2Frefit-for-public-urls%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank">
+3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**: <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=BIG-IP-Cloud-Edition-Demo&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.0%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank">
    <img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a>
 
 4. In the CloudFormation Template (CFT), populate this information:
