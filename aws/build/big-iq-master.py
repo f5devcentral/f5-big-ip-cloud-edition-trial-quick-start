@@ -198,7 +198,7 @@ def define_interface ():
                     ]
                 }, {
                     "Label": {
-                        "default": "Accept BIG-IQ License: https://aws.amazon.com/marketplace/pp/B00KIZG6KA"
+                        "default": "Accept BIG-IQ License: https://aws.amazon.com/marketplace/pp/B07DR2WGJJ"
                     },
                     "Parameters": [ ]
                 }, {
