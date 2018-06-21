@@ -7,7 +7,7 @@ With F5® BIG-IQ® Centralized Management (CM), you can securely manage traffic 
 
 From a centralized view, you can monitor the health and statistics of your applications as well as devices that are load balancing traffic and hosting applications. You can also set up alert thresholds to immediately notify you of certain events.
 
-This CloudFormation Template (CFT) creates two BIG-IQ VE instances: a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE, and a BIG-IQ Data Collection Device (DCD) to store analytics data. It also creates a BIG-IP VE instance and a demo web server.
+This CloudFormation Template (CFT) creates two BIG-IQ VE instances: a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE, and a BIG-IQ Data Collection Device (DCD) to store analytics data. It also creates and an Apache demo web server.
 
 ![Deployment Diagram](images/aws-ssg-example-in-cloud.png)
 
@@ -97,7 +97,7 @@ Teardown instructions
 
    *Expected time: ~10 min*
 
-2. Open the [Cloud Formation Console](https://console.aws.amazon.com/cloudformation/) and delete the stack BIG-IP-Cloud-Edition-Demo.
+2. Open the [Cloud Formation Console](https://console.aws.amazon.com/cloudformation/) and delete the stack.
 
    *Expected time: ~5 min*
 
