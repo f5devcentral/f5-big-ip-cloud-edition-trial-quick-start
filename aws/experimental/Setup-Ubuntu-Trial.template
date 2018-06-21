@@ -183,7 +183,7 @@
                 "# Install the files and packages from the metadata\n",
                 "apt-get -y update\n",
                 "apt-get -y install python-setuptools\n",
-                "echo '* * * * * /usr/bin/ab -n 300 -c 500 https://",
+                "echo '* * * * * /usr/bin/ab -n 30 -c 30 https://",
                 {
                   "Ref": "loadBalancerDnsName"
                 },
