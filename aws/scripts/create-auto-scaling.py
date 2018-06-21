@@ -112,7 +112,7 @@ def create_cloud_resources(env, device_template_result):
                 "moduleSelection": "WAF",
                 "licenseType": "Utility",
                 "imageId": env.BIGIP_AMI,
-                "instanceType": "m4.xlarge"
+                "instanceType": "m3.2xlarge"
             },
             "isVmwCluster": True
         }
