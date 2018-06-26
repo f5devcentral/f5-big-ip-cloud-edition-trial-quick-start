@@ -39,7 +39,7 @@ To deploy this CFT in AWS, complete the following steps.
    * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified, clicking **Continue to Subscribe**, and accepting terms
    * BIG-IQ Amazon Machine Image (AMI) IDs
    * License Keys BIG-IQ 1 and 2 (from F5 trial, used for the BIG-IQ CM and DCD instances)
-   * License Pool BIG-IP (from F5 trial *BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances*, used for the SSG)
+   * License Pool BIG-IP (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
    * SSH Key (your AWS key pair name)
    * SSG CloudFormation Stack Name
 
