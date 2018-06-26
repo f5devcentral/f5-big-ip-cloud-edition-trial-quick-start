@@ -21,11 +21,12 @@ To deploy this CFT in AWS, complete the following steps.
 **Note:** This template is not supported in the Paris region and in AWS GovCloud.
 
 1. To get a BIG-IQ trial license, go to [F5 Cloud Edition Trial](https://f5.com/products/trials/product-trials).
+   Select **BIG-IP Cloud Edition - Advanced Web Application Firewall**
 
 2. Subscribe and accept the terms for these F5 products:
 
    * [F5 BIG-IP Cloud Edition - BYOL](https://aws.amazon.com/marketplace/pp/B07DR2WGJJ)
-   * [F5 BIG-IP Virtual Edition - BEST - (PAYG, 25Mbps)](https://aws.amazon.com/marketplace/pp/B079C4WR32)
+   * [F5 BIG-IP Virtual Edition - BEST - (BYOL)](https://aws.amazon.com/marketplace/pp/B00KXHNAPW)
 
 3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
@@ -37,7 +38,8 @@ To deploy this CFT in AWS, complete the following steps.
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
    * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified, clicking **Continue to Subscribe**, and accepting terms
    * BIG-IQ Amazon Machine Image (AMI) IDs
-   * License Key 1 and 2 (license keys from F5, used for the BIG-IQ CM and DCD instances)
+   * License Keys BIG-IQ 1 and 2 (from F5 trial, used for the BIG-IQ CM and DCD instances)
+   * License Pool BIG-IP (from F5 trial *BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances*, used for the SSG)
    * SSH Key (your AWS key pair name)
    * SSG CloudFormation Stack Name
 
@@ -83,7 +85,7 @@ To deploy this CFT in AWS, complete the following steps.
 
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition).
 
-Note: If the application deployment fails, click Retry.
+**Note:** If the application deployment fails, click Retry.
 
 Teardown instructions
 ---------------------
