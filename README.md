@@ -1,5 +1,5 @@
-BIG-IP® Cloud Edition Trial
-===========================
+BIG-IP® Cloud Edition Trial Quick Start
+=======================================
 
 F5® [BIG-IP® Cloud Edition](https://www.f5.com/pdf/products/f5_bigip_cloud_edition_solution_overview.pdf): Automatically deploy pre-built app services dedicated to each application.
 
