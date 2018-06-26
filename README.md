@@ -25,8 +25,8 @@ To deploy this CFT in AWS, complete the following steps.
 
 2. Subscribe and accept the terms for these F5 products:
 
-   * [F5 BIG-IP Cloud Edition - BYOL](https://aws.amazon.com/marketplace/pp/B07DR2WGJJ)
-   * [F5 BIG-IP Virtual Edition - BEST - (BYOL)](https://aws.amazon.com/marketplace/pp/B00KXHNAPW)
+   * [F5 BIG-IP Cloud Edition (BYOL)](https://aws.amazon.com/marketplace/pp/B07DR2WGJJ)
+   * [F5 BIG-IP Virtual Edition - BEST (BYOL)](https://aws.amazon.com/marketplace/pp/B00KXHNAPW)
 
 3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
