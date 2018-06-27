@@ -416,9 +416,16 @@ def create_scale_rules_and_alerts(env, ssg_result):
         }
     )
 
+def randomize_ssg_name (ssg_name):
+    ssg_name = ssg_name[0:10]
+    random_part = str(int(round(time.time() * 1000)))
+    return ssg_name + (random_part[-14:])
+
+
 def main():
     print("Parsing arguments...")
     env = parse_args()
+    env.SSG_NAME = randomize_ssg_name(env.SSG_NAME)
     print("Fetching device template...")
     device_template_result = create_device_template(env)
     print("Creating cloud resources...")
