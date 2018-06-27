@@ -31,18 +31,17 @@ To deploy this CFT in AWS, complete the following steps.
 
 3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
-   coming soon...
+comming soon...
 
 4. In the CloudFormation Template (CFT), populate this information:
 
    * Stack name (must be fewer than 25 characters)
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
    * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified, clicking **Continue to Subscribe**, and accepting terms
-   * BIG-IQ Amazon Machine Image (AMI) IDs
-   * License Keys BIG-IQ 1 and 2 (from F5 trial, used for the BIG-IQ CM and DCD instances)
-   * License Pool BIG-IP (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
+   * License Keys 1 and 2 (from F5 trial, used for the BIG-IQ CM and DCD instances)
+   * BIG-IP License Pool Key (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
    * SSH Key (your AWS key pair name)
-   * SSG CloudFormation Stack Name
+   * SSG CloudFormation Stack Name (must be unique and fewer than 25 characters)
 
    *Expected time: ~5 min*
 
