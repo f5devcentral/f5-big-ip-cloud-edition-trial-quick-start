@@ -34,6 +34,8 @@ def parse_args ():
     parser.add_argument("--LOOKUP_SERVER_LIST", type=str, required=True)
     parser.add_argument("--NTP_SERVER", type=str, required=True)
     parser.add_argument("--SSG_NAME", type=str, required=True)
+    parser.add_argument("--CM_IP", type=str, required=True)
+    parser.add_argument("--BIG_IQ_PWD", type=str, required=True)
     return parser.parse_args()
 
 
@@ -110,9 +112,16 @@ def create_cloud_resources(env, device_template_result):
                 "restrictedSourceAddress": "0.0.0.0/0",
                 "sshKeyName": env.AWS_SSH_KEY,
                 "moduleSelection": "WAF",
-                "licenseType": "Utility",
+                "licenseType": "BYOL",
                 "imageId": env.BIGIP_AMI,
-                "instanceType": "m3.2xlarge"
+                "instanceType": "m3.2xlarge",
+                "byolLicenseInformation": {
+                    "bigiqAddress": env.CM_IP,
+                    "bigiqUser": "admin",
+                    "bigiqPassword": env.BIG_IQ_PWD,
+                    "licensePoolName": "license-pool",
+                    "unitOfMeasure": "hourly"
+                }
             },
             "isVmwCluster": True
         }
@@ -130,7 +139,7 @@ def create_ssg(env, cloud_environment_result):
                 "link": "https://localhost/mgmt/cm/cloud/environments/" + cloud_environment_result["id"]
             },
             "minSize": 1,
-            "maxSize": 5,
+            "maxSize": 3,
             "maxSupportedApplications": 3,
             "desiredSize": 1,
             "postDeviceCreationUserScriptReference": None,

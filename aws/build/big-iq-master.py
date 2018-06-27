@@ -106,6 +106,9 @@ def define_instance_init_files (t, args):
                         "--DCD_IP_ADDRESS",
                         GetAtt("BigIqDcdEth0", "PrimaryPrivateIpAddress")
                     ]),
+                    "set-basic-auth on", # The calls within require identity gleaned from a login
+                    Join(" ", ['/config/cloud/create-license-pool.py --REG_KEY', Ref(t.parameters["licensePoolKey"]), '--BIG_IQ_PWD "$BIG_IQ_PWD"']),
+                    "set-basic-auth off",
                     Join("", [
                         "/config/cloud/create-auto-scaling.py ",
                         "--AWS_SUBNET_1A ", Ref(t.resources["Subnet1"]), " ",
@@ -119,16 +122,18 @@ def define_instance_init_files (t, args):
                         "--BIGIP_AMI ", FindInMap("AmiRegionMap", Ref("AWS::Region"), "bigip"),
                         " --BIGIQ_URI http://localhost:8100 ",
                         "--BIGIP_USER admin",
-                        " --BIGIP_PWD '$BIG_IP_PWD'",
+                        ' --BIGIP_PWD "$BIG_IP_PWD"',
                         " --CLOUD_PROVIDER_NAME aws ",
                         "--CLOUD_ENVIRONMENT_NAME aws-env ",
                         "--DEFAULT_REGION ", Ref("AWS::Region"), " ",
                         "--DEVICE_TEMPLATE_NAME default-ssg-template ",
                         "--LOOKUP_SERVER_LIST 8.8.8.8 ",
                         "--NTP_SERVER time.nist.gov ",
+                        "--CM_IP ", Ref(t.resources["CmElasticIp"]),
+                        ' --BIG_IQ_PWD "$BIG_IQ_PWD"',
                         # Though I would like to, I cannot substring the stackname and concat something here,
                         # there are no aws intrinsic functions which can do this
-                        "--SSG_NAME ", Ref(t.parameters["ssgName"])
+                        " --SSG_NAME ", Ref(t.parameters["ssgName"])
                     ]),
                     Join(" ", [
                         "/config/cloud/deploy-application.py --NODE_IP", GetAtt("UbuntuExampleApplicationStack", "Outputs.HTTPServerIP"),
@@ -203,7 +208,7 @@ def define_interface ():
                     "Parameters": [ ]
                 }, {
                     "Label": {
-                        "default": "Accept BIG-IP License: https://aws.amazon.com/marketplace/pp/B079C4WR32"
+                        "default": "Accept BIG-IP License: https://aws.amazon.com/marketplace/pp/B00KXHNAPW"
                     },
                     "Parameters": [ ]
                 }, {
@@ -217,6 +222,7 @@ def define_interface ():
                         "bigIpAmi",
                         "licenseKey1",
                         "licenseKey2",
+                        "licensePoolKey",
                         "instanceType",
                         "restrictedSrcAddress",
                         "sshKey",
@@ -325,6 +331,9 @@ def define_param_labels ():
         "licenseKey2": {
             "default": "License Key 2"
         },
+        "licensePoolKey": {
+            "default": "BIG-IP License Pool Key"
+        },
         "vpcCidrBlock": {
             "default": "VPC CIDR Block"
         },
@@ -355,20 +364,7 @@ def define_param_labels ():
 def define_parameters (t):
     t.add_parameter(Parameter("instanceType",
         AllowedValues = [
-            "t2.medium",
-            "t2.large",
-            "m3.2xlarge",
-            "m4.large",
-            "m4.xlarge",
-            "m4.2xlarge",
-            "m4.4xlarge",
-            "m4.10xlarge",
-            "c3.2xlarge",
-            "c3.4xlarge",
-            "c3.8xlarge",
-            "c4.xlarge",
-            "c4.2xlarge",
-            "c4.4xlarge"
+            "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.2xlarge"
         ],
         ConstraintDescription = "Must be a valid EC2 instance type for BIG-IQ",
         Default = "m4.2xlarge",
@@ -385,6 +381,13 @@ def define_parameters (t):
     t.add_parameter(Parameter("licenseKey2",
         ConstraintDescription = "Verify your F5 BYOL regkey.",
         Description = "F5 BIG-IQ license key",
+        MaxLength = 255,
+        MinLength = 1,
+        Type = "String"
+    ))
+    t.add_parameter(Parameter("licensePoolKey",
+        ConstraintDescription = "Verify your F5 BIG-IP Pool regkey.",
+        Description = "F5 BIG-IP license pool key",
         MaxLength = 255,
         MinLength = 1,
         Type = "String"
@@ -613,6 +616,16 @@ def define_networking (t):
 
 # Define the BIQ ec2 instances, there is a centralized management and data collection device
 def define_ec2_instances (t, args):
+    t.add_resource(EIP(
+        "CmElasticIp",
+        Domain = "vpc"
+    ))
+
+    t.add_resource(EIP(
+        "DcdElasticIp",
+        Domain = "vpc"
+    ))
+
     t.add_resource(NetworkInterface(
         "BigIqCmEth0",
         Description = "BIG-IQ CM Instance Management IP",
@@ -701,16 +714,6 @@ def define_ec2_instances (t, args):
         )
     ))
 
-    t.add_resource(EIP(
-        "CmElasticIp",
-        Domain = "vpc"
-    ))
-
-    t.add_resource(EIP(
-        "DcdElasticIp",
-        Domain = "vpc"
-    ))
-
     t.add_resource(EIPAssociation(
         "CmEipAssociation",
         AllocationId = GetAtt("CmElasticIp", "AllocationId"),
@@ -740,6 +743,7 @@ def define_ec2_instances (t, args):
             TemplateURL = "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/" + args.branch + "/Setup-Ubuntu-Trial.template"
         )
     )
+
 
 # Define all the resources for this stack
 def define_resources (t, args):
