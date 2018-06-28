@@ -31,7 +31,7 @@ To deploy this CFT in AWS, complete the following steps.
 
 3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
-comming soon...
+coming soon...
 
 4. In the CloudFormation Template (CFT), populate this information:
 
@@ -76,6 +76,8 @@ comming soon...
    * Let the scripts finish before moving to the next step.
 
    *Expected time: ~25 min*
+   
+**Note:** the AWS access key ID/secret key requires full access permissions for the following AWS resources: Auto Scale Groups, Instances, SQS, S3, CloudWatch, and CloudFormation. Additionally, you need list, create, and delete permissions for the IAM role/rolePolicy/InstanceProfile. For quicker testing, assign a AdministratorAccess policy to your keys.
 
 8. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
