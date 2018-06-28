@@ -65,6 +65,23 @@ def define_instance_init_files (t, args):
                     generate_pwd_prompt('AWS Secret Access Key: ', 'AWS_SECRET_KEY'),
                     generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
                     generate_pwd_prompt('BIG-IP Password [Alphanumerics only]: ', 'BIG_IP_PWD'),
+                    'nohup /config/cloud/setup-cm-background.sh "$AWS_ACCESS_KEY" "$AWS_SECRET_KEY" "$BIG_IQ_PWD" "$BIG_IP_PWD" &> /var/log/setup.log < /dev/null &',
+                    "echo 'tail -f /var/log/setup.log in order to monitor setup progress'",
+                    "echo;"
+                    "echo 'Make sure you follow Teardown instructions from the GitHub repository once you are done with your testing.'"
+                ])
+            ),
+            "/config/cloud/setup-cm-background.sh": InitFile(
+                mode = "000755",
+                owner = "root",
+                group = "root",
+                content = Join("\n", [
+                    # This script is run in root context
+                    "#!/usr/bin/env bash",
+                    'AWS_ACCESS_KEY="$1"',
+                    'AWS_SECRET_KEY="$2"',
+                    'BIG_IQ_PWD="$3"',
+                    'BIG_IP_PWD="$4"',
                     "mount -o remount,rw /usr",
                     download_and_extract_scripts,
                     "/usr/local/bin/pip install awscli",
@@ -151,8 +168,19 @@ def define_instance_init_files (t, args):
                 content = Join("\n", [
                     "#!/usr/bin/env bash",
                     generate_pwd_prompt('BIG-IQ Password [Alphanumerics only]: ', 'BIG_IQ_PWD'),
+                    'nohup /config/cloud/setup-dcd-background.sh "$BIG_IQ_PWD" &> /var/log/setup.log < /dev/null &',
+                    "echo 'tail -f /var/log/setup.log in order to monitor setup progress'"
+                ])
+            ),
+            "/config/cloud/setup-dcd-background.sh": InitFile(
+                mode = "000755",
+                owner = "root",
+                group = "root",
+                content = Join("\n", [
+                    "#!/usr/bin/env bash",
                     download_and_extract_scripts,
                     "/config/cloud/wait-for-rjd.py",
+                    'BIG_IQ_PWD="$1"',
                     Join("", [
                         "tmsh modify auth user admin",
                         ' password "$BIG_IQ_PWD"',
@@ -240,63 +268,62 @@ def define_mappings (t):
     t.add_mapping("AmiRegionMap", {
         "ap-northeast-1": {
             "bigiq": "ami-5fcc0a20",
-            "bigip": "ami-1ca2b060"
+            "bigip": "ami-c3bfadbf"
         },
         "ap-northeast-2": {
             "bigiq": "ami-ce3c97a0",
-            "bigip": "ami-6acd6304"
+            "bigip": "ami-ffce6091"
         },
         "ap-south-1": {
             "bigiq": "ami-e07c558f",
-            "bigip": "ami-35ceea5a"
+            "bigip": "ami-1fcce8709"
         },
         "ap-southeast-1": {
             "bigiq": "ami-af82bad3",
-            "bigip": "ami-1723056b"
+            "bigip": "ami-5125032d"
         },
         "ap-southeast-2": {
             "bigiq": "ami-d1eb36b3",
-            "bigip": "ami-1d32fb7f"
+            "bigip": "ami-8b30f9e9"
         },
         "ca-central-1": {
             "bigiq": "ami-2aad2e4e",
-            "bigip": "ami-b32aacd7"
+            "bigip": "ami-472bad23"
         },
         "eu-central-1": {
             "bigiq": "ami-4cc5f2a7",
-            "bigip": "ami-164119fd"
+            "bigip": "ami-c94d1522"
         },
         "eu-west-1": {
             "bigiq": "ami-ce6f69b7",
-            "bigip": "ami-c16e34b8"
+            "bigip": "ami-21712b58"
         },
         "eu-west-2": {
             "bigiq": "ami-f8e30c9f",
-            "bigip": "ami-32f81855"
+            "bigip": "ami-6ef91909"
         },
         "sa-east-1": {
             "bigiq": "ami-4ae1b826",
-            "bigip": "ami-65421309"
+            "bigip": "ami-225b0a4e"
         },
         "us-east-1": {
             "bigiq": "ami-8f9bebf0",
-            "bigip": "ami-030fd17c"
+            "bigip": "ami-8fe13ff0"
         },
         "us-east-2": {
             "bigiq": "ami-c0d9e6a5",
-            "bigip": "ami-b3ad9dd6"
+            "bigip": "ami-daa999bf"
         },
 
         "us-west-1": {
             "bigiq": "ami-5ba64338",
-            "bigip": "ami-880b18e8"
+            "bigip": "ami-b40417d4"
         },
         "us-west-2": {
             "bigiq": "ami-370d4a4f",
-            "bigip": "ami-12a3c36a"
+            "bigip": "ami-105b3b68"
         }
     })
-
 
 # Define the parameter labels for the AWS::CloudFormation::Interface
 def define_param_labels ():
