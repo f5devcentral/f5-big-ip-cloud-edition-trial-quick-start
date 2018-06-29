@@ -2,59 +2,59 @@
     "Mappings": {
         "AmiRegionMap": {
             "ap-northeast-1": {
-                "bigip": "ami-1ca2b060",
+                "bigip": "ami-c3bfadbf",
                 "bigiq": "ami-5fcc0a20"
             },
             "ap-northeast-2": {
-                "bigip": "ami-6acd6304",
+                "bigip": "ami-ffce6091",
                 "bigiq": "ami-ce3c97a0"
             },
             "ap-south-1": {
-                "bigip": "ami-35ceea5a",
+                "bigip": "ami-1fcce8709",
                 "bigiq": "ami-e07c558f"
             },
             "ap-southeast-1": {
-                "bigip": "ami-1723056b",
+                "bigip": "ami-5125032d",
                 "bigiq": "ami-af82bad3"
             },
             "ap-southeast-2": {
-                "bigip": "ami-1d32fb7f",
+                "bigip": "ami-8b30f9e9",
                 "bigiq": "ami-d1eb36b3"
             },
             "ca-central-1": {
-                "bigip": "ami-b32aacd7",
+                "bigip": "ami-472bad23",
                 "bigiq": "ami-2aad2e4e"
             },
             "eu-central-1": {
-                "bigip": "ami-164119fd",
+                "bigip": "ami-c94d1522",
                 "bigiq": "ami-4cc5f2a7"
             },
             "eu-west-1": {
-                "bigip": "ami-c16e34b8",
+                "bigip": "ami-21712b58",
                 "bigiq": "ami-ce6f69b7"
             },
             "eu-west-2": {
-                "bigip": "ami-32f81855",
+                "bigip": "ami-6ef91909",
                 "bigiq": "ami-f8e30c9f"
             },
             "sa-east-1": {
-                "bigip": "ami-65421309",
+                "bigip": "ami-225b0a4e",
                 "bigiq": "ami-4ae1b826"
             },
             "us-east-1": {
-                "bigip": "ami-030fd17c",
+                "bigip": "ami-8fe13ff0",
                 "bigiq": "ami-8f9bebf0"
             },
             "us-east-2": {
-                "bigip": "ami-b3ad9dd6",
+                "bigip": "ami-daa999bf",
                 "bigiq": "ami-c0d9e6a5"
             },
             "us-west-1": {
-                "bigip": "ami-880b18e8",
+                "bigip": "ami-b40417d4",
                 "bigiq": "ami-5ba64338"
             },
             "us-west-2": {
-                "bigip": "ami-12a3c36a",
+                "bigip": "ami-105b3b68",
                 "bigiq": "ami-370d4a4f"
             }
         }
@@ -76,13 +76,13 @@
                 },
                 {
                     "Label": {
-                        "default": "Accept BIG-IQ License: https://aws.amazon.com/marketplace/pp/B00KIZG6KA"
+                        "default": "Accept BIG-IQ License: https://aws.amazon.com/marketplace/pp/B07DR2WGJJ"
                     },
                     "Parameters": []
                 },
                 {
                     "Label": {
-                        "default": "Accept BIG-IP License: https://aws.amazon.com/marketplace/pp/B079C4WR32"
+                        "default": "Accept BIG-IP License: https://aws.amazon.com/marketplace/pp/B00KXHNAPW"
                     },
                     "Parameters": []
                 },
@@ -97,6 +97,7 @@
                         "bigIpAmi",
                         "licenseKey1",
                         "licenseKey2",
+                        "licensePoolKey",
                         "instanceType",
                         "restrictedSrcAddress",
                         "sshKey",
@@ -136,6 +137,9 @@
                 },
                 "licenseKey2": {
                     "default": "License Key 2"
+                },
+                "licensePoolKey": {
+                    "default": "BIG-IP License Pool Key"
                 },
                 "restrictedSrcAddress": {
                     "default": "Source Address(es) for SSH Access"
@@ -223,20 +227,10 @@
     "Parameters": {
         "instanceType": {
             "AllowedValues": [
-                "t2.medium",
-                "t2.large",
-                "m3.2xlarge",
-                "m4.large",
                 "m4.xlarge",
                 "m4.2xlarge",
                 "m4.4xlarge",
-                "m4.10xlarge",
-                "c3.2xlarge",
-                "c3.4xlarge",
-                "c3.8xlarge",
-                "c4.xlarge",
-                "c4.2xlarge",
-                "c4.4xlarge"
+                "m4.2xlarge"
             ],
             "ConstraintDescription": "Must be a valid EC2 instance type for BIG-IQ",
             "Default": "m4.2xlarge",
@@ -253,6 +247,13 @@
         "licenseKey2": {
             "ConstraintDescription": "Verify your F5 BYOL regkey.",
             "Description": "F5 BIG-IQ license key",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "licensePoolKey": {
+            "ConstraintDescription": "Verify your F5 BIG-IP Pool regkey.",
+            "Description": "F5 BIG-IP license pool key",
             "MaxLength": 255,
             "MinLength": 1,
             "Type": "String"
@@ -321,18 +322,18 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "/config/cloud/setup-cm.sh": {
+                            "/config/cloud/setup-cm-background.sh": {
                                 "content": {
                                     "Fn::Join": [
                                         "\n",
                                         [
                                             "#!/usr/bin/env bash",
-                                            "read -s -p \"AWS Access Key ID: \" v1 \necho \nread -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \nwhile [ \"$v1\" != \"$AWS_ACCESS_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Access Key ID: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \ndone \necho",
-                                            "read -s -p \"AWS Secret Access Key: \" v1 \necho \nread -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \nwhile [ \"$v1\" != \"$AWS_SECRET_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Secret Access Key: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \ndone \necho",
-                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
-                                            "read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \nwhile [ \"$v1\" != \"$BIG_IP_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \ndone \necho",
+                                            "AWS_ACCESS_KEY=\"$1\"",
+                                            "AWS_SECRET_KEY=\"$2\"",
+                                            "BIG_IQ_PWD=\"$3\"",
+                                            "BIG_IP_PWD=\"$4\"",
                                             "mount -o remount,rw /usr",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/refit-for-public-urls/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
                                             "/usr/local/bin/pip install awscli",
                                             {
                                                 "Fn::Join": [
@@ -415,6 +416,20 @@
                                                     ]
                                                 ]
                                             },
+                                            "set-basic-auth on",
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/create-license-pool.py --REG_KEY",
+                                                        {
+                                                            "Ref": "licensePoolKey"
+                                                        },
+                                                        "--BIG_IQ_PWD \"$BIG_IQ_PWD\""
+                                                    ]
+                                                ]
+                                            },
+                                            "set-basic-auth off",
                                             {
                                                 "Fn::Join": [
                                                     "",
@@ -464,7 +479,7 @@
                                                         },
                                                         " --BIGIQ_URI http://localhost:8100 ",
                                                         "--BIGIP_USER admin",
-                                                        " --BIGIP_PWD '$BIG_IP_PWD'",
+                                                        " --BIGIP_PWD \"$BIG_IP_PWD\"",
                                                         " --CLOUD_PROVIDER_NAME aws ",
                                                         "--CLOUD_ENVIRONMENT_NAME aws-env ",
                                                         "--DEFAULT_REGION ",
@@ -475,7 +490,12 @@
                                                         "--DEVICE_TEMPLATE_NAME default-ssg-template ",
                                                         "--LOOKUP_SERVER_LIST 8.8.8.8 ",
                                                         "--NTP_SERVER time.nist.gov ",
-                                                        "--SSG_NAME ",
+                                                        "--CM_IP ",
+                                                        {
+                                                            "Ref": "CmElasticIp"
+                                                        },
+                                                        " --BIG_IQ_PWD \"$BIG_IQ_PWD\"",
+                                                        " --SSG_NAME ",
                                                         {
                                                             "Ref": "ssgName"
                                                         }
@@ -515,6 +535,26 @@
                                                     ]
                                                 ]
                                             }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-cm.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p \"AWS Access Key ID: \" v1 \necho \nread -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \nwhile [ \"$v1\" != \"$AWS_ACCESS_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Access Key ID: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \ndone \necho",
+                                            "read -s -p \"AWS Secret Access Key: \" v1 \necho \nread -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \nwhile [ \"$v1\" != \"$AWS_SECRET_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Secret Access Key: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \ndone \necho",
+                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
+                                            "read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \nwhile [ \"$v1\" != \"$BIG_IP_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \ndone \necho",
+                                            "nohup /config/cloud/setup-cm-background.sh \"$AWS_ACCESS_KEY\" \"$AWS_SECRET_KEY\" \"$BIG_IQ_PWD\" \"$BIG_IP_PWD\" &> /var/log/setup.log < /dev/null &",
+                                            "echo 'tail -f /var/log/setup.log in order to monitor setup progress'",
+                                            "echo;echo 'Make sure you follow Teardown instructions from the GitHub repository once you are done with your testing.'"
                                         ]
                                     ]
                                 },
@@ -622,15 +662,15 @@
                 "AWS::CloudFormation::Init": {
                     "config": {
                         "files": {
-                            "/config/cloud/setup-dcd.sh": {
+                            "/config/cloud/setup-dcd-background.sh": {
                                 "content": {
                                     "Fn::Join": [
                                         "\n",
                                         [
                                             "#!/usr/bin/env bash",
-                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/refit-for-public-urls/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
                                             "/config/cloud/wait-for-rjd.py",
+                                            "BIG_IQ_PWD=\"$1\"",
                                             {
                                                 "Fn::Join": [
                                                     "",
@@ -655,6 +695,22 @@
                                                     ]
                                                 ]
                                             }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-dcd.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
+                                            "nohup /config/cloud/setup-dcd-background.sh \"$BIG_IQ_PWD\" &> /var/log/setup.log < /dev/null &",
+                                            "echo 'tail -f /var/log/setup.log in order to monitor setup progress'"
                                         ]
                                     ]
                                 },
@@ -1122,7 +1178,7 @@
                         "Ref": "VPC"
                     }
                 },
-                "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/refit-for-public-urls/Setup-Ubuntu-Trial.template"
+                "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.0/Setup-Ubuntu-Trial.template"
             },
             "Type": "AWS::CloudFormation::Stack"
         },
