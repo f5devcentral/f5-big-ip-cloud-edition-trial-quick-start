@@ -52,7 +52,7 @@ To deploy this CFT in AWS, complete the following steps.
 
    *Expected time: ~5 min*
 
-6. Use your key to SSH into the BIG-IQ DCD instance and execute the following commands:
+6. Use admin user and your AWS SSH key to SSH into the BIG-IQ DCD instance, then execute the following commands:
 
    ```
    # bash
@@ -64,7 +64,7 @@ To deploy this CFT in AWS, complete the following steps.
 
    *Expected time: ~2 min*
 
-7. Use your key to SSH into the BIG-IQ CM instance and execute the following commands:
+7. Use admin user and your AWS SSH key to SSH into the BIG-IQ CM instance, then execute the following commands:
 
    ```
    # bash
