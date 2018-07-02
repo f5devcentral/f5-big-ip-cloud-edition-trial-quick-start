@@ -667,6 +667,16 @@ def define_ec2_instances (t, args):
         SubnetId = Ref("Subnet1")
     ))
 
+    bd_mappings = [
+            BlockDeviceMapping(
+                DeviceName = "/dev/xvda",
+                Ebs = EBSBlockDevice(
+                    DeleteOnTermination = True,
+                    VolumeType = "gp2"
+                )
+            )
+        ]
+
     t.add_resource(Instance(
         "BigIqCm",
         # Kick off cfn-init b/c BIG-IP doesn't run this automatically
@@ -701,7 +711,8 @@ def define_ec2_instances (t, args):
                         "Big-IQ CM:",
                         Ref("AWS::StackName")
                     ])
-        )
+        ),
+        BlockDeviceMappings = bd_mappings
     ))
 
     t.add_resource(Instance(
@@ -738,7 +749,8 @@ def define_ec2_instances (t, args):
                         "Big-IQ DCD:",
                         Ref("AWS::StackName")
                     ])
-        )
+        ),
+        BlockDeviceMappings = bd_mappings
     ))
 
     t.add_resource(EIPAssociation(

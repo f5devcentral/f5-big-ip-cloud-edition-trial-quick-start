@@ -567,6 +567,15 @@
                 }
             },
             "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AmiRegionMap",
@@ -723,6 +732,15 @@
                 }
             },
             "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
                 "ImageId": {
                     "Fn::FindInMap": [
                         "AmiRegionMap",
