@@ -61,13 +61,9 @@ def create_device_template(env):
         env.BIGIQ_URI + "/cm/device/templates",
         {
             "name": env.DEVICE_TEMPLATE_NAME,
+            "type": "AWS",
             "timeZone": "UTC",
             "ntpServerList": [env.NTP_SERVER],
-            "lookupServerList": [env.LOOKUP_SERVER_LIST],
-            # "provisionedModuleList": [{
-            #     "module": "LTM",
-            #     "level": "NOMINAL"
-            # }],
             "userAccountList": [{
                 "username": env.BIGIP_USER,
                 "password": env.BIGIP_PWD,

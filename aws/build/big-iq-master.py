@@ -231,12 +231,12 @@ def define_interface ():
                     ]
                 }, {
                     "Label": {
-                        "default": "Accept BIG-IQ License: https://aws.amazon.com/marketplace/pp/B07DR2WGJJ"
+                        "default": "Accept BIG-IQ Terms and Conditions: https://aws.amazon.com/marketplace/pp/B00KIZG6KA"
                     },
                     "Parameters": [ ]
                 }, {
                     "Label": {
-                        "default": "Accept BIG-IP License: https://aws.amazon.com/marketplace/pp/B00KXHNAPW"
+                        "default": "Accept BIG-IP Terms and Conditions: https://aws.amazon.com/marketplace/pp/B07G5MT2KT"
                     },
                     "Parameters": [ ]
                 }, {
@@ -267,61 +267,60 @@ def define_interface ():
 def define_mappings (t):
     t.add_mapping("AmiRegionMap", {
         "ap-northeast-1": {
-            "bigiq": "ami-5fcc0a20",
-            "bigip": "ami-c3bfadbf"
+            "bigip": "ami-113f42fc",
+            "bigiq": "ami-0333dd63ae0b1112a"
         },
         "ap-northeast-2": {
-            "bigiq": "ami-ce3c97a0",
-            "bigip": "ami-ffce6091"
+            "bigip": "ami-04eb9812dfb6c904a",
+            "bigiq": "ami-0edeb70b0aaf278a6"
         },
         "ap-south-1": {
-            "bigiq": "ami-e07c558f",
-            "bigip": "ami-1fcce8709"
+            "bigip": "ami-08fc42da3ff3a2d67",
+            "bigiq": "ami-0b9201eb7648bb07d"
         },
         "ap-southeast-1": {
-            "bigiq": "ami-af82bad3",
-            "bigip": "ami-5125032d"
+            "bigip": "ami-36e5a6dc",
+            "bigiq": "ami-08a3a55743fb2fd5d"
         },
         "ap-southeast-2": {
-            "bigiq": "ami-d1eb36b3",
-            "bigip": "ami-8b30f9e9"
+            "bigip": "ami-e15bfa83",
+            "bigiq": "ami-094d47e7fedebb201"
         },
         "ca-central-1": {
-            "bigiq": "ami-2aad2e4e",
-            "bigip": "ami-472bad23"
+            "bigip": "ami-2151dc45",
+            "bigiq": "ami-8d27aae9"
         },
         "eu-central-1": {
-            "bigiq": "ami-4cc5f2a7",
-            "bigip": "ami-c94d1522"
+            "bigip": "ami-a2989449",
+            "bigiq": "ami-04622a8db3ae94f89"
         },
         "eu-west-1": {
-            "bigiq": "ami-ce6f69b7",
-            "bigip": "ami-21712b58"
+            "bigip": "ami-5317f6be",
+            "bigiq": "ami-0f3b2ffeb3c4ff43c"
         },
         "eu-west-2": {
-            "bigiq": "ami-f8e30c9f",
-            "bigip": "ami-6ef91909"
+            "bigip": "ami-10b14477",
+            "bigiq": "ami-61ae5a06"
         },
         "sa-east-1": {
-            "bigiq": "ami-4ae1b826",
-            "bigip": "ami-225b0a4e"
+            "bigip": "ami-00b63cf358955934b",
+            "bigiq": "ami-08d385bd2cbe52df6"
         },
         "us-east-1": {
-            "bigiq": "ami-8f9bebf0",
-            "bigip": "ami-8fe13ff0"
+            "bigip": "ami-58c3d327",
+            "bigiq": "ami-075f269e21d926462"
         },
         "us-east-2": {
-            "bigiq": "ami-c0d9e6a5",
-            "bigip": "ami-daa999bf"
+            "bigip": "ami-2b4e4b4e",
+            "bigiq": "ami-076b40df0c056a3da"
         },
-
         "us-west-1": {
-            "bigiq": "ami-5ba64338",
-            "bigip": "ami-b40417d4"
+            "bigip": "ami-a24ea2c1",
+            "bigiq": "ami-0b69901ceb507a45b"
         },
         "us-west-2": {
-            "bigiq": "ami-370d4a4f",
-            "bigip": "ami-105b3b68"
+            "bigip": "ami-414e6b39",
+            "bigiq": "ami-7f416207"
         }
     })
 
@@ -353,10 +352,10 @@ def define_param_labels ():
             "default": "AWS Instance Size"
         },
         "licenseKey1": {
-            "default": "License Key 1"
+            "default": "BIG-IQ CM License Key"
         },
         "licenseKey2": {
-            "default": "License Key 2"
+            "default": "BIG-IQ DCD License Key"
         },
         "licensePoolKey": {
             "default": "BIG-IP License Pool Key"
@@ -391,7 +390,7 @@ def define_param_labels ():
 def define_parameters (t):
     t.add_parameter(Parameter("instanceType",
         AllowedValues = [
-            "m4.xlarge", "m4.2xlarge", "m4.4xlarge", "m4.2xlarge"
+            "m4.2xlarge", "m4.4xlarge"
         ],
         ConstraintDescription = "Must be a valid EC2 instance type for BIG-IQ",
         Default = "m4.2xlarge",
@@ -400,14 +399,14 @@ def define_parameters (t):
     ))
     t.add_parameter(Parameter("licenseKey1",
         ConstraintDescription = "Verify your F5 BYOL regkey.",
-        Description = "F5 BIG-IQ license key",
+        Description = "F5 BIG-IQ CM license key",
         MaxLength = 255,
         MinLength = 1,
         Type = "String"
     ))
     t.add_parameter(Parameter("licenseKey2",
         ConstraintDescription = "Verify your F5 BYOL regkey.",
-        Description = "F5 BIG-IQ license key",
+        Description = "F5 BIG-IQ DCD license key",
         MaxLength = 255,
         MinLength = 1,
         Type = "String"

@@ -57,14 +57,29 @@
       "eu-west-2": {
         "64": "ami-f4f21593"
       },
-      "us-west-3": {
-        "64": "ami-0e55e373"
+      "eu-west-3": {
+        "64": "ami-041e7189b2a6677a5"
+      },
+      "ap-southeast-2": {
+        "64": "ami-d38a4ab1"
       },
       "ap-southeast-1": {
         "64": "ami-52d4802e"
       },
+      "ap-northeast-1": {
+        "64": "ami-0d74386b"
+      },
       "ap-northeast-2": {
         "64": "ami-a414b9ca"
+      },
+      "ap-south-1": {
+        "64": "ami-0189d76e"
+      },
+      "sa-east-1": {
+        "64": "ami-423d772e"
+      },
+      "ca-central-1": {
+        "64": "ami-ae55d2ca"
       }
     }
   },

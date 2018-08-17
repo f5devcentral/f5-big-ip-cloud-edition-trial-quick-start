@@ -1,6 +1,8 @@
 BIG-IP® Cloud Edition Trial Quick Start
 =======================================
 
+**Note:** Updated with BIG-IQ 6.0.1 and BIG-IP 13.1.1
+
 F5® [BIG-IP® Cloud Edition](https://www.f5.com/pdf/products/f5_bigip_cloud_edition_solution_overview.pdf): Automatically deploy pre-built app services dedicated to each application.
 
 With F5® BIG-IQ® Centralized Management (CM), you can securely manage traffic to your applications in AWS by using what F5 calls a Service Scaling Group (SSG).
@@ -24,10 +26,10 @@ To deploy this CFT in AWS, complete the following steps.
 
    Select **BIG-IP Cloud Edition - Advanced Web Application Firewall**
 
-2. Subscribe and accept the terms for these F5 products:
+2. Subscribe and accept the Terms and Conditions for these F5 products:
 
-   * [F5 BIG-IP Cloud Edition (BYOL)](https://aws.amazon.com/marketplace/pp/B07DR2WGJJ)
-   * [F5 BIG-IP Virtual Edition - BEST (BYOL)](https://aws.amazon.com/marketplace/pp/B00KXHNAPW)
+   * [F5 BIG-IQ Virtual Edition - (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
+   * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)](https://aws.amazon.com/marketplace/pp/B07G5MT2KT)
 
 3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
@@ -38,8 +40,9 @@ To deploy this CFT in AWS, complete the following steps.
    * Stack name (must be fewer than 25 characters)
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
    * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified, clicking **Continue to Subscribe**, and accepting terms
-   * License Keys 1 and 2 (from F5 trial, used for the BIG-IQ CM and DCD instances)
-   * BIG-IP License Pool Key (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
+   * BIG-IQ CM License Key (from F5 trial **BIG-IQ Console Node**)
+   * BIG-IQ DCD License Key (from F5 trial **BIG-IQ Data Collection Device**)
+   * BIG-IP WAF License Pool Key (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
    * SSH Key (your AWS key pair name)
    * SSG CloudFormation Stack Name (must be unique and fewer than 25 characters)
 
@@ -75,7 +78,7 @@ To deploy this CFT in AWS, complete the following steps.
    * The password must match the password you used on the BIG-IQ DCD instance in the previous step.
    * Let the scripts finish before moving to the next step.
 
-   *Expected time: ~25 min*
+   *Expected time: ~30 min*
    
 **Note:** the AWS access key ID/secret key requires full access permissions for the following AWS resources: Auto Scale Groups, Instances, SQS, S3, CloudWatch, and CloudFormation. Additionally, you need list, create, and delete permissions for the IAM role/rolePolicy/InstanceProfile. For quicker testing, assign a AdministratorAccess policy to your keys.
 
@@ -99,11 +102,21 @@ Teardown instructions
 
    * Delete the Service Scaling Group, under Application tab > ENVIRONMENTS > Service Scaling Groups, select the AWS SSG, then Delete.
 
-   *Expected time: ~10 min*
+   *Expected time: ~15 min*
 
 2. Open the [Cloud Formation Console](https://console.aws.amazon.com/cloudformation/) and delete the stack.
 
-   *Expected time: ~5 min*
+   *Expected time: ~10 min*
+
+Troubleshooting
+---------------
+1.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
+2.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
+3.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
+4.	In AWS Marketplace, check if you have subscribed and accepted the terms for the F5 products.
+5.	In AWS CFT Console, check the CFT status, make sure it is COMPLETED.
+6.	In AWS IAM Console, confirm the Access Key has the necessary permissions.
+7.	In AWS EC2 Console, check the Activity History in the Auto Scaling Group.
 
 ### Copyright
 
