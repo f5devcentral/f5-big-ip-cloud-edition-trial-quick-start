@@ -67,11 +67,9 @@
                         "default": "NETWORKING CONFIGURATION"
                     },
                     "Parameters": [
-                        "vpcCidrBlock",
-                        "subnet1CidrBlock",
-                        "subnet2CidrBlock",
-                        "subnet1Az",
-                        "subnet2Az"
+                        "vpc",
+                        "subnet1",
+                        "subnet2"
                     ]
                 },
                 {
@@ -150,20 +148,14 @@
                 "sshKey": {
                     "default": "SSH Key"
                 },
-                "subnet1Az": {
+                "subnet1": {
                     "default": "Subnet AZ1"
                 },
-                "subnet1CidrBlock": {
-                    "default": "Subnet 1 CIDR Block"
-                },
-                "subnet2Az": {
+                "subnet2": {
                     "default": "Subnet AZ2"
                 },
-                "subnet2CidrBlock": {
-                    "default": "Subnet 2 CIDR Block"
-                },
-                "vpcCidrBlock": {
-                    "default": "VPC CIDR Block"
+                "vpc": {
+                    "default": "VPC"
                 }
             }
         },
@@ -278,40 +270,19 @@
             "Description": "Key pair for accessing the instance",
             "Type": "AWS::EC2::KeyPair::KeyName"
         },
-        "subnet1Az": {
-            "Description": "Name of an Availability Zone in this Region",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
+        "subnet1": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "Availability Zone in this Region which is different than Subnet AZ2",
+            "Type": "AWS::EC2::Subnet::Id"
         },
-        "subnet1CidrBlock": {
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
-            "Default": "10.1.1.0/24",
-            "Description": " The CIDR block for the second subnet which is compatible with the VPC CIDR block",
-            "MaxLength": 18,
-            "MinLength": 9,
-            "Type": "String"
+        "subnet2": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "Availability Zone in this Region which is different than Subnet AZ1",
+            "Type": "AWS::EC2::Subnet::Id"
         },
-        "subnet2Az": {
-            "Description": "Name of an Availability Zone in this Region which is different than Subnet AZ1",
-            "Type": "AWS::EC2::AvailabilityZone::Name"
-        },
-        "subnet2CidrBlock": {
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
-            "Default": "10.1.2.0/24",
-            "Description": " The CIDR block for the second subnet which is compatible with the VPC CIDR block",
-            "MaxLength": 18,
-            "MinLength": 9,
-            "Type": "String"
-        },
-        "vpcCidrBlock": {
-            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
-            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
-            "Default": "10.1.0.0/16",
-            "Description": " The CIDR block for the VPC",
-            "MaxLength": 18,
-            "MinLength": 9,
-            "Type": "String"
+        "vpc": {
+            "ConstraintDescription": "This must be an existing VPC within the working region.",
+            "Type": "AWS::EC2::VPC::Id"
         }
     },
     "Resources": {
@@ -435,22 +406,22 @@
                                                         "/config/cloud/create-auto-scaling.py ",
                                                         "--AWS_SUBNET_1A ",
                                                         {
-                                                            "Ref": "Subnet1"
+                                                            "Ref": "subnet1"
                                                         },
                                                         " ",
                                                         "--AWS_SUBNET_1B ",
                                                         {
-                                                            "Ref": "Subnet2"
+                                                            "Ref": "subnet2"
                                                         },
                                                         " ",
                                                         "--AWS_US_EAST_1A ",
                                                         {
-                                                            "Ref": "subnet1Az"
+                                                            "Ref": "subnet1"
                                                         },
                                                         " ",
                                                         "--AWS_US_EAST_1B ",
                                                         {
-                                                            "Ref": "subnet2Az"
+                                                            "Ref": "subnet2"
                                                         },
                                                         " ",
                                                         "--AWS_SSH_KEY ",
@@ -460,7 +431,7 @@
                                                         " ",
                                                         "--AWS_VPC ",
                                                         {
-                                                            "Ref": "VPC"
+                                                            "Ref": "vpc"
                                                         },
                                                         " ",
                                                         "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
@@ -606,7 +577,7 @@
                             }
                         ],
                         "SubnetId": {
-                            "Ref": "Subnet1"
+                            "Ref": "subnet1"
                         }
                     }
                 ],
@@ -659,7 +630,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "Subnet1"
+                    "Ref": "subnet1"
                 }
             },
             "Type": "AWS::EC2::NetworkInterface"
@@ -771,7 +742,7 @@
                             }
                         ],
                         "SubnetId": {
-                            "Ref": "Subnet1"
+                            "Ref": "subnet1"
                         }
                     }
                 ],
@@ -824,7 +795,7 @@
                     }
                 ],
                 "SubnetId": {
-                    "Ref": "Subnet1"
+                    "Ref": "subnet1"
                 }
             },
             "Type": "AWS::EC2::NetworkInterface"
@@ -865,10 +836,10 @@
                 ],
                 "Subnets": [
                     {
-                        "Ref": "Subnet1"
+                        "Ref": "subnet1"
                     },
                     {
-                        "Ref": "Subnet2"
+                        "Ref": "subnet2"
                     }
                 ]
             },
@@ -930,114 +901,10 @@
                 },
                 "SecurityGroupIngress": [],
                 "VpcId": {
-                    "Ref": "VPC"
+                    "Ref": "vpc"
                 }
             },
             "Type": "AWS::EC2::SecurityGroup"
-        },
-        "IGW": {
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                " ",
-                                [
-                                    "BIG-IQ Internet Gateway:",
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ]
-            },
-            "Type": "AWS::EC2::InternetGateway"
-        },
-        "IGWAttachment": {
-            "Properties": {
-                "InternetGatewayId": {
-                    "Ref": "IGW"
-                },
-                "VpcId": {
-                    "Ref": "VPC"
-                }
-            },
-            "Type": "AWS::EC2::VPCGatewayAttachment"
-        },
-        "Route1Default": {
-            "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "GatewayId": {
-                    "Ref": "IGW"
-                },
-                "RouteTableId": {
-                    "Ref": "RouteTable1"
-                }
-            },
-            "Type": "AWS::EC2::Route"
-        },
-        "Route2Default": {
-            "Properties": {
-                "DestinationCidrBlock": "0.0.0.0/0",
-                "GatewayId": {
-                    "Ref": "IGW"
-                },
-                "RouteTableId": {
-                    "Ref": "RouteTable2"
-                }
-            },
-            "Type": "AWS::EC2::Route"
-        },
-        "RouteTable1": {
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                " ",
-                                [
-                                    "BIG-IQ Route Table 1:",
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VPC"
-                }
-            },
-            "Type": "AWS::EC2::RouteTable"
-        },
-        "RouteTable2": {
-            "Properties": {
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                " ",
-                                [
-                                    "BIG-IQ Route Table 2:",
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VPC"
-                }
-            },
-            "Type": "AWS::EC2::RouteTable"
         },
         "SecurityGroup": {
             "Properties": {
@@ -1071,103 +938,13 @@
                         "FromPort": "22",
                         "IpProtocol": "tcp",
                         "ToPort": "22"
-                    },
-                    {
-                        "CidrIp": {
-                            "Ref": "vpcCidrBlock"
-                        },
-                        "FromPort": "1",
-                        "IpProtocol": "tcp",
-                        "ToPort": "65356"
                     }
                 ],
                 "VpcId": {
-                    "Ref": "VPC"
+                    "Ref": "vpc"
                 }
             },
             "Type": "AWS::EC2::SecurityGroup"
-        },
-        "Subnet1": {
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "subnet1Az"
-                },
-                "CidrBlock": {
-                    "Ref": "subnet1CidrBlock"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                " ",
-                                [
-                                    "BIG-IQ Subnet 1:",
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VPC"
-                }
-            },
-            "Type": "AWS::EC2::Subnet"
-        },
-        "Subnet1RouteTableAssociation": {
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "RouteTable1"
-                },
-                "SubnetId": {
-                    "Ref": "Subnet1"
-                }
-            },
-            "Type": "AWS::EC2::SubnetRouteTableAssociation"
-        },
-        "Subnet2": {
-            "Properties": {
-                "AvailabilityZone": {
-                    "Ref": "subnet2Az"
-                },
-                "CidrBlock": {
-                    "Ref": "subnet2CidrBlock"
-                },
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                " ",
-                                [
-                                    "Big-IQ Subnet 2:",
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ],
-                "VpcId": {
-                    "Ref": "VPC"
-                }
-            },
-            "Type": "AWS::EC2::Subnet"
-        },
-        "Subnet2RouteTableAssociation": {
-            "Properties": {
-                "RouteTableId": {
-                    "Ref": "RouteTable2"
-                },
-                "SubnetId": {
-                    "Ref": "Subnet2"
-                }
-            },
-            "Type": "AWS::EC2::SubnetRouteTableAssociation"
         },
         "UbuntuExampleApplicationStack": {
             "Properties": {
@@ -1188,50 +965,15 @@
                         "Ref": "sshKey"
                     },
                     "subnet": {
-                        "Ref": "Subnet1"
+                        "Ref": "subnet1"
                     },
                     "vpcId": {
-                        "Ref": "VPC"
+                        "Ref": "vpc"
                     }
                 },
                 "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.1/Setup-Ubuntu-Trial.template"
             },
             "Type": "AWS::CloudFormation::Stack"
         },
-        "VPC": {
-            "Properties": {
-                "CidrBlock": {
-                    "Ref": "vpcCidrBlock"
-                },
-                "EnableDnsHostnames": "false",
-                "EnableDnsSupport": "true",
-                "InstanceTenancy": "default",
-                "Tags": [
-                    {
-                        "Key": "Name",
-                        "Value": {
-                            "Fn::Join": [
-                                " ",
-                                [
-                                    "BIG-IQ VPC:",
-                                    {
-                                        "Ref": "AWS::StackName"
-                                    }
-                                ]
-                            ]
-                        }
-                    }
-                ]
-            },
-            "Type": "AWS::EC2::VPC"
-        },
-        "VPCAcl": {
-            "Properties": {
-                "VpcId": {
-                    "Ref": "VPC"
-                }
-            },
-            "Type": "AWS::EC2::NetworkAcl"
-        }
     }
 }

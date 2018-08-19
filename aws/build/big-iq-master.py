@@ -131,7 +131,7 @@ def define_instance_init_files (t, args):
                         "--AWS_SUBNET_1A ", Ref(t.resources["Subnet1"]), " ",
                         "--AWS_SUBNET_1B ", Ref(t.resources["Subnet2"]), " ",
                         "--AWS_US_EAST_1A ", Ref(t.parameters["subnet1Az"]), " ",
-                        "--AWS_US_EAST_1B ", Ref(t.parameters["subnet1Az"]), " ",
+                        "--AWS_US_EAST_1B ", Ref(t.parameters["subnet2Az"]), " ",
                         "--AWS_SSH_KEY ", Ref(t.parameters["sshKey"]), " ",
                         "--AWS_VPC ", Ref(t.resources["VPC"]), " ",
                         "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
