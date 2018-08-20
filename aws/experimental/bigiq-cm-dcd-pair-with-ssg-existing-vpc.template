@@ -69,7 +69,9 @@
                     "Parameters": [
                         "vpc",
                         "subnet1",
-                        "subnet2"
+                        "subnet1az",
+                        "subnet2",
+                        "subnet2az",  
                     ]
                 },
                 {
@@ -149,10 +151,16 @@
                     "default": "SSH Key"
                 },
                 "subnet1": {
-                    "default": "Subnet AZ1"
+                    "default": "Subnet 1"
                 },
                 "subnet2": {
-                    "default": "Subnet AZ2"
+                    "default": "Subnet 2"
+                },
+                "subnet1az": {
+                    "default": "Subnet 1's Availbility Zone"
+                },
+                "subnet2az": {
+                    "default": "Subnet 2's Availbility Zone"
                 },
                 "vpc": {
                     "default": "VPC"
@@ -272,13 +280,23 @@
         },
         "subnet1": {
             "ConstraintDescription": "The subnet ID must be within an existing VPC",
-            "Description": "Availability Zone in this Region which is different than Subnet AZ2",
+            "Description": "Availability Zone in this Subnet which is different than Subnet 2",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "subnet2": {
             "ConstraintDescription": "The subnet ID must be within an existing VPC",
-            "Description": "Availability Zone in this Region which is different than Subnet AZ1",
+            "Description": "Availability Zone in this Subnet which is different than Subnet 1",
             "Type": "AWS::EC2::Subnet::Id"
+        },
+        "subnet1az": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "Corresponding Availability Zone for Subnet 1",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "subnet2az": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "Corresponding Availability Zone for Subnet 2",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "vpc": {
             "ConstraintDescription": "This must be an existing VPC within the working region.",
@@ -416,12 +434,12 @@
                                                         " ",
                                                         "--AWS_US_EAST_1A ",
                                                         {
-                                                            "Ref": "subnet1"
+                                                            "Ref": "subnet1az"
                                                         },
                                                         " ",
                                                         "--AWS_US_EAST_1B ",
                                                         {
-                                                            "Ref": "subnet2"
+                                                            "Ref": "subnet2az"
                                                         },
                                                         " ",
                                                         "--AWS_SSH_KEY ",
@@ -457,7 +475,6 @@
                                                         },
                                                         " ",
                                                         "--DEVICE_TEMPLATE_NAME default-ssg-template ",
-                                                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
                                                         "--NTP_SERVER time.nist.gov ",
                                                         "--CM_IP ",
                                                         {
