@@ -33,15 +33,16 @@ To deploy this CFT in AWS, complete the following steps.
 
 3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
-   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial-NEW-VPC&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.1%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (new VPC)
+   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial-NEW-VPC&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.1%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (new VPC/demo app)
 
-   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial-EXISTING-VPC&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.1%2Fbigiq-cm-dcd-pair-with-ssg-existing-vpc.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (existing VPC, no demo application)
+   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial-EXISTING-VPC&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.1%2Fbigiq-cm-dcd-pair-with-ssg-existing-vpc.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (existing VPC/no demo app)
 
 4. In the CloudFormation Template (CFT), populate this information:
 
    * Stack name (must be fewer than 25 characters)
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
-   * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified, clicking **Continue to Subscribe**, and accepting terms
+   * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified,
+   clicking **Continue to Subscribe**, and accepting terms
    * BIG-IQ CM License Key (from F5 trial **BIG-IQ Console Node**)
    * BIG-IQ DCD License Key (from F5 trial **BIG-IQ Data Collection Device**)
    * BIG-IP WAF License Pool Key (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
@@ -84,15 +85,25 @@ To deploy this CFT in AWS, complete the following steps.
    
 **Note:** the AWS access key ID/secret key requires full access permissions for the following AWS resources: Auto Scale Groups, Instances, SQS, S3, CloudWatch, and CloudFormation. Additionally, you need list, create, and delete permissions for the IAM role/rolePolicy/InstanceProfile. For quicker testing, assign a AdministratorAccess policy to your keys.
 
-8. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+8a. **[new VPC/demo app CFT]** Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
    * Use the username `admin`.
    * Click the Applications tab > APPLICATIONS. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
 
-For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition).
+8b. **[existing VPC/no demo app CFT]** Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
-**Note:** If the application deployment fails, click Retry.
+   * Use the username `admin`.
+   * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
+   * Click the Applications tab > APPLICATIONS. Create. Select `Default-AWS-f5-HTTPS-WAF-lb-template`.
+    - Name: your application name
+    - Domain Names: your application domain names
+    - Environment: select the available Service Scaling Group
+    - Name of Classic Load Balancer: the name of your ELB (EC2 > Load Balancing > Load Balancers)
+    - Listeners: your application ports (e.g. `TCP/443 - TCP/443` and `TCP/80 - TCP/80`)
+    - Servers's IP Address: your application server's IP addresses
+
+For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition).
 
 Teardown instructions
 ---------------------
@@ -112,13 +123,14 @@ Teardown instructions
 
 Troubleshooting
 ---------------
-1.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
-2.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
-3.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
-4.	In AWS Marketplace, check if you have subscribed and accepted the terms for the F5 products.
-5.	In AWS CFT Console, check the CFT status, make sure it is COMPLETED.
-6.	In AWS IAM Console, confirm the Access Key has the necessary permissions.
-7.	In AWS EC2 Console, check the Activity History in the Auto Scaling Group.
+1.  In BIG-IQ UI, if the application deployment failed, click Retry.
+2.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
+3.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
+4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
+5.	In AWS Marketplace, check if you have subscribed and accepted the terms for the F5 products.
+6.	In AWS CFT Console, check the CFT status, make sure it is COMPLETED.
+7.	In AWS IAM Console, confirm the Access Key has the necessary permissions.
+8.	In AWS EC2 Console, check the Activity History in the Auto Scaling Group.
 
 ### Copyright
 

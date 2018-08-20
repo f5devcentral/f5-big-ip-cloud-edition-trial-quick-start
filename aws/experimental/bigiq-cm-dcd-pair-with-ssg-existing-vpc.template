@@ -71,7 +71,7 @@
                         "subnet1",
                         "subnet1az",
                         "subnet2",
-                        "subnet2az",  
+                        "subnet2az"
                     ]
                 },
                 {
@@ -931,5 +931,20 @@
             },
             "Type": "AWS::EC2::SecurityGroup"
         },
+        "SGBaseIngress": {
+            "DependsOn": "SecurityGroup",
+            "Properties": {
+                "GroupId": {
+                    "Fn::GetAtt": [ "SecurityGroup", "GroupId" ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": 1,
+                "ToPort": 65356,
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [ "SecurityGroup", "GroupId" ]
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        }
     }
 }
