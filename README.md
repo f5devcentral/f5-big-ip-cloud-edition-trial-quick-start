@@ -35,6 +35,8 @@ To deploy this CFT in AWS, complete the following steps.
 
    <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial-NEW-VPC&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.1%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (new VPC/demo app)
 
+   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial-EXISTING-VPC&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates%2F6.0.1%2Fbigiq-cm-dcd-pair-with-ssg-existing-vpc.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (existing VPC/no demo app)
+
 4. In the CloudFormation Template (CFT), populate this information:
 
    * Stack name (must be fewer than 25 characters)
@@ -94,13 +96,12 @@ To deploy this CFT in AWS, complete the following steps.
    * Use the username `admin`.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
    * Click the Applications tab > APPLICATIONS. Create. Select `Default-AWS-f5-HTTPS-WAF-lb-template`.
-   
-    - Name: your application name
-    - Domain Names: your application domain names
-    - Environment: select the available Service Scaling Group
-    - Name of Classic Load Balancer: the name of your ELB (EC2 > Load Balancing > Load Balancers)
-    - Listeners: your application ports (e.g. TCP/443 - TCP/443 and TCP/80 - TCP/80)
-    - Servers's IP Address: your application server's IP addresses
+       * **Name**: your application name
+       * **Domain Names**: your application domain names
+       * **Environment**: select the available Service Scaling Group
+       * **Name of Classic Load Balancer**: the name of your ELB (EC2 > Load Balancing > Load Balancers)
+       * **Listeners**: your application ports (e.g. TCP/443 - TCP/443 and TCP/80 - TCP/80)
+       * **Servers's IP Address**: your application server's IP addresses
 
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition).
 
