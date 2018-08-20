@@ -94,13 +94,12 @@ To deploy this CFT in AWS, complete the following steps.
    * Use the username `admin`.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
    * Click the Applications tab > APPLICATIONS. Create. Select `Default-AWS-f5-HTTPS-WAF-lb-template`.
-   
-    - Name: your application name
-    - Domain Names: your application domain names
-    - Environment: select the available Service Scaling Group
-    - Name of Classic Load Balancer: the name of your ELB (EC2 > Load Balancing > Load Balancers)
-    - Listeners: your application ports (e.g. TCP/443 - TCP/443 and TCP/80 - TCP/80)
-    - Servers's IP Address: your application server's IP addresses
+       * Name: your application name
+       * Domain Names: your application domain names
+       * Environment: select the available Service Scaling Group
+       * Name of Classic Load Balancer: the name of your ELB (EC2 > Load Balancing > Load Balancers)
+       * Listeners: your application ports (e.g. TCP/443 - TCP/443 and TCP/80 - TCP/80)
+       * Servers's IP Address: your application server's IP addresses
 
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition).
 
