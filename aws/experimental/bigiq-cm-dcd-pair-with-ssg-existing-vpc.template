@@ -475,6 +475,7 @@
                                                         },
                                                         " ",
                                                         "--DEVICE_TEMPLATE_NAME default-ssg-template ",
+                                                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
                                                         "--NTP_SERVER time.nist.gov ",
                                                         "--CM_IP ",
                                                         {

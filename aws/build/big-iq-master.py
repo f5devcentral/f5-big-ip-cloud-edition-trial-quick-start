@@ -144,6 +144,7 @@ def define_instance_init_files (t, args):
                         "--CLOUD_ENVIRONMENT_NAME aws-env ",
                         "--DEFAULT_REGION ", Ref("AWS::Region"), " ",
                         "--DEVICE_TEMPLATE_NAME default-ssg-template ",
+                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
                         "--NTP_SERVER time.nist.gov ",
                         "--CM_IP ", Ref(t.resources["CmElasticIp"]),
                         ' --BIG_IQ_PWD "$BIG_IQ_PWD"',
