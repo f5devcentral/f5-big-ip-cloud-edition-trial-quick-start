@@ -31,7 +31,7 @@ def parse_args ():
     parser.add_argument("--CLOUD_ENVIRONMENT_NAME", type=str, required=True)
     parser.add_argument("--DEFAULT_REGION", type=str, required=True)
     parser.add_argument("--DEVICE_TEMPLATE_NAME", type=str, required=True)
-    parser.add_argument("--LOOKUP_SERVER_LIST", type=str, required=True)
+    parser.add_argument("--LOOKUP_SERVER_LIST", type=str, required=True) # not used in 6.0.1
     parser.add_argument("--NTP_SERVER", type=str, required=True)
     parser.add_argument("--SSG_NAME", type=str, required=True)
     parser.add_argument("--CM_IP", type=str, required=True)
