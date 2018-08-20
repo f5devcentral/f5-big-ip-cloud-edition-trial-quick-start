@@ -280,22 +280,22 @@
         },
         "subnet1": {
             "ConstraintDescription": "The subnet ID must be within an existing VPC",
-            "Description": "Availability Zone in this Subnet which is different than Subnet 2",
+            "Description": "",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "subnet2": {
             "ConstraintDescription": "The subnet ID must be within an existing VPC",
-            "Description": "Availability Zone in this Subnet which is different than Subnet 1",
+            "Description": "",
             "Type": "AWS::EC2::Subnet::Id"
         },
         "subnet1az": {
             "ConstraintDescription": "The subnet ID must be within an existing VPC",
-            "Description": "Corresponding Availability Zone for Subnet 1",
+            "Description": "Corresponding Availability Zone for Subnet 1 which is different than Subnet 2",
             "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "subnet2az": {
             "ConstraintDescription": "The subnet ID must be within an existing VPC",
-            "Description": "Corresponding Availability Zone for Subnet 2",
+            "Description": "Corresponding Availability Zone for Subnet 2 which is different than Subnet 1",
             "Type": "AWS::EC2::AvailabilityZone::Name"
         },
         "vpc": {
@@ -485,39 +485,6 @@
                                                         " --SSG_NAME ",
                                                         {
                                                             "Ref": "ssgName"
-                                                        }
-                                                    ]
-                                                ]
-                                            },
-                                            {
-                                                "Fn::Join": [
-                                                    " ",
-                                                    [
-                                                        "/config/cloud/deploy-application.py --NODE_IP",
-                                                        {
-                                                            "Fn::GetAtt": [
-                                                                "UbuntuExampleApplicationStack",
-                                                                "Outputs.HTTPServerIP"
-                                                            ]
-                                                        },
-                                                        "--ELB_NAME",
-                                                        {
-                                                            "Fn::Join": [
-                                                                "",
-                                                                [
-                                                                    "ELB-",
-                                                                    {
-                                                                        "Ref": "AWS::StackName"
-                                                                    }
-                                                                ]
-                                                            ]
-                                                        },
-                                                        "--ELB_DNS_NAME",
-                                                        {
-                                                            "Fn::GetAtt": [
-                                                                "ClassicELB",
-                                                                "DNSName"
-                                                            ]
                                                         }
                                                     ]
                                                 ]
@@ -963,35 +930,6 @@
                 }
             },
             "Type": "AWS::EC2::SecurityGroup"
-        },
-        "UbuntuExampleApplicationStack": {
-            "Properties": {
-                "Parameters": {
-                    "ebsVolumeSize": "40",
-                    "ec2Name": "apache-demo-server",
-                    "instanceType": "t2.small",
-                    "loadBalancerDnsName": {
-                        "Fn::GetAtt": [
-                            "ClassicELB",
-                            "DNSName"
-                        ]
-                    },
-                    "region": {
-                        "Ref": "AWS::Region"
-                    },
-                    "sshKey": {
-                        "Ref": "sshKey"
-                    },
-                    "subnet": {
-                        "Ref": "subnet1"
-                    },
-                    "vpcId": {
-                        "Ref": "vpc"
-                    }
-                },
-                "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.1/Setup-Ubuntu-Trial.template"
-            },
-            "Type": "AWS::CloudFormation::Stack"
         },
     }
 }
