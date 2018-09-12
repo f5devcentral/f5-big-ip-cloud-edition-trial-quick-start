@@ -13,7 +13,7 @@ This CloudFormation Template (CFT) creates two BIG-IQ VE instances: a BIG-IQ CM 
 
 After you configure the BIG-IQ instances, BIG-IQ automatically launches a BIG-IP VE instance in AWS.
 
-![Deployment Diagram](images/aws-ssg-example-in-cloud.png)
+![Deployment Diagram](images/aws-ssg-example-in-cloud2.png)
 
 Instructions for AWS
 --------------------
