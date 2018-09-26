@@ -331,7 +331,7 @@
                                             "BIG_IQ_PWD=\"$3\"",
                                             "BIG_IP_PWD=\"$4\"",
                                             "mount -o remount,rw /usr",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.1/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-pm/6.0.1.1/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
                                             "/usr/local/bin/pip install awscli",
                                             {
                                                 "Fn::Join": [
@@ -675,7 +675,7 @@
                                         "\n",
                                         [
                                             "#!/usr/bin/env bash",
-                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.1/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-pm/6.0.1.1/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
                                             "/config/cloud/wait-for-rjd.py",
                                             "BIG_IQ_PWD=\"$1\"",
                                             {
@@ -1194,7 +1194,7 @@
                         "Ref": "VPC"
                     }
                 },
-                "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/6.0.1/Setup-Ubuntu-Trial.template"
+                "TemplateURL": "https://s3.amazonaws.com/big-iq-quickstart-cf-templates-pm/6.0.1.1/Setup-Ubuntu-Trial.template"
             },
             "Type": "AWS::CloudFormation::Stack"
         },
