@@ -130,12 +130,9 @@
       "Metadata": {
         "AWS::CloudFormation::Init": {
           "config": {
-            "commands": {
+            "command": {
               "a_update_apt": {
                 "command": "apt-get -y update"
-              },
-              "b_install_apache": {
-                "command": "apt-get -y install apache2 apache2-utils"
               }
             }
           }
@@ -197,7 +194,8 @@
                 "#!/bin/bash -xe\n",
                 "# Install the files and packages from the metadata\n",
                 "apt-get -y update\n",
-                "apt-get -y install python-setuptools\n",
+                "apt-get -y install python-setuptools docker.io\n",
+                "docker run -d -p 80:80 --net=host --restart unless-stopped -e F5DEMO_APP=website -e F5DEMO_NODENAME='F5 AWS' -e F5DEMO_COLOR=ffd734 -e F5DEMO_NODENAME_SSL='F5 AWS (SSL)' -e F5DEMO_COLOR_SSL=a0bf37 f5devcentral/f5-demo-httpd\n",
                 "echo '* * * * * /usr/bin/ab -n 30 -c 30 https://",
                 {
                   "Ref": "loadBalancerDnsName"

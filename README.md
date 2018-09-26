@@ -1,7 +1,7 @@
 BIG-IP® Cloud Edition Trial Quick Start
 =======================================
 
-**Note:** Updated with BIG-IQ 6.0.1 and BIG-IP 13.1.1
+**Note:** Updated with BIG-IQ 6.0.1.1 and BIG-IP 13.1.1
 
 F5® [BIG-IP® Cloud Edition](https://www.f5.com/pdf/products/f5_bigip_cloud_edition_solution_overview.pdf): Automatically deploy pre-built app services dedicated to each application.
 
