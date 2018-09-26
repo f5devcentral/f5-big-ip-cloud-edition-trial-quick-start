@@ -48,7 +48,7 @@ def define_instance_init_files (t, args):
     download_and_extract_scripts = (
         "mkdir -p /config/cloud \n"
         "cd /config/cloud \n"
-        "curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates/" + args.branch + "/scripts.tar.gz > scripts.tar.gz \n"
+        "curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/" + args.branch + "/scripts.tar.gz > scripts.tar.gz \n"
         "tar --strip-components=1 -xvzf scripts.tar.gz \n"
     )
 
@@ -778,7 +778,7 @@ def define_ec2_instances (t, args):
                 "loadBalancerDnsName": GetAtt("ClassicELB", "DNSName")
             },
             # TODO use a different S3 account to host this template
-            TemplateURL = "https://s3.amazonaws.com/big-iq-quickstart-cf-templates/" + args.branch + "/Setup-Ubuntu-Trial.template"
+            TemplateURL = "https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/" + args.branch + "/Setup-Ubuntu-Trial.template"
         )
     )
 
