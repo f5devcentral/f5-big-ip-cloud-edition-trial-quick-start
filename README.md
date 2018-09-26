@@ -28,6 +28,7 @@ To deploy this CFT in AWS, complete the following steps.
 
 2. Subscribe and accept the Terms and Conditions for these F5 products:
 
+   * [F5 BIG-IP Cloud Edition - (BYOL)](https://aws.amazon.com/marketplace/pp/B07DR2WGJJ)
    * [F5 BIG-IQ Virtual Edition - (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
    * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)](https://aws.amazon.com/marketplace/pp/B07G5MT2KT)
 
