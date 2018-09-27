@@ -2,59 +2,59 @@
     "Mappings": {
         "AmiRegionMap": {
             "ap-northeast-1": {
-                "bigip": "ami-113f42fc",
+                "bigip": "ami-00320423988425f3d",
                 "bigiq": "ami-005d0ca50a2110d74"
             },
             "ap-northeast-2": {
-                "bigip": "ami-04eb9812dfb6c904a",
+                "bigip": "ami-09954bada9cf468cb",
                 "bigiq": "ami-06d37a6b49440d818"
             },
             "ap-south-1": {
-                "bigip": "ami-08fc42da3ff3a2d67",
+                "bigip": "ami-045104677062aef7d",
                 "bigiq": "ami-0870b9d5b20ce9157"
             },
             "ap-southeast-1": {
-                "bigip": "ami-36e5a6dc",
+                "bigip": "ami-095976ed364e0db59",
                 "bigiq": "ami-02d863bf27ea1fa45"
             },
             "ap-southeast-2": {
-                "bigip": "ami-e15bfa83",
+                "bigip": "ami-098d744be7a18d539",
                 "bigiq": "ami-0025f9b16ef68d20d"
             },
             "ca-central-1": {
-                "bigip": "ami-2151dc45",
+                "bigip": "ami-0b6671ac004f408e8",
                 "bigiq": "ami-088a1aa945a9e74aa"
             },
             "eu-central-1": {
-                "bigip": "ami-a2989449",
+                "bigip": "ami-08224fc41cc989329",
                 "bigiq": "ami-02a613946fcb9893a"
             },
             "eu-west-1": {
-                "bigip": "ami-5317f6be",
+                "bigip": "ami-06ccb3fa7c3c99e58",
                 "bigiq": "ami-00d8f80d0486e0d85"
             },
             "eu-west-2": {
-                "bigip": "ami-10b14477",
+                "bigip": "ami-05e10a3fc2419c8b6",
                 "bigiq": "ami-00528b308218a0378"
             },
             "sa-east-1": {
-                "bigip": "ami-00b63cf358955934b",
+                "bigip": "ami-0a5d31ab37d68f28c",
                 "bigiq": "ami-00dadf8b33f1cceb6"
             },
             "us-east-1": {
-                "bigip": "ami-58c3d327",
+                "bigip": "ami-04e893bab1e8b9b10",
                 "bigiq": "ami-044e51ee1eb228e94"
             },
             "us-east-2": {
-                "bigip": "ami-2b4e4b4e",
+                "bigip": "ami-0d5e9d0e47f3d7c44",
                 "bigiq": "ami-067256f677111bd39"
             },
             "us-west-1": {
-                "bigip": "ami-a24ea2c1",
+                "bigip": "ami-09ed2e81904ef5d57",
                 "bigiq": "ami-05bb1e4b1d8a228b0"
             },
             "us-west-2": {
-                "bigip": "ami-414e6b39",
+                "bigip": "ami-0f8580cb1944b10ff",
                 "bigiq": "ami-054972c015d92da99"
             }
         }
