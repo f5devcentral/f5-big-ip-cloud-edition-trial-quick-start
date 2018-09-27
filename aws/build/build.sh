@@ -14,10 +14,11 @@ aws s3 cp --acl public-read ../built/scripts.tar.gz "s3://big-iq-quickstart-cf-t
 # Compile template file
 #./big-iq-master.py --branch $branch_name > $template_output
 
-#aws s3 cp --acl public-read bigiq-cm-dcd-pair-with-ssg.template "s3://big-iq-quickstart-cf-templates-aws/6.0.1.1/"
-#aws s3 cp --acl public-read bigiq-cm-dcd-pair-with-ssg-existing-vpc.template "s3://big-iq-quickstart-cf-templates-aws/6.0.1.1/"
-
 # Copy templates
 for f in ../experimental/*.template; do
     aws s3 cp --acl public-read "$f" "s3://big-iq-quickstart-cf-templates-aws/$branch_name/"
 done
+
+#aws s3 cp --acl public-read aws/experimental/Setup-Ubuntu-Trial.template "s3://big-iq-quickstart-cf-templates-aws/6.0.1.1/"
+#aws s3 cp --acl public-read aws/experimental/bigiq-cm-dcd-pair-with-ssg.template "s3://big-iq-quickstart-cf-templates-aws/6.0.1.1/"
+#aws s3 cp --acl public-read aws/experimental/bigiq-cm-dcd-pair-with-ssg-existing-vpc.template "s3://big-iq-quickstart-cf-templates-aws/6.0.1.1/"
