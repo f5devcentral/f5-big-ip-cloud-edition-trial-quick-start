@@ -1,0 +1,968 @@
+{
+    "Mappings": {
+        "AmiRegionMap": {
+            "ap-northeast-1": {
+                "bigip": "ami-00320423988425f3d",
+                "bigiq": "ami-005d0ca50a2110d74"
+            },
+            "ap-northeast-2": {
+                "bigip": "ami-09954bada9cf468cb",
+                "bigiq": "ami-06d37a6b49440d818"
+            },
+            "ap-south-1": {
+                "bigip": "ami-045104677062aef7d",
+                "bigiq": "ami-0870b9d5b20ce9157"
+            },
+            "ap-southeast-1": {
+                "bigip": "ami-095976ed364e0db59",
+                "bigiq": "ami-02d863bf27ea1fa45"
+            },
+            "ap-southeast-2": {
+                "bigip": "ami-098d744be7a18d539",
+                "bigiq": "ami-0025f9b16ef68d20d"
+            },
+            "ca-central-1": {
+                "bigip": "ami-0b6671ac004f408e8",
+                "bigiq": "ami-088a1aa945a9e74aa"
+            },
+            "eu-central-1": {
+                "bigip": "ami-08224fc41cc989329",
+                "bigiq": "ami-02a613946fcb9893a"
+            },
+            "eu-west-1": {
+                "bigip": "ami-06ccb3fa7c3c99e58",
+                "bigiq": "ami-00d8f80d0486e0d85"
+            },
+            "eu-west-2": {
+                "bigip": "ami-05e10a3fc2419c8b6",
+                "bigiq": "ami-00528b308218a0378"
+            },
+            "sa-east-1": {
+                "bigip": "ami-0a5d31ab37d68f28c",
+                "bigiq": "ami-00dadf8b33f1cceb6"
+            },
+            "us-east-1": {
+                "bigip": "ami-04e893bab1e8b9b10",
+                "bigiq": "ami-044e51ee1eb228e94"
+            },
+            "us-east-2": {
+                "bigip": "ami-0d5e9d0e47f3d7c44",
+                "bigiq": "ami-067256f677111bd39"
+            },
+            "us-west-1": {
+                "bigip": "ami-09ed2e81904ef5d57",
+                "bigiq": "ami-05bb1e4b1d8a228b0"
+            },
+            "us-west-2": {
+                "bigip": "ami-0f8580cb1944b10ff",
+                "bigiq": "ami-054972c015d92da99"
+            }
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Interface": {
+            "ParameterGroups": [
+                {
+                    "Label": {
+                        "default": "NETWORKING CONFIGURATION"
+                    },
+                    "Parameters": [
+                        "vpc",
+                        "subnet1",
+                        "subnet2",
+                        "subnet3",
+                        "subnet3az",
+                        "subnet4",
+                        "subnet4az"
+                    ]
+                },
+                {
+                    "Label": {
+                        "default": "Accept BIG-IQ Terms and Conditions: https://aws.amazon.com/marketplace/pp/B00KIZG6KA"
+                    },
+                    "Parameters": []
+                },
+                {
+                    "Label": {
+                        "default": "Accept BIG-IP Terms and Conditions: https://aws.amazon.com/marketplace/pp/B07G5MT2KT"
+                    },
+                    "Parameters": []
+                },
+                {
+                    "Label": {
+                        "default": "BIG-IQ/IP CONFIGURATION"
+                    },
+                    "Parameters": [
+                        "bigIqPassword",
+                        "bigIpPassword",
+                        "bigIqAmi",
+                        "bigIpAmi",
+                        "licenseKey1",
+                        "licenseKey2",
+                        "licensePoolKey",
+                        "instanceType",
+                        "restrictedSrcAddress",
+                        "sshKey",
+                        "iamAccessKey",
+                        "iamSecretKey",
+                        "ssgName"
+                    ]
+                }
+            ],
+            "ParameterLabels": {
+                "bigIpAmi": {
+                    "default": "BIG-IP AMI"
+                },
+                "bigIpPassword": {
+                    "default": "BIG-IP Admin Password"
+                },
+                "bigIqAmi": {
+                    "default": "BIG-IQ AMI"
+                },
+                "bigIqPassword": {
+                    "default": "BIG-IQ Admin Password"
+                },
+                "iamAccessKey": {
+                    "default": "IAM Access Key"
+                },
+                "iamSecretKey": {
+                    "default": "IAM Secret Key"
+                },
+                "imageName": {
+                    "default": "Image Name"
+                },
+                "instanceType": {
+                    "default": "AWS Instance Size"
+                },
+                "licenseKey1": {
+                    "default": "BIG-IQ CM License Key"
+                },
+                "licenseKey2": {
+                    "default": "BIG-IQ DCD License Key"
+                },
+                "licensePoolKey": {
+                    "default": "BIG-IP License Pool Key"
+                },
+                "restrictedSrcAddress": {
+                    "default": "Source Address(es) for SSH Access"
+                },
+                "ssgName": {
+                    "default": "SSG CloudFormation Stack Name"
+                },
+                "sshKey": {
+                    "default": "SSH Key"
+                },
+                "subnet1": {
+                    "default": "Subnet 1 (same AZ) BIG-IQ"
+                },
+                "subnet2": {
+                    "default": "Subnet 2 (same AZ) BIG-IQ"
+                },
+                "subnet3": {
+                    "default": "Subnet 3 BIG-IP SSG"
+                },
+                "subnet3az": {
+                    "default": "Subnet 3 AZ1 BIG-IP SSG"
+                },
+                "subnet4": {
+                    "default": "Subnet 4 BIG-IP SSG"
+                },
+                "subnet4az": {
+                    "default": "Subnet 4 AZ2 BIG-IP SSG"
+                },
+                "vpc": {
+                    "default": "VPC"
+                }
+            }
+        },
+        "Version": "1.0.0"
+    },
+    "Outputs": {
+        "BigIqCmEipAddress": {
+            "Description": "IP address of the management port on BIG-IQ",
+            "Value": {
+                "Ref": "CmElasticIp"
+            }
+        },
+        "BigIqCmExternalInterfacePrivateIp": {
+            "Description": "Internally routable IP of the public interface on BIG-IQ",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BigIqCmEth0",
+                    "PrimaryPrivateIpAddress"
+                ]
+            }
+        },
+        "BigIqCmInstanceId": {
+            "Description": "Instance Id of BIG-IQ in Amazon",
+            "Value": {
+                "Ref": "BigIqCm"
+            }
+        },
+        "BigIqCmManagementInterface": {
+            "Description": "Management interface ID on BIG-IQ",
+            "Value": {
+                "Ref": "BigIqCmEth0"
+            }
+        },
+        "BigIqCmUrl": {
+            "Description": "BIG-IQ CM Management GUI",
+            "Value": {
+                "Fn::Join": [
+                    "",
+                    [
+                        "https://",
+                        {
+                            "Fn::GetAtt": [
+                                "BigIqCm",
+                                "PublicIp"
+                            ]
+                        }
+                    ]
+                ]
+            }
+        },
+        "availabilityZone1": {
+            "Description": "Availability Zone",
+            "Value": {
+                "Fn::GetAtt": [
+                    "BigIqCm",
+                    "AvailabilityZone"
+                ]
+            }
+        }
+    },
+    "Parameters": {
+        "instanceType": {
+            "AllowedValues": [
+                "m4.2xlarge",
+                "m4.4xlarge"
+            ],
+            "ConstraintDescription": "Must be a valid EC2 instance type for BIG-IQ",
+            "Default": "m4.2xlarge",
+            "Description": "Size of the F5 BIG-IQ Virtual Instance",
+            "Type": "String"
+        },
+        "licenseKey1": {
+            "ConstraintDescription": "Verify your F5 BYOL regkey.",
+            "Description": "F5 BIG-IQ CM license key",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "licenseKey2": {
+            "ConstraintDescription": "Verify your F5 BYOL regkey.",
+            "Description": "F5 BIG-IQ DCD license key",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "licensePoolKey": {
+            "ConstraintDescription": "Verify your F5 BIG-IP Pool regkey.",
+            "Description": "F5 BIG-IP license pool key",
+            "MaxLength": 255,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "restrictedSrcAddress": {
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "Must be a valid IP CIDR range of the form x.x.x.x/x.",
+            "Default": "0.0.0.0/0",
+            "Description": " The IP address range used to SSH and access managment GUI on the EC2 instances",
+            "MaxLength": 18,
+            "MinLength": 9,
+            "Type": "String"
+        },
+        "ssgName": {
+            "AllowedPattern": "[\\da-zA-Z\\-]{1,25}",
+            "ConstraintDescription": "SSG Name must contain only alphanumerics and hyphens and be less than 25 characters long",
+            "Default": "demo-ssg-trial",
+            "Description": "A unique CloudFormation StackName within your AWS account",
+            "MaxLength": 25,
+            "MinLength": 1,
+            "Type": "String"
+        },
+        "sshKey": {
+            "Description": "Key pair for accessing the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName"
+        },
+        "subnet1": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "subnet2": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "subnet3": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "subnet4": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "",
+            "Type": "AWS::EC2::Subnet::Id"
+        },
+        "subnet3az": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "Corresponding Availability Zone for Subnet 3 which is different than Subnet 4",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "subnet4az": {
+            "ConstraintDescription": "The subnet ID must be within an existing VPC",
+            "Description": "Corresponding Availability Zone for Subnet 4 which is different than Subnet 3",
+            "Type": "AWS::EC2::AvailabilityZone::Name"
+        },
+        "vpc": {
+            "ConstraintDescription": "This must be an existing VPC within the working region.",
+            "Type": "AWS::EC2::VPC::Id"
+        }
+    },
+    "Resources": {
+        "BigIqCm": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "/config/cloud/setup-cm-background.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "AWS_ACCESS_KEY=\"$1\"",
+                                            "AWS_SECRET_KEY=\"$2\"",
+                                            "BIG_IQ_PWD=\"$3\"",
+                                            "BIG_IP_PWD=\"$4\"",
+                                            "mount -o remount,rw /usr",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "/usr/local/bin/pip install awscli",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        " AWS_DEFAULT_REGION=",
+                                                        {
+                                                            "Ref": "AWS::Region"
+                                                        },
+                                                        " AWS_ACCESS_KEY_ID=\"$AWS_ACCESS_KEY\"",
+                                                        " AWS_SECRET_ACCESS_KEY=\"$AWS_SECRET_KEY\"",
+                                                        " /usr/local/bin/aws elb delete-load-balancer-listeners --load-balancer-name",
+                                                        " ELB-",
+                                                        {
+                                                            "Ref": "AWS::StackName"
+                                                        },
+                                                        " --load-balancer-ports 80 80"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                                                        {
+                                                            "Ref": "licenseKey1"
+                                                        },
+                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                                                        "--TIMEOUT_SEC 1200"
+                                                    ]
+                                                ]
+                                            },
+                                            "sleep 10",
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/add-dcd.py --DCD_IP_ADDRESS",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "BigIqDcdEth0",
+                                                                "PrimaryPrivateIpAddress"
+                                                            ]
+                                                        },
+                                                        {
+                                                            "Fn::Join": [
+                                                                " ",
+                                                                [
+                                                                    "--DCD_PWD \"$BIG_IQ_PWD\"",
+                                                                    "--DCD_USERNAME admin"
+                                                                ]
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "tmsh modify auth user admin",
+                                                        " password \"$BIG_IQ_PWD\"",
+                                                        " && tmsh save sys config"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/activate-dcd-services.py --SERVICES asm",
+                                                        "--DCD_IP_ADDRESS",
+                                                        {
+                                                            "Fn::GetAtt": [
+                                                                "BigIqDcdEth0",
+                                                                "PrimaryPrivateIpAddress"
+                                                            ]
+                                                        }
+                                                    ]
+                                                ]
+                                            },
+                                            "set-basic-auth on",
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/create-license-pool.py --REG_KEY",
+                                                        {
+                                                            "Ref": "licensePoolKey"
+                                                        },
+                                                        "--BIG_IQ_PWD \"$BIG_IQ_PWD\""
+                                                    ]
+                                                ]
+                                            },
+                                            "set-basic-auth off",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "/config/cloud/create-auto-scaling.py ",
+                                                        "--AWS_SUBNET_1A ",
+                                                        {
+                                                            "Ref": "subnet3"
+                                                        },
+                                                        " ",
+                                                        "--AWS_SUBNET_1B ",
+                                                        {
+                                                            "Ref": "subnet4"
+                                                        },
+                                                        " ",
+                                                        "--AWS_US_EAST_1A ",
+                                                        {
+                                                            "Ref": "subnet3az"
+                                                        },
+                                                        " ",
+                                                        "--AWS_US_EAST_1B ",
+                                                        {
+                                                            "Ref": "subnet4az"
+                                                        },
+                                                        " ",
+                                                        "--AWS_SSH_KEY ",
+                                                        {
+                                                            "Ref": "sshKey"
+                                                        },
+                                                        " ",
+                                                        "--AWS_VPC ",
+                                                        {
+                                                            "Ref": "vpc"
+                                                        },
+                                                        " ",
+                                                        "--AWS_ACCESS_KEY_ID $AWS_ACCESS_KEY ",
+                                                        "--AWS_SECRET_ACCESS_KEY $AWS_SECRET_KEY ",
+                                                        "--BIGIP_AMI ",
+                                                        {
+                                                            "Fn::FindInMap": [
+                                                                "AmiRegionMap",
+                                                                {
+                                                                    "Ref": "AWS::Region"
+                                                                },
+                                                                "bigip"
+                                                            ]
+                                                        },
+                                                        " --BIGIQ_URI http://localhost:8100 ",
+                                                        "--BIGIP_USER admin",
+                                                        " --BIGIP_PWD \"$BIG_IP_PWD\"",
+                                                        " --CLOUD_PROVIDER_NAME aws ",
+                                                        "--CLOUD_ENVIRONMENT_NAME aws-env ",
+                                                        "--DEFAULT_REGION ",
+                                                        {
+                                                            "Ref": "AWS::Region"
+                                                        },
+                                                        " ",
+                                                        "--DEVICE_TEMPLATE_NAME default-ssg-template ",
+                                                        "--LOOKUP_SERVER_LIST 8.8.8.8 ",
+                                                        "--NTP_SERVER time.nist.gov ",
+                                                        "--CM_IP ",
+                                                        {
+                                                            "Ref": "CmElasticIp"
+                                                        },
+                                                        " --BIG_IQ_PWD \"$BIG_IQ_PWD\"",
+                                                        " --SSG_NAME ",
+                                                        {
+                                                            "Ref": "ssgName"
+                                                        }
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-cm.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p \"AWS Access Key ID: \" v1 \necho \nread -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \nwhile [ \"$v1\" != \"$AWS_ACCESS_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Access Key ID: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Access Key ID: \" AWS_ACCESS_KEY \ndone \necho",
+                                            "read -s -p \"AWS Secret Access Key: \" v1 \necho \nread -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \nwhile [ \"$v1\" != \"$AWS_SECRET_KEY\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"AWS Secret Access Key: \" v1 \n    echo \n    read -s -p \"Re-enter AWS Secret Access Key: \" AWS_SECRET_KEY \ndone \necho",
+                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
+                                            "read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \nwhile [ \"$v1\" != \"$BIG_IP_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IP Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IP Password [Alphanumerics only]: \" BIG_IP_PWD \ndone \necho",
+                                            "nohup /config/cloud/setup-cm-background.sh \"$AWS_ACCESS_KEY\" \"$AWS_SECRET_KEY\" \"$BIG_IQ_PWD\" \"$BIG_IP_PWD\" &> /var/log/setup.log < /dev/null &",
+                                            "echo 'tail -f /var/log/setup.log in order to monitor setup progress'",
+                                            "echo;echo 'Make sure you follow Teardown instructions from the GitHub repository once you are done with your testing.'"
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AmiRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "bigiq"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "instanceType"
+                },
+                "KeyName": {
+                    "Ref": "sshKey"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "NetworkInterfaceId": {
+                            "Ref": "BigIqCmEth0"
+                        }
+                    },
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "BIG-IQ CM Instance Management IP",
+                        "DeviceIndex": "1",
+                        "GroupSet": [
+                            {
+                                "Ref": "SecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "subnet1"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "Big-IQ CM:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "/opt/aws/apitools/cfn-init-1.4-0.amzn1/bin/cfn-init -v -s ",
+                                {
+                                    "Ref": "AWS::StackId"
+                                },
+                                " -r ",
+                                "BigIqCm",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "BigIqCmEth0": {
+            "Properties": {
+                "Description": "BIG-IQ CM Instance Management IP",
+                "GroupSet": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "subnet1"
+                }
+            },
+            "Type": "AWS::EC2::NetworkInterface"
+        },
+        "BigIqDcd": {
+            "Metadata": {
+                "AWS::CloudFormation::Init": {
+                    "config": {
+                        "files": {
+                            "/config/cloud/setup-dcd-background.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "mkdir -p /config/cloud \ncd /config/cloud \ncurl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz \ntar --strip-components=1 -xvzf scripts.tar.gz \n",
+                                            "/config/cloud/wait-for-rjd.py",
+                                            "BIG_IQ_PWD=\"$1\"",
+                                            {
+                                                "Fn::Join": [
+                                                    "",
+                                                    [
+                                                        "tmsh modify auth user admin",
+                                                        " password \"$BIG_IQ_PWD\"",
+                                                        " && tmsh save sys config && set-basic-auth on"
+                                                    ]
+                                                ]
+                                            },
+                                            {
+                                                "Fn::Join": [
+                                                    " ",
+                                                    [
+                                                        "/config/cloud/configure-bigiq.py --LICENSE_KEY",
+                                                        {
+                                                            "Ref": "licenseKey2"
+                                                        },
+                                                        "--MASTER_PASSPHRASE ValidPassphrase1234567812345678!",
+                                                        "--TIMEOUT_SEC 1200",
+                                                        "--NODE_TYPE DCD"
+                                                    ]
+                                                ]
+                                            }
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            },
+                            "/config/cloud/setup-dcd.sh": {
+                                "content": {
+                                    "Fn::Join": [
+                                        "\n",
+                                        [
+                                            "#!/usr/bin/env bash",
+                                            "read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \necho \nread -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \nwhile [ \"$v1\" != \"$BIG_IQ_PWD\" ]; do \n    echo \n    echo \"Entries did not match, try again\" \n    echo \n    read -s -p \"BIG-IQ Password [Alphanumerics only]: \" v1 \n    echo \n    read -s -p \"Re-enter BIG-IQ Password [Alphanumerics only]: \" BIG_IQ_PWD \ndone \necho",
+                                            "nohup /config/cloud/setup-dcd-background.sh \"$BIG_IQ_PWD\" &> /var/log/setup.log < /dev/null &",
+                                            "echo 'tail -f /var/log/setup.log in order to monitor setup progress'"
+                                        ]
+                                    ]
+                                },
+                                "group": "root",
+                                "mode": "000755",
+                                "owner": "root"
+                            }
+                        }
+                    }
+                }
+            },
+            "Properties": {
+                "BlockDeviceMappings": [
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "DeleteOnTermination": "true",
+                            "VolumeType": "gp2"
+                        }
+                    }
+                ],
+                "ImageId": {
+                    "Fn::FindInMap": [
+                        "AmiRegionMap",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        "bigiq"
+                    ]
+                },
+                "InstanceType": {
+                    "Ref": "instanceType"
+                },
+                "KeyName": {
+                    "Ref": "sshKey"
+                },
+                "NetworkInterfaces": [
+                    {
+                        "DeviceIndex": "0",
+                        "NetworkInterfaceId": {
+                            "Ref": "BigIqDcdEth0"
+                        }
+                    },
+                    {
+                        "DeleteOnTermination": "true",
+                        "Description": "BIG-IQ DCD Instance Management IP",
+                        "DeviceIndex": "1",
+                        "GroupSet": [
+                            {
+                                "Ref": "SecurityGroup"
+                            }
+                        ],
+                        "SubnetId": {
+                            "Ref": "subnet1"
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::Join": [
+                                " ",
+                                [
+                                    "Big-IQ DCD:",
+                                    {
+                                        "Ref": "AWS::StackName"
+                                    }
+                                ]
+                            ]
+                        }
+                    }
+                ],
+                "UserData": {
+                    "Fn::Base64": {
+                        "Fn::Join": [
+                            "",
+                            [
+                                "#!/bin/bash\n",
+                                "/opt/aws/apitools/cfn-init-1.4-0.amzn1/bin/cfn-init -v -s ",
+                                {
+                                    "Ref": "AWS::StackId"
+                                },
+                                " -r ",
+                                "BigIqDcd",
+                                " --region ",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                "\n"
+                            ]
+                        ]
+                    }
+                }
+            },
+            "Type": "AWS::EC2::Instance"
+        },
+        "BigIqDcdEth0": {
+            "Properties": {
+                "Description": "BIG-IQ DCD Instance Management IP",
+                "GroupSet": [
+                    {
+                        "Ref": "SecurityGroup"
+                    }
+                ],
+                "SubnetId": {
+                    "Ref": "subnet1"
+                }
+            },
+            "Type": "AWS::EC2::NetworkInterface"
+        },
+        "ClassicELB": {
+            "Properties": {
+                "HealthCheck": {
+                    "HealthyThreshold": "10",
+                    "Interval": "30",
+                    "Target": "TCP:22",
+                    "Timeout": "5",
+                    "UnhealthyThreshold": "2"
+                },
+                "Listeners": [
+                    {
+                        "InstancePort": "80",
+                        "InstanceProtocol": "TCP",
+                        "LoadBalancerPort": "80",
+                        "Protocol": "TCP"
+                    }
+                ],
+                "LoadBalancerName": {
+                    "Fn::Join": [
+                        "",
+                        [
+                            "ELB-",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "Scheme": "internet-facing",
+                "SecurityGroups": [
+                    {
+                        "Ref": "ElbSecurityGroup"
+                    }
+                ],
+                "Subnets": [
+                    {
+                        "Ref": "subnet3"
+                    },
+                    {
+                        "Ref": "subnet4"
+                    }
+                ]
+            },
+            "Type": "AWS::ElasticLoadBalancing::LoadBalancer"
+        },
+        "CmEipAssociation": {
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "CmElasticIp",
+                        "AllocationId"
+                    ]
+                },
+                "NetworkInterfaceId": {
+                    "Ref": "BigIqCmEth0"
+                }
+            },
+            "Type": "AWS::EC2::EIPAssociation"
+        },
+        "CmElasticIp": {
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Type": "AWS::EC2::EIP"
+        },
+        "DcdEipAssociation": {
+            "Properties": {
+                "AllocationId": {
+                    "Fn::GetAtt": [
+                        "DcdElasticIp",
+                        "AllocationId"
+                    ]
+                },
+                "NetworkInterfaceId": {
+                    "Ref": "BigIqDcdEth0"
+                }
+            },
+            "Type": "AWS::EC2::EIPAssociation"
+        },
+        "DcdElasticIp": {
+            "Properties": {
+                "Domain": "vpc"
+            },
+            "Type": "AWS::EC2::EIP"
+        },
+        "ElbSecurityGroup": {
+            "Properties": {
+                "GroupDescription": "vpc-sg",
+                "GroupName": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "ELB-SG-",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "SecurityGroupIngress": [],
+                "VpcId": {
+                    "Ref": "vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "SecurityGroup": {
+            "Properties": {
+                "GroupDescription": "vpc-sg",
+                "GroupName": {
+                    "Fn::Join": [
+                        " ",
+                        [
+                            "BIG-IQ SG:",
+                            {
+                                "Ref": "AWS::StackName"
+                            }
+                        ]
+                    ]
+                },
+                "SecurityGroupIngress": [
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "443",
+                        "IpProtocol": "tcp",
+                        "ToPort": "443"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "80",
+                        "IpProtocol": "tcp",
+                        "ToPort": "80"
+                    },
+                    {
+                        "CidrIp": "0.0.0.0/0",
+                        "FromPort": "22",
+                        "IpProtocol": "tcp",
+                        "ToPort": "22"
+                    }
+                ],
+                "VpcId": {
+                    "Ref": "vpc"
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroup"
+        },
+        "SGBaseIngress": {
+            "DependsOn": "SecurityGroup",
+            "Properties": {
+                "GroupId": {
+                    "Fn::GetAtt": [ "SecurityGroup", "GroupId" ]
+                },
+                "IpProtocol": "tcp",
+                "FromPort": 1,
+                "ToPort": 65356,
+                "SourceSecurityGroupId": {
+                    "Fn::GetAtt": [ "SecurityGroup", "GroupId" ]
+                }
+            },
+            "Type": "AWS::EC2::SecurityGroupIngress"
+        }
+    }
+}
