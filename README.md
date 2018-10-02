@@ -9,16 +9,16 @@ With F5® BIG-IQ® Centralized Management (CM), you can securely manage traffic 
 
 From a centralized view, you can monitor the health and statistics of your applications as well as devices that are load balancing traffic and hosting applications. You can also set up alert thresholds to immediately notify you of certain events.
 
-This CloudFormation Template (CFT) or Azure Resource Manager (ARM) creates two BIG-IQ VE instances: a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE, and a BIG-IQ Data Collection Device (DCD) to store analytics data. The CFT also creates an Apache demo web server. 
+This **CloudFormation Template (CFT)** or **Azure Resource Manager (ARM)** creates two BIG-IQ VE instances: a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE, and a BIG-IQ Data Collection Device (DCD) to store analytics data. The CFT also creates an Apache demo web server. 
 
 After you configure the BIG-IQ instances, BIG-IQ automatically launches a BIG-IP VE instance in AWS or Azure.
 
-[AWS Quick Start](/aws)
-[Azure Quick Start](/azure)
+- [AWS Quick Start](/aws)
+- [Azure Quick Start](/azure)
 
 ### Copyright
 
-Copyright 2014-2018 F5 Networks Inc.
+Copyright 2014-2019 F5 Networks Inc.
 
 ### License
 

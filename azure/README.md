@@ -3,7 +3,7 @@ BIG-IP® Cloud Edition Trial Quick Start - Azure
 
 **Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 14.1.0
 
-![Deployment Diagram](../images/aws-ssg-example-in-cloud-2.png)
+
 
 Instructions for Azure
 ----------------------
@@ -19,7 +19,7 @@ Troubleshooting
 
 ### Copyright
 
-Copyright 2014-2018 F5 Networks Inc.
+Copyright 2014-2019 F5 Networks Inc.
 
 ### License
 
