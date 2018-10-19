@@ -131,6 +131,7 @@ def create_ssg(env, cloud_environment_result):
         {
             "name": env.SSG_NAME,
             "description": "AWS scaling group",
+            "providerType" : "AWS",
             "environmentReference": {
                 "link": "https://localhost/mgmt/cm/cloud/environments/" + cloud_environment_result["id"]
             },
