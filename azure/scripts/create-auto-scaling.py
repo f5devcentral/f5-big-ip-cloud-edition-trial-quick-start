@@ -15,21 +15,21 @@ from util import print_partial, complete, req
 def parse_args ():
     # Ugly but expedient conversion of ansible-playbook to a parameterized python script
     parser = argparse.ArgumentParser()
-    parser.add_argument("--AWS_SUBNET_1A", type=str, required=True)
-    parser.add_argument("--AWS_SUBNET_1B", type=str, required=True)
-    parser.add_argument("--AWS_US_EAST_1A", type=str, required=True)
-    parser.add_argument("--AWS_US_EAST_1B", type=str, required=True)
-    parser.add_argument("--AWS_SSH_KEY", type=str, required=True)
-    parser.add_argument("--AWS_VPC", type=str, required=True)
-    parser.add_argument("--AWS_ACCESS_KEY_ID", type=str, required=True)
-    parser.add_argument("--AWS_SECRET_ACCESS_KEY", type=str, required=True)
-    parser.add_argument("--BIGIP_AMI", type=str, required=True)
+    parser.add_argument("--RESOURCE", type=str, required=True)
+    parser.add_argument("--DEFAULT_LOCATION", type=str, required=True)
+    parser.add_argument("--VNET1", type=str, required=True)
+    parser.add_argument("--SUBNET1", type=str, required=True)
+    parser.add_argument("--BYOL_BIGIP_NAME", type=str, required=True)
+    parser.add_argument("--BYOL_BIGIP_VERSION", type=str, required=True)
+    parser.add_argument("--SUBSCRIPTION_ID", type=str, required=True)
+    parser.add_argument("--SERVICE_PRINCIPAL_SECRET", type=str, required=True)
+    parser.add_argument("--TENANT_ID", type=str, required=True)
+    parser.add_argument("--CLIENT_ID", type=str, required=True)
     parser.add_argument("--BIGIQ_URI", type=str, required=True)
     parser.add_argument("--BIGIP_PWD", type=str, required=True)
     parser.add_argument("--BIGIP_USER", type=str, required=True)
     parser.add_argument("--CLOUD_PROVIDER_NAME", type=str, required=True)
     parser.add_argument("--CLOUD_ENVIRONMENT_NAME", type=str, required=True)
-    parser.add_argument("--DEFAULT_REGION", type=str, required=True)
     parser.add_argument("--DEVICE_TEMPLATE_NAME", type=str, required=True)
     parser.add_argument("--LOOKUP_SERVER_LIST", type=str, required=True) # not used in 6.0.1
     parser.add_argument("--NTP_SERVER", type=str, required=True)
@@ -61,7 +61,7 @@ def create_device_template(env):
         env.BIGIQ_URI + "/cm/device/templates",
         {
             "name": env.DEVICE_TEMPLATE_NAME,
-            "type": "AWS",
+            "type": "Azure",
             "timeZone": "UTC",
             "ntpServerList": [env.NTP_SERVER],
             "userAccountList": [{
@@ -78,13 +78,15 @@ def create_cloud_resources(env, device_template_result):
     cloud_provider_result = post(
         env.BIGIQ_URI + "/cm/cloud/providers",
         {
-            "providerType": "AWS",
+            "providerType": "Azure",
             "name": env.CLOUD_PROVIDER_NAME,
-            "description": "AWS cloud provider",
-            "awsProperties": {
-                "awsCloud": "AWS",
-                "accessKeyId": env.AWS_ACCESS_KEY_ID,
-                "secretAccessKey": env.AWS_SECRET_ACCESS_KEY
+            "description": "Azure cloud provider",
+            "azureProperties": {
+                    "azureCloud": "AZURE",
+                    "subscriptionId": env.SUBSCRIPTION_ID,
+                    "servicePrincipalSecret": env.SERVICE_PRINCIPAL_SECRET,
+                    "tenantId": env.TENANT_ID,
+                    "clientId": env.CLIENT_ID
             }
         }
     )
@@ -94,31 +96,31 @@ def create_cloud_resources(env, device_template_result):
         env.BIGIQ_URI + "/cm/cloud/environments",
         {
             "name": env.CLOUD_ENVIRONMENT_NAME,
-            "description": "AWS cloud environment",
+            "description": "AZURE cloud environment",
             "providerReference": {
                 "link": "https://localhost/mgmt/cm/cloud/providers/" + cloud_provider_result["id"]
             },
             "deviceTemplateReference": {
                 "link": "https://localhost/mgmt/cm/device/templates/" + device_template_result["id"]
             },
-            "awsProperties": {
-                "region": env.DEFAULT_REGION,
-                "vpc": env.AWS_VPC,
-                "availabilityZones": [env.AWS_US_EAST_1A, env.AWS_US_EAST_1B],
-                "subnets": [env.AWS_SUBNET_1A, env.AWS_SUBNET_1B],
-                "restrictedSourceAddress": "0.0.0.0/0",
-                "sshKeyName": env.AWS_SSH_KEY,
+            "azureProperties": {
+                "location": env.DEFAULT_LOCATION,
+                "mgmtSubnetName": env.SUBNET1,
+                "vnetName": env.VNET1",
+                "vnetResourceGroupName": env.RESOURCE",
+                "sourceAddrRestriction": "*",
                 "moduleSelection": "WAF",
                 "licenseType": "BYOL",
-                "imageId": env.BIGIP_AMI,
-                "instanceType": "m3.2xlarge",
+                "imageName": env.BYOL_BIGIP_NAME",
+                "bigipVersion": env.BYOL_BIGIP_VERSION",
+                "instanceType": "Standard_DS4_v2",
                 "byolLicenseInformation": {
                     "bigiqAddress": env.CM_IP,
                     "bigiqUser": "admin",
                     "bigiqPassword": env.BIG_IQ_PWD,
-                    "licensePoolName": "license-pool"
+                    "licensePoolName": "license-pool",
                 }
-            },
+            }
             "isVmwCluster": True
         }
     )
@@ -130,8 +132,8 @@ def create_ssg(env, cloud_environment_result):
         env.BIGIQ_URI + "/cm/cloud/service-scaling-groups",
         {
             "name": env.SSG_NAME,
-            "description": "AWS scaling group",
-            "providerType" : "AWS",
+            "description": "Azure scaling group",
+            "providerType": "Azure",
             "environmentReference": {
                 "link": "https://localhost/mgmt/cm/cloud/environments/" + cloud_environment_result["id"]
             },
@@ -143,14 +145,14 @@ def create_ssg(env, cloud_environment_result):
             "preDeviceDeletionUserScriptReference": None,
             "scalingPolicies": [{
                 "name": "scale-out",
-                "cooldown": 15,
+                "cooldown": 30,
                 "direction": "ADD",
                 "type": "ChangeCount",
                 "value": 1
             },
             {
                 "name": "scale-in",
-                "cooldown": 15,
+                "cooldown": 30,
                 "direction": "REMOVE",
                 "type": "ChangeCount",
                 "value": 1

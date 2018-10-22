@@ -1,7 +1,7 @@
 BIG-IP® Cloud Edition Trial Quick Start - Azure
 ===============================================
 
-**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 14.1.0
+**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 13.1.1
 
 
 
