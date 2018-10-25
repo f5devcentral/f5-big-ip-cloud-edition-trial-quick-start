@@ -80,7 +80,7 @@ To deploy this CFT in AWS, complete the following steps.
 
    * Enter the [AWS access key ID/secret key](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) (used for the Service Scaling Group object creation), BIG-IQ and BIG-IP passwords.
    * The password must match the password you used on the BIG-IQ DCD instance in the previous step.
-   * The password for the BIG-IP must pass the basic pam_cracklib checks, which checks for the following issues:
+   * The password for the BIG-IP must pass the basic pam_cracklib checks (e.g. ``olleH!321olleH!321``), which checks for the following issues:
       * Does the password contain dictionary words.
       * Is the password a palindrome.
       * Is the password too simple.
