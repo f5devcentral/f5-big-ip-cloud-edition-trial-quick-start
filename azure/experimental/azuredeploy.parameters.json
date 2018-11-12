@@ -1,0 +1,56 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "adminUsername": {
+            "value": "azureuser"
+        },
+        "authenticationType": {
+            "value": "password"
+        },
+        "adminPasswordOrKey": {
+            "value": null
+        },
+        "dnsLabel": {
+            "value": "testdns"
+        },
+        "licenseKey1": {
+            "value": "aaa"
+        },
+        "instanceType": {
+            "value": "Standard_D2s_v3"
+        },
+        "bigIqVersion": {
+            "value": "6.0.100813"
+        },
+        "licenseKey2": {
+            "value": "asdfsdf"
+        },
+        "licensePoolKey": {
+            "value": "asdfsf"
+        },
+        "restrictedSrcAddress": {
+            "value": "*"
+        },
+        "extSubnetPrefix": {
+            "value": "10.1.1.0/24"
+        },
+        "intSubnetPrefix": {
+            "value": "10.1.2.0/24"
+        },
+        "vnetAddressPrefix": {
+            "value": "10.1.0.0/16"
+        },
+        "instanceName": {
+            "value": "demo-ssg-trial"
+        },
+        "customImage": {
+            "value": "OPTIONAL"
+        },
+        "tagValues": {
+            "value": {
+                "application": "BIGIQ"
+            }
+        }
+    }
+}
