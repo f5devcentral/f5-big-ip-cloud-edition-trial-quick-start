@@ -541,6 +541,13 @@
         }
     ],
     "outputs": {
-        
+        "BIGIQ-DCD-GUI-URL": {
+            "type": "string",
+            "value": "[concat('https://', reference(variables('extPublicIPAddressId')).ipAddress, ':', 443)]"
+        },
+        "BIGIQ-DCD-sshCommand": {
+            "type": "string",
+            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('extPublicIPAddressId')).ipAddress)]"
+          }
     }
 }
