@@ -4,7 +4,7 @@
     "parameters": {
         "adminUsername": {
             "defaultValue": "azureuser",
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User name for the Virtual Machine."
             }
@@ -15,28 +15,21 @@
                 "password",
                 "sshPublicKey"
             ],
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
             }
         },
         "adminPasswordOrKey": {
-            "type": "SecureString",
+            "type": "securestring",
             "metadata": {
                 "description": "Password or SSH public key to login to the Virtual Machine. Note: There are a number of special characters that you should avoid using for F5 product user accounts.  See [K2873](https://support.f5.com/csp/article/K2873) for details. Note: If using key-based authentication, this should be the public key as a string, typically starting with **---- BEGIN SSH2 PUBLIC KEY ----** and ending with **---- END SSH2 PUBLIC KEY ----**."
-            }
-        },
-        "dnsLabel": {
-            "defaultValue": "",
-            "type": "String",
-            "metadata": {
-                "description": "Unique DNS Name for the Public IP address used to access the Virtual Machine."
             }
         },
         "licenseKey1": {
             "minLength": 1,
             "maxLength": 255,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "F5 BIG-IQ CM license key "
             }
@@ -49,7 +42,7 @@
                 "Standard_D8s_v3",
                 "Standard_D16s_v3"
             ],
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Instance size of the Virtual Machine."
             }
@@ -59,7 +52,7 @@
             "allowedValues": [
                 "6.0.100813"
             ],
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "F5 BIG-IQ version you want to use."
             }
@@ -67,7 +60,7 @@
         "licenseKey2": {
             "minLength": 1,
             "maxLength": 255,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "F5 BIG-IQ DCD license key"
             }
@@ -75,14 +68,21 @@
         "licensePoolKey": {
             "minLength": 1,
             "maxLength": 255,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "F5 BIG-IP license pool key"
             }
         },
+        "location": {
+            "type": "string",
+            "defaultValue": "[resourceGroup().location]",
+            "metadata": {
+              "description": "Location for all resources."
+            }
+          },
         "restrictedSrcAddress": {
             "defaultValue": "*",
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": " The IP address range used to SSH and access managment GUI on the EC2 instances"
             }
@@ -91,7 +91,7 @@
             "defaultValue": "10.1.1.0/24",
             "minLength": 9,
             "maxLength": 18,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": " The address range for the first subnet which is compatible with the Virtual Network,Must be a valid IP address range of the form x.x.x.x/x."
             }
@@ -100,7 +100,7 @@
             "defaultValue": "10.1.2.0/24",
             "minLength": 9,
             "maxLength": 18,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": " The address range for the second subnet which is compatible with the VPC CIDR block,Must be a valid IP address range of the form x.x.x.x/x."
             }
@@ -109,7 +109,7 @@
             "defaultValue": "10.1.0.0/16",
             "minLength": 9,
             "maxLength": 18,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": " The vnet address block  , Must be a valid IP in range of the form x.x.x.x/x."
             }
@@ -118,7 +118,7 @@
             "defaultValue": "demo-ssg-trial-dcd",
             "minLength": 1,
             "maxLength": 25,
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "A unique CloudFormation StackName within your azure account, to be used to set DCD server instance."
             }
@@ -134,7 +134,7 @@
         },
         "customImage": {
             "defaultValue": "OPTIONAL",
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "If you would like to deploy using a local BIG-IP image, provide either the full URL to the VHD in Azure storage **or** the full resource ID to an existing Microsoft.Compute image resource.  **Note**: Unless specifically required, leave the default of **OPTIONAL**."
             }
@@ -143,17 +143,17 @@
             "defaultValue": {
                 "application": "BIGIQ"
             },
-            "type": "Object",
+            "type": "object",
             "metadata": {
                 "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
             }
         }
     },
     "variables": {
-        "computeApiVersion": "2017-12-01",
+        "computeApiVersion": "2018-10-01",
         "networkApiVersion": "2018-08-01",
         "storageApiVersion": "2017-10-01",
-        "location": "[resourceGroup().location]",
+        "location": "[parameters('location')]",
         "adminPasswordOrKey": "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": true,
@@ -169,7 +169,6 @@
         "subscriptionID": "[subscription().subscriptionId]",
         "resourceGroupName": "[resourceGroup().name]",
         "singleQuote": "'",
-        "dnsLabel": "[toLower(parameters('dnsLabel'))]",
         "skuToUse": "f5-bigiq-virtual-edition-byol",
         "offerToUse": "f5-big-iq",
         "imagePlan": {
@@ -185,36 +184,31 @@
         },
         "dcdInstanceName": "[toLower(parameters('dcdInstanceName'))]",
         "cmInstanceName": "[toLower(parameters('cmInstanceName'))]",
-        "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]",
+        "virtualNetworkName": "[concat('BIG-IQ-VNET-',variables('resourceGroupName'))]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "vnetAddressPrefix": "[parameters('vnetAddressPrefix')]",
         "publicIPAddressType": "Static",
-        "extPublicIPAddressName": "[concat(variables('dnsLabel'), '-ext-pip')]",
-        "extPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extPublicIPAddressName'))]",
-        "extNicName": "[concat(variables('dnsLabel'), '-ext')]",
+        "extPublicIPAddressName": "[concat('BIG-IQ-DCD-IP-' , variables('resourceGroupName'))]",
+        "dcdPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extPublicIPAddressName'))]",
+        "extNicName": "[concat('BIG-IQ-DCD-NetworkInterface-' , variables('resourceGroupName'))]",
         "extNicID": "[resourceId('Microsoft.Network/NetworkInterfaces', variables('extNicName'))]",
-        "intNicName": "[concat(variables('dnsLabel'), '-int')]",
-        "extSubnetName": "ext",
+        "intNicName": "[concat('BIG-IQ-CM-NetworkInterface-' , variables('resourceGroupName'))]",
+        "extSubnetName": "[concat( variables('resourceGroupName') , '-mgmtSubnet')]",
         "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extSubnetName'))]",
         "extNsgName": "[concat('BIG-IQ-SG-', variables('resourceGroupName'))]",
         "extNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',variables('extNsgName'))]",
-        "extRouteTableName": "[concat('BIG-IQ Route Table 2: ', variables('resourceGroupName'))]",
-        "intSelfPublicIpAddressNamePrefix": "[concat(variables('dnsLabel'), '-self-pip')]",
-        "intSelfPublicIpAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intSelfPublicIpAddressNamePrefix'))]",
-        "intpublicIPAddressNamePrefix": "[concat(variables('dnsLabel'), '-int-pip')]",
-        "intPublicIPAddressIdPrefix": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressNamePrefix'))]",
-        "intNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(variables('dnsLabel'),'-int-nsg'))]",
-        "intSubnetName": "internal",
+        "extRouteTableName": "[concat('BIG-IQ Route Table 2- ', variables('resourceGroupName'))]",
+        "intSubnetName": "[concat( variables('resourceGroupName') , '-intSubnet')]",
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]",
-        "intpublicIPAddressName": "[concat(variables('dnsLabel'), '-int-pip')]",
-        "intPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressName'))]",
+        "intpublicIPAddressName": "[concat('BIG-IQ-CM-IP-' , variables('resourceGroupName'))]",
+        "cmPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressName'))]",
         "tagValues": "[parameters('tagValues')]",
-        "newDataStorageAccountName": "[concat(uniqueString(variables('dnsLabel'), resourceGroup().id, deployment().name), 'data000')]",
+        "newDataStorageAccountName": "[concat(uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name), 'data000')]",
         "dataStorageAccountType": "Standard_LRS",
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
         "useCustomImage": "[not(empty(variables('customImage')))]",
         "createNewCustomImage": "[contains(variables('customImage'), 'https://')]",
-        "newCustomImageName": "[concat(variables('dnsLabel'), 'image')]",
+        "newCustomImageName": "[concat(variables('resourceGroupName'), '-image')]",
         "storageProfileArray": {
             "customImage": {
                 "imageReference": {
@@ -257,9 +251,9 @@
         "dcdBackgroundConfig": "[concat('#!/usr/bin/env bash','\n','mkdir -p /config/cloud;','cd /config/cloud;','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz ;','tar --strip-components=1 -xvzf scripts.tar.gz ;','\n','/config/cloud/wait-for-rjd.py;','BIG_IQ_PWD=$1;','tmsh modify auth user admin password $BIG_IQ_PWD && tmsh save sys config && set-basic-auth on;','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD;')]",
         "setupDcdBackgroundScript": "[concat(variables('singleQuote'), variables('dcdBackgroundConfig'), variables('singleQuote'))]",
         "setUpDcdScript": "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgdjEgCmVjaG8gCnJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIAp3aGlsZSBbICIkdjEiICE9ICIkQklHX0lRX1BXRCIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJSZS1lbnRlciBCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgQklHX0lRX1BXRCAKZG9uZSAKZWNobwpub2h1cCAvY29uZmlnL2Nsb3VkL3NldHVwLWRjZC1iYWNrZ3JvdW5kLnNoICIkQklHX0lRX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcyc=",
-        "cmBackgroundConfig": "[concat('#!/usr/bin/env bash','\n','mkdir -p /config/cloud;','cd /config/cloud;','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz ;','tar --strip-components=1 -xvzf scripts.tar.gz ;','\n','/config/cloud/wait-for-rjd.py;','BIG_IQ_PWD=$1;','tmsh modify auth user admin password $BIG_IQ_PWD && tmsh save sys config && set-basic-auth on;','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD;')]",
-        "setupCmBackgroundScript": "[concat(variables('singleQuote'), variables('cmBackgroundConfig'), variables('singleQuote'))]",
-        "setUpCmScript": "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgdjEgCmVjaG8gCnJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIAp3aGlsZSBbICIkdjEiICE9ICIkQklHX0lRX1BXRCIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJSZS1lbnRlciBCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgQklHX0lRX1BXRCAKZG9uZSAKZWNobwpub2h1cCAvY29uZmlnL2Nsb3VkL3NldHVwLWRjZC1iYWNrZ3JvdW5kLnNoICIkQklHX0lRX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcyc="
+        "cmBackgroundConfig":"",
+        "setUpCmBackgroundScript": "[concat(variables('singleQuote'), variables('cmBackgroundConfig'), variables('singleQuote'))]",
+        "setUpCmScript" : "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJBV1MgQWNjZXNzIEtleSBJRDogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQVdTIEFjY2VzcyBLZXkgSUQ6ICIgQVdTX0FDQ0VTU19LRVkgCndoaWxlIFsgIiR2MSIgIT0gIiRBV1NfQUNDRVNTX0tFWSIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkFXUyBBY2Nlc3MgS2V5IElEOiAiIHYxIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIlJlLWVudGVyIEFXUyBBY2Nlc3MgS2V5IElEOiAiIEFXU19BQ0NFU1NfS0VZIApkb25lIAplY2hvCnJlYWQgLXMgLXAgIkFXUyBTZWNyZXQgQWNjZXNzIEtleTogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQVdTIFNlY3JldCBBY2Nlc3MgS2V5OiAiIEFXU19TRUNSRVRfS0VZIAp3aGlsZSBbICIkdjEiICE9ICIkQVdTX1NFQ1JFVF9LRVkiIF07IGRvIAogICAgZWNobyAKICAgIGVjaG8gIkVudHJpZXMgZGlkIG5vdCBtYXRjaCwgdHJ5IGFnYWluIiAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJBV1MgU2VjcmV0IEFjY2VzcyBLZXk6ICIgdjEgCiAgICBlY2hvIAogICAgcmVhZCAtcyAtcCAiUmUtZW50ZXIgQVdTIFNlY3JldCBBY2Nlc3MgS2V5OiAiIEFXU19TRUNSRVRfS0VZIApkb25lIAplY2hvCnJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQklHLUlRIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIEJJR19JUV9QV0QgCndoaWxlIFsgIiR2MSIgIT0gIiRCSUdfSVFfUFdEIiBdOyBkbyAKICAgIGVjaG8gCiAgICBlY2hvICJFbnRyaWVzIGRpZCBub3QgbWF0Y2gsIHRyeSBhZ2FpbiIgCiAgICBlY2hvIAogICAgcmVhZCAtcyAtcCAiQklHLUlRIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIHYxIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIApkb25lIAplY2hvCnJlYWQgLXMgLXAgIkJJRy1JUCBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQklHLUlQIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIEJJR19JUF9QV0QgCndoaWxlIFsgIiR2MSIgIT0gIiRCSUdfSVBfUFdEIiBdOyBkbyAKICAgIGVjaG8gCiAgICBlY2hvICJFbnRyaWVzIGRpZCBub3QgbWF0Y2gsIHRyeSBhZ2FpbiIgCiAgICBlY2hvIAogICAgcmVhZCAtcyAtcCAiQklHLUlQIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIHYxIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUCBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVBfUFdEIApkb25lIAplY2hvCm5vaHVwIC9jb25maWcvY2xvdWQvc2V0dXAtY20tYmFja2dyb3VuZC5zaCAiJEFXU19BQ0NFU1NfS0VZIiAiJEFXU19TRUNSRVRfS0VZIiAiJEJJR19JUV9QV0QiICIkQklHX0lQX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcycKZWNobztlY2hvICdNYWtlIHN1cmUgeW91IGZvbGxvdyBUZWFyZG93biBpbnN0cnVjdGlvbnMgZnJvbSB0aGUgR2l0SHViIHJlcG9zaXRvcnkgb25jZSB5b3UgYXJlIGRvbmUgd2l0aCB5b3VyIHRlc3RpbmcuJw=="
     },
     "resources": [
         {
@@ -363,7 +357,7 @@
                         "name": "[concat(variables('dcdInstanceName'), '-ipconfig1')]",
                         "properties": {
                             "PublicIpAddress": {
-                                "Id": "[variables('extPublicIPAddressId')]"
+                                "Id": "[variables('dcdPublicIPAddressId')]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
@@ -378,7 +372,7 @@
             },
             "dependsOn": [
                 "[variables('vnetId')]",
-                "[variables('extPublicIPAddressId')]",
+                "[variables('dcdPublicIPAddressId')]",
                 "[variables('extNsgID')]"
             ]
         },
@@ -394,7 +388,7 @@
                         "name": "[concat(variables('cmInstanceName'), '-ipconfig2')]",
                         "properties": {
                             "PublicIpAddress": {
-                                "Id": "[variables('intPublicIPAddressId')]"
+                                "Id": "[variables('cmPublicIPAddressId')]"
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
@@ -409,7 +403,7 @@
             },
             "dependsOn": [
                 "[variables('vnetId')]",
-                "[variables('intPublicIPAddressId')]",
+                "[variables('cmPublicIPAddressId')]",
                 "[variables('extNsgID')]"
             ]
         },
@@ -594,7 +588,7 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /config/cloud ;cd /config/cloud ;curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz;tar --strip-components=1 -xvzf scripts.tar.gz ;','echo ', variables('setUpCmBackgroundScript'), ' > /config/cloud/setup-cm-background.sh; chmod +x /config/cloud/setup-cm-background.sh;','echo ', variables('setUpCmScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;')]"
+                    "commandToExecute": "[concat('mkdir -p /config/cloud ;cd /config/cloud ;curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz;tar --strip-components=1 -xvzf scripts.tar.gz ;','echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','BIG_IQ_PWD=\"$1\"','\n','BIG_IP_PWD=\"$2\"','\n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 \n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('extNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD \"$BIG_IQ_PWD\" --DCD_USERNAME admin \n','tmsh modify auth user admin password \"$BIG_IQ_PWD\" && tmsh save sys config','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('extNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('licensePoolKey'),' --BIG_IQ_PWD \"$BIG_IQ_PWD\" \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --AWS_SUBNET_1A toBeDoneByRoman','/config/cloud/deploy-application.py --NODE_IP Outputs.HTTPServerIP') , variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;','echo ', variables('setUpCmScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
@@ -611,11 +605,19 @@
     "outputs": {
         "BIGIQ-DCD-GUI-URL": {
             "type": "string",
-            "value": "[concat('https://', reference(variables('extPublicIPAddressId')).ipAddress, ':', 443)]"
+            "value": "[concat('https://', reference(variables('dcdPublicIPAddressId')).ipAddress, ':', 443)]"
         },
         "BIGIQ-DCD-sshCommand": {
             "type": "string",
-            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('extPublicIPAddressId')).ipAddress)]"
+            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('dcdPublicIPAddressId')).ipAddress)]"
+          },
+          "BIGIQ-CM-GUI-URL": {
+            "type": "string",
+            "value": "[concat('https://', reference(variables('cmPublicIPAddressId')).ipAddress, ':', 443)]"
+        },
+        "BIGIQ-CM-sshCommand": {
+            "type": "string",
+            "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('cmPublicIPAddressId')).ipAddress)]"
           }
     }
 }
