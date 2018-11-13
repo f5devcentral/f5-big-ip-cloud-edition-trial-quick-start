@@ -11,11 +11,8 @@
         "adminPasswordOrKey": {
             "value": null
         },
-        "dnsLabel": {
-            "value": "testdns"
-        },
         "licenseKey1": {
-            "value": "aaa"
+            "value": null
         },
         "instanceType": {
             "value": "Standard_D2s_v3"
@@ -24,10 +21,13 @@
             "value": "6.0.100813"
         },
         "licenseKey2": {
-            "value": "asdfsdf"
+            "value": null
         },
         "licensePoolKey": {
-            "value": "asdfsf"
+            "value": null
+        },
+        "location": {
+            "value": "eastus2"
         },
         "restrictedSrcAddress": {
             "value": "*"
@@ -41,8 +41,11 @@
         "vnetAddressPrefix": {
             "value": "10.1.0.0/16"
         },
-        "instanceName": {
-            "value": "demo-ssg-trial"
+        "dcdInstanceName": {
+            "value": "demo-ssg-trial-dcd"
+        },
+        "cmInstanceName": {
+            "value": "demo-ssg-trial-cm"
         },
         "customImage": {
             "value": "OPTIONAL"
