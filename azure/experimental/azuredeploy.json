@@ -42,7 +42,7 @@
             }
         },
         "instanceType": {
-            "defaultValue": "Standard_DS2_v2",
+            "defaultValue": "Standard_D2s_v3",
             "allowedValues": [
                 "Standard_D4s_v3",
                 "Standard_D2s_v3",
@@ -114,13 +114,22 @@
                 "description": " The vnet address block  , Must be a valid IP in range of the form x.x.x.x/x."
             }
         },
-        "instanceName": {
-            "defaultValue": "demo-ssg-trial",
+        "dcdInstanceName": {
+            "defaultValue": "demo-ssg-trial-dcd",
             "minLength": 1,
             "maxLength": 25,
             "type": "String",
             "metadata": {
-                "description": "A unique CloudFormation StackName within your azure account"
+                "description": "A unique CloudFormation StackName within your azure account, to be used to set DCD server instance."
+            }
+        },
+        "cmInstanceName": {
+            "defaultValue": "demo-ssg-trial-cm",
+            "minLength": 1,
+            "maxLength": 25,
+            "type": "String",
+            "metadata": {
+                "description": "A unique CloudFormation StackName within your azure account, to be used to set CM server instance."
             }
         },
         "customImage": {
@@ -174,7 +183,8 @@
             "sku": "[variables('skuToUse')]",
             "version": "[parameters('bigIqVersion')]"
         },
-        "instanceName": "[toLower(parameters('instanceName'))]",
+        "dcdInstanceName": "[toLower(parameters('dcdInstanceName'))]",
+        "cmInstanceName": "[toLower(parameters('cmInstanceName'))]",
         "virtualNetworkName": "[concat(variables('dnsLabel'), '-vnet')]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "vnetAddressPrefix": "[parameters('vnetAddressPrefix')]",
@@ -246,7 +256,10 @@
         ],
         "dcdBackgroundConfig": "[concat('#!/usr/bin/env bash','\n','mkdir -p /config/cloud;','cd /config/cloud;','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz ;','tar --strip-components=1 -xvzf scripts.tar.gz ;','\n','/config/cloud/wait-for-rjd.py;','BIG_IQ_PWD=$1;','tmsh modify auth user admin password $BIG_IQ_PWD && tmsh save sys config && set-basic-auth on;','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD;')]",
         "setupDcdBackgroundScript": "[concat(variables('singleQuote'), variables('dcdBackgroundConfig'), variables('singleQuote'))]",
-        "setUpDcdScript": "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgdjEgCmVjaG8gCnJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIAp3aGlsZSBbICIkdjEiICE9ICIkQklHX0lRX1BXRCIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJSZS1lbnRlciBCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgQklHX0lRX1BXRCAKZG9uZSAKZWNobwpub2h1cCAvY29uZmlnL2Nsb3VkL3NldHVwLWRjZC1iYWNrZ3JvdW5kLnNoICIkQklHX0lRX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcyc="
+        "setUpDcdScript": "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgdjEgCmVjaG8gCnJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIAp3aGlsZSBbICIkdjEiICE9ICIkQklHX0lRX1BXRCIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJSZS1lbnRlciBCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgQklHX0lRX1BXRCAKZG9uZSAKZWNobwpub2h1cCAvY29uZmlnL2Nsb3VkL3NldHVwLWRjZC1iYWNrZ3JvdW5kLnNoICIkQklHX0lRX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcyc=",
+        "cmBackgroundConfig": "[concat('#!/usr/bin/env bash','\n','mkdir -p /config/cloud;','cd /config/cloud;','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz ;','tar --strip-components=1 -xvzf scripts.tar.gz ;','\n','/config/cloud/wait-for-rjd.py;','BIG_IQ_PWD=$1;','tmsh modify auth user admin password $BIG_IQ_PWD && tmsh save sys config && set-basic-auth on;','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD;')]",
+        "setupCmBackgroundScript": "[concat(variables('singleQuote'), variables('cmBackgroundConfig'), variables('singleQuote'))]",
+        "setUpCmScript": "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgdjEgCmVjaG8gCnJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIAp3aGlsZSBbICIkdjEiICE9ICIkQklHX0lRX1BXRCIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJSZS1lbnRlciBCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgQklHX0lRX1BXRCAKZG9uZSAKZWNobwpub2h1cCAvY29uZmlnL2Nsb3VkL3NldHVwLWRjZC1iYWNrZ3JvdW5kLnNoICIkQklHX0lRX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcyc="
     },
     "resources": [
         {
@@ -347,7 +360,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('instanceName'), '-ipconfig1')]",
+                        "name": "[concat(variables('dcdInstanceName'), '-ipconfig1')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[variables('extPublicIPAddressId')]"
@@ -378,7 +391,7 @@
             "properties": {
                 "ipConfigurations": [
                     {
-                        "name": "[concat(variables('instanceName'), '-ipconfig2')]",
+                        "name": "[concat(variables('cmInstanceName'), '-ipconfig2')]",
                         "properties": {
                             "PublicIpAddress": {
                                 "Id": "[variables('intPublicIPAddressId')]"
@@ -472,7 +485,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "name": "[variables('instanceName')]",
+            "name": "[variables('dcdInstanceName')]",
             "apiVersion": "[variables('computeApiVersion')]",
             "location": "[variables('location')]",
             "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
@@ -494,19 +507,13 @@
                             "properties": {
                                 "primary": true
                             }
-                        },
-                        {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]",
-                            "properties": {
-                                "primary": false
-                            }
                         }
                     ]
                 },
                 "osProfile": {
                     "adminPassword": "[variables('adminPasswordOrKey')]",
                     "adminUsername": "[parameters('adminUsername')]",
-                    "computerName": "[variables('instanceName')]",
+                    "computerName": "[variables('dcdInstanceName')]",
                     "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
                 },
                 "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
@@ -514,13 +521,53 @@
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
                 "[variables('newCustomImageName')]",
-                "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]",
+                "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[variables('cmInstanceName')]",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[variables('location')]",
+            "plan": "[if(variables('useCustomImage'), json('null'), variables('imagePlan'))]",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "properties": {
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName')), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob]"
+                    }
+                },
+                "hardwareProfile": {
+                    "vmSize": "[parameters('instanceType')]"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('intNicName'))]",
+                            "properties": {
+                                "primary": true
+                            }
+                        }
+                    ]
+                },
+                "osProfile": {
+                    "adminPassword": "[variables('adminPasswordOrKey')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "computerName": "[variables('cmInstanceName')]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                },
+                "storageProfile": "[if(variables('useCustomImage'), variables('storageProfileArray').customImage, variables('storageProfileArray').platformImage)]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
+                "[variables('newCustomImageName')]",
                 "[concat('Microsoft.Network/networkInterfaces/', variables('intNicName'))]"
             ]
         },
         {
             "type": "Microsoft.Compute/virtualMachines/extensions",
-            "name": "[concat(variables('instanceName'),'/startupscript')]",
+            "name": "[concat(variables('dcdInstanceName'),'/dcdStartupScript')]",
             "apiVersion": "[variables('computeApiVersion')]",
             "location": "[variables('location')]",
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
@@ -536,7 +583,28 @@
                 "typeHandlerVersion": "2.0"
             },
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('instanceName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dcdInstanceName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(variables('cmInstanceName'),'/cmStartupScript')]",
+            "apiVersion": "[variables('computeApiVersion')]",
+            "location": "[variables('location')]",
+            "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
+            "properties": {
+                "protectedSettings": {
+                    "commandToExecute": "[concat('mkdir -p /config/cloud ;cd /config/cloud ;curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz;tar --strip-components=1 -xvzf scripts.tar.gz ;','echo ', variables('setUpCmBackgroundScript'), ' > /config/cloud/setup-cm-background.sh; chmod +x /config/cloud/setup-cm-background.sh;','echo ', variables('setUpCmScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;')]"
+                },
+                "publisher": "Microsoft.Azure.Extensions",
+                "settings": {
+                    "fileUris": []
+                },
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', variables('cmInstanceName'))]"
             ]
         }
     ],
