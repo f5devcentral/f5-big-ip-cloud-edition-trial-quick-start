@@ -1,0 +1,295 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for all resources."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Virtual network to which this instance would be associated"
+      }
+    },
+    "instanceName": {
+      "defaultValue": "apache-demo-server",
+      "maxLength": 25,
+      "minLength": 1,
+      "type": "string",
+      "metadata": {
+        "description": "A unique CloudFormation StackName within your azure account"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "azureuser",
+      "metadata": {
+        "description": "User name for the Virtual Machine."
+      }
+    },
+    "authenticationType": {
+      "allowedValues": [
+        "password",
+        "sshPublicKey"
+      ],
+      "defaultValue": "password",
+      "metadata": {
+        "description": "Type of authentication to use on the Virtual Machine, password based authentication or key based authentication."
+      },
+      "type": "string"
+    },
+    "adminPasswordOrKey": {
+      "type": "securestring",
+      "defaultValue": "admin",
+      "metadata": {
+        "description": "Password for the Virtual Machine."
+      }
+    },
+    "subnet": {
+      "type": "string"
+    },
+    "dataDiskVolumeSize": {
+      "type": "string",
+      "defaultValue": "40"
+    },
+    "loadBalancerDnsName": {
+      "type": "string",
+      "metadata": {
+        "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+    "ubuntuOSVersion": {
+      "type": "string",
+      "defaultValue": "18.04.0-LTS",
+      "allowedValues": [
+        "12.04.5-LTS",
+        "14.04.5-LTS",
+        "15.10",
+        "16.04.0-LTS",
+        "18.04-LTS"
+      ],
+      "metadata": {
+        "description": "The Ubuntu version for the VM. This will pick a fully patched image of this given Ubuntu version."
+      }
+    },
+    "tagValues": {
+      "defaultValue": {
+        "application": "f5-demo-APP"
+      },
+      "metadata": {
+        "description": "Default key/value resource tags will be added to the resources in this deployment, if you would like the values to be unique adjust them as needed for each key."
+      },
+      "type": "object"
+    }
+  },
+  "variables": {
+    "singleQuote": "'",
+    "imagePublisher": "Canonical",
+    "imageOffer": "UbuntuServer",
+    "computeApiVersion": "2018-10-01",
+    "networkApiVersion": "2018-08-01",
+    "nicName": "[concat('ubuntu-nic-',uniqueString(resourceGroup().id, deployment().name))]",
+    "location": "[resourceGroup().location]",
+    "subnetName": "[parameters('subnet')]",
+    "nsgName": "[concat('ubuntu-', parameters('ubuntuOSVersion'), '-' , variables('resourceGroupName'))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',variables('nsgName'))]",
+    "resourceGroupName": "[resourceGroup().name]",
+    "adminPasswordOrKey": "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]",
+    "linuxConfiguration": {
+      "disablePasswordAuthentication": true,
+      "ssh": {
+        "publicKeys": [
+          {
+            "keyData": "[variables('adminPasswordOrKey')]",
+            "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]"
+          }
+        ]
+      }
+    },
+    "publicIPAddressName": "[concat('ubuntu-ip-',uniqueString(resourceGroup().id, deployment().name))]",
+    "publicIPAddressType": "Dynamic",
+    "publicIPAddressId" : "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+    "vmName": "[parameters('instanceName')]",
+    "vmSize": "Standard_A1",
+    "virtualNetworkName": "[parameters('vNetName')]",
+    "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "location": "[variables('location')]",
+      "name": "[variables('nsgName')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "ssh_allow_22",
+            "properties": {
+              "access": "Allow",
+              "description": "Enable remote access via port SSH (22) User port pings instead of icmp to test azure vm connectivity",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "direction": "Inbound",
+              "priority": 102,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "http_allow_80",
+            "properties": {
+              "access": "Allow",
+              "description": "Enable remote access via port HTTP (80) , User port pings instead of icmp to test azure vm connectivity",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "80",
+              "direction": "Inbound",
+              "priority": 103,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          },
+          {
+            "name": "ssl_allow_443",
+            "properties": {
+              "access": "Allow",
+              "description": "Enable remote access via port HTTPS (443) , User port pings instead of icmp to test azure vm connectivity",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
+              "direction": "Inbound",
+              "priority": 104,
+              "protocol": "Tcp",
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*"
+            }
+          }
+        ]
+      },
+      "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
+      "type": "Microsoft.Network/networkSecurityGroups"
+    },
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('publicIPAddressName')]",
+      "location": "[parameters('location')]",
+      "properties": {
+        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('loadBalancerDnsName')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('networkApiVersion')]",
+      "dependsOn": [
+          "[variables('publicIPAddressId')]",
+          "[variables('nsgID')]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[variables('nicName')]",
+      "properties": {
+          "ipConfigurations": [
+              {
+                  "name": "[concat(variables('vmName'), '-ipconfig1-ubnuntu')]",
+                  "properties": {
+                      "PublicIpAddress": {
+                          "Id": "[variables('publicIPAddressId')]"
+                      },
+                      "privateIPAllocationMethod": "Dynamic",
+                      "subnet": {
+                          "id": "[variables('subnetRef')]"
+                      }
+                  }
+              }
+          ],
+          "networkSecurityGroup": {
+              "id": "[variables('nsgID')]"
+          }
+      },
+      "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
+      "type": "Microsoft.Network/networkInterfaces"
+  },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[variables('vmName')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('vmName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPasswordOrKey')]",
+          "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('ubuntuOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage"
+          },
+          "dataDisks": [
+            {
+              "diskSizeGB": "[parameters('dataDiskVolumeSize')]",
+              "lun": 0,
+              "createOption": "Empty"
+            }
+          ]
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "apiVersion": "[variables('computeApiVersion')]",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ],
+      "location": "[variables('location')]",
+      "name": "[concat(variables('vmName'),'/startupscript')]",
+      "properties": {
+        "protectedSettings": {
+          "commandToExecute": "[concat('#!/bin/bash -xe\n','# Install the files and packages from the metadata\n','apt-get -y update\n','apt-get -y install python-setuptools docker.io apache2-utils\n','apt-get -y install python-setuptools docker.io apache2-utils\n','docker run -d -p 80:80 --net=host --restart unless-stopped -e F5DEMO_APP=website -e F5DEMO_NODENAME=',variables('singleQuote'),'F5 Azure',variables('singleQuote'),' -e F5DEMO_COLOR=ffd734 -e F5DEMO_NODENAME_SSL=',variables('singleQuote'),'F5 Azure (SSL)',variables('singleQuote'),' -e F5DEMO_COLOR_SSL=a0bf37 f5devcentral/f5-demo-httpd\n','echo ',variables('singleQuote'),'* * * * * /usr/bin/ab -n 30 -c 30 https://',parameters('loadBalancerDnsName'),'/\n',variables('singleQuote'),' >> /var/spool/cron/crontabs/ubuntu \n','chown ubuntu:ubuntu /var/spool/cron/crontabs/ubuntu \n','crontab -u ubuntu /var/spool/cron/crontabs/ubuntu \n')]"
+        },
+        "publisher": "Microsoft.Azure.Extensions",
+        "settings": {
+          "fileUris": []
+        },
+        "type": "CustomScript",
+        "typeHandlerVersion": "2.0"
+      },
+      "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
+      "type": "Microsoft.Compute/virtualMachines/extensions"
+    }
+  ],
+  "outputs": {
+    "hostname": {
+      "type": "string",
+      "value": "[reference(variables('publicIPAddressId')).ipAddress]"
+    },
+    "sshCommand": {
+      "type": "string",
+      "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressId')).ipAddress)]"
+    }
+  }
+}
