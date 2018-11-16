@@ -89,7 +89,7 @@
                 "description": " The IP address range used to SSH and access managment GUI on the EC2 instances"
             }
         },
-        "extSubnetPrefix": {
+        "mgmtSubnetPrefix": {
             "defaultValue": "10.1.1.0/24",
             "minLength": 9,
             "maxLength": 18,
@@ -115,6 +115,10 @@
             "metadata": {
                 "description": " The vnet address block  , Must be a valid IP in range of the form x.x.x.x/x."
             }
+        },
+        "ssgName" : {
+            "type":"string",
+            "defaultValue": "azure-f5-ssg"
         },
         "dcdInstanceName": {
             "defaultValue": "demo-ssg-trial-dcd",
@@ -169,6 +173,8 @@
             }
         },
         "subscriptionID": "[subscription().subscriptionId]",
+        "tenantID":"[subscription().tenantId]",
+        "ssgName":"[parameters('ssgName')]",
         "resourceGroupName": "[resourceGroup().name]",
         "singleQuote": "'",
         "skuToUse": "f5-bigiq-virtual-edition-byol",
@@ -186,22 +192,22 @@
         },
         "dcdInstanceName": "[toLower(parameters('dcdInstanceName'))]",
         "cmInstanceName": "[toLower(parameters('cmInstanceName'))]",
-        "virtualNetworkName": "[concat('BIG-IQ-VNET-',variables('resourceGroupName'))]",
+        "virtualNetworkName": "[concat('BIG-IQ-VNET-',variables('resourceGroupName'),'-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
         "vnetAddressPrefix": "[parameters('vnetAddressPrefix')]",
         "publicIPAddressType": "Static",
-        "extPublicIPAddressName": "[concat('BIG-IQ-DCD-IP-' , variables('resourceGroupName'))]",
+        "extPublicIPAddressName": "[concat('BIG-IQ-DCD-IP-' , variables('resourceGroupName'),'-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "dcdPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('extPublicIPAddressName'))]",
-        "extNicName": "[concat('BIG-IQ-DCD-NetworkInterface-' , variables('resourceGroupName'))]",
-        "extNicID": "[resourceId('Microsoft.Network/NetworkInterfaces', variables('extNicName'))]",
-        "intNicName": "[concat('BIG-IQ-CM-NetworkInterface-' , variables('resourceGroupName'))]",
-        "extSubnetName": "[concat( variables('resourceGroupName') , '-mgmtSubnet')]",
-        "extSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('extSubnetName'))]",
-        "extNsgName": "[concat('BIG-IQ-SG-', variables('resourceGroupName'))]",
-        "extNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',variables('extNsgName'))]",
-        "intSubnetName": "[concat( variables('resourceGroupName') , '-intSubnet')]",
+        "mgmtNicName": "[concat('BIG-IQ-DCD-NetworkInterface-' , variables('resourceGroupName') ,'-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
+        "mgmtNicID": "[resourceId('Microsoft.Network/NetworkInterfaces', variables('mgmtNicName'))]",
+        "intNicName": "[concat('BIG-IQ-CM-NetworkInterface-' , variables('resourceGroupName'),'-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
+        "mgmtSubnetName": "[concat( variables('resourceGroupName') , '-mgmtSubnet','-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
+        "mgmtSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('mgmtSubnetName'))]",
+        "mgmtNsgName": "[concat('BIG-IQ-SG-', variables('resourceGroupName'),'-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
+        "mgmtNsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',variables('mgmtNsgName'))]",
+        "intSubnetName": "[concat( variables('resourceGroupName') , '-intSubnet','-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "intSubnetId": "[concat(variables('vnetId'), '/subnets/', variables('intsubnetName'))]",
-        "intpublicIPAddressName": "[concat('BIG-IQ-CM-IP-' , variables('resourceGroupName'))]",
+        "intpublicIPAddressName": "[concat('BIG-IQ-CM-IP-' , variables('resourceGroupName'),'-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "cmPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressName'))]",
         "tagValues": "[parameters('tagValues')]",
         "newDataStorageAccountName": "[concat(uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name), 'data000')]",
@@ -279,7 +285,7 @@
         },
         {
             "type": "Microsoft.Network/networkSecurityGroups",
-            "name": "[variables('extNsgName')]",
+            "name": "[variables('mgmtNsgName')]",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[variables('location')]",
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
@@ -346,7 +352,7 @@
         },
         {
             "type": "Microsoft.Network/networkInterfaces",
-            "name": "[variables('extNicName')]",
+            "name": "[variables('mgmtNicName')]",
             "apiVersion": "[variables('networkApiVersion')]",
             "location": "[variables('location')]",
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
@@ -360,19 +366,19 @@
                             },
                             "privateIPAllocationMethod": "Dynamic",
                             "subnet": {
-                                "id": "[variables('extSubnetId')]"
+                                "id": "[variables('mgmtSubnetId')]"
                             }
                         }
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[variables('extNsgID')]"
+                    "id": "[variables('mgmtNsgID')]"
                 }
             },
             "dependsOn": [
                 "[variables('vnetId')]",
                 "[variables('dcdPublicIPAddressId')]",
-                "[variables('extNsgID')]"
+                "[variables('mgmtNsgID')]"
             ]
         },
         {
@@ -397,13 +403,13 @@
                     }
                 ],
                 "networkSecurityGroup": {
-                    "id": "[variables('extNsgID')]"
+                    "id": "[variables('mgmtNsgID')]"
                 }
             },
             "dependsOn": [
                 "[variables('vnetId')]",
                 "[variables('cmPublicIPAddressId')]",
-                "[variables('extNsgID')]"
+                "[variables('mgmtNsgID')]"
             ]
         },
         {
@@ -420,11 +426,11 @@
                 },
                 "subnets": [
                     {
-                        "name": "[variables('extSubnetName')]",
+                        "name": "[variables('mgmtSubnetName')]",
                         "properties": {
-                            "addressPrefix": "[parameters('extSubnetPrefix')]",
+                            "addressPrefix": "[parameters('mgmtSubnetPrefix')]",
                             "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('extNsgName'))]"
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('mgmtNsgName'))]"
                             }
                         }
                     },
@@ -433,14 +439,14 @@
                         "properties": {
                             "addressPrefix": "[parameters('intSubnetPrefix')]",
                             "networkSecurityGroup": {
-                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('extNsgName'))]"
+                                "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('mgmtNsgName'))]"
                             }
                         }
                     }
                 ]
             },
             "dependsOn": [
-                "[concat('Microsoft.Network/networkSecurityGroups/', variables('extNsgName'))]"
+                "[concat('Microsoft.Network/networkSecurityGroups/', variables('mgmtNsgName'))]"
             ]
         },
         {
@@ -496,7 +502,7 @@
                 "networkProfile": {
                     "networkInterfaces": [
                         {
-                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('extNicName'))]",
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('mgmtNicName'))]",
                             "properties": {
                                 "primary": true
                             }
@@ -514,7 +520,7 @@
             "dependsOn": [
                 "[concat('Microsoft.Storage/storageAccounts/', variables('newDataStorageAccountName'))]",
                 "[variables('newCustomImageName')]",
-                "[concat('Microsoft.Network/networkInterfaces/', variables('extNicName'))]"
+                "[concat('Microsoft.Network/networkInterfaces/', variables('mgmtNicName'))]"
             ]
         },
         {
@@ -559,6 +565,37 @@
             ]
         },
         {
+            "apiVersion": "2018-05-01",
+            "name": "linkedTemplate",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+              "mode": "Incremental",
+              "templateLink": {
+                 "uri":"https://s3.amazonaws.com/azuretemplates/ubuntu-azure-trail-deploy.json"
+              },
+              "parameters": {
+                 "location":{
+                    "value": "[variables('location')]"
+                  },
+                  "authenticationType":{
+                    "value": "[parameters('authenticationType')]"
+                  },
+                  "adminPasswordOrKey":{
+                    "value": "[variables('adminPasswordOrKey')]"
+                  },
+                  "vnetName":{
+                     "value":"[variables('virtualNetworkName')]"   
+                  },
+                  "subnet":{
+                    "value": "[variables('mgmtSubnetName')]"
+                  },
+                  "loadBalancerDnsName":{
+                    "value": "ip10-ec2internal"
+                  }
+              }
+            }
+         },
+        {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('dcdInstanceName'),'/dcdStartupScript')]",
             "apiVersion": "[variables('computeApiVersion')]",
@@ -587,7 +624,7 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /config/cloud ;cd /config/cloud ;curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz;tar --strip-components=1 -xvzf scripts.tar.gz ;','echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','BIG_IQ_PWD=\"$1\"','\n','BIG_IP_PWD=\"$2\"','\n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 \n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('extNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD \"$BIG_IQ_PWD\" --DCD_USERNAME admin \n','tmsh modify auth user admin password \"$BIG_IQ_PWD\" && tmsh save sys config','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('extNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('licensePoolKey'),' --BIG_IQ_PWD \"$BIG_IQ_PWD\" \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --AWS_SUBNET_1A toBeDoneByRoman','/config/cloud/deploy-application.py --NODE_IP Outputs.HTTPServerIP') , variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;','echo ', variables('setUpCmScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;')]"
+                    "commandToExecute": "[concat('mkdir -p /config/cloud ;cd /config/cloud ;curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz;tar --strip-components=1 -xvzf scripts.tar.gz ;','echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl https://s3.amazonaws.com/big-iq-quickstart-cf-templates-aws/6.0.1.1/scripts.tar.gz > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','BIG_IQ_PWD=\"$1\"','\n','BIG_IP_PWD=\"$2\"','\n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('licenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 \n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD \"$BIG_IQ_PWD\" --DCD_USERNAME admin \n','tmsh modify auth user admin password \"$BIG_IQ_PWD\" && tmsh save sys config','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('licensePoolKey'),' --BIG_IQ_PWD \"$BIG_IQ_PWD\" \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --RESOURCE ', variables('resourceGroupName') ,' --DEFAULT_LOCATION ',variables('location'),' --VNET1 ',variables('virtualNetworkName'),' --SUBNET1 ',variables('mgmtSubnetName'),' --BYOL_BIGIP_NAME invalid',' --BYOL_BIGIP_VERSION invalid',' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET invalid',' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID invalid',' --BIGIQ_URI http://localhost:8100',' --BIGIP_USER admin',' --BIGIP_PWD \"$BIG_IP_PWD\"',' --CLOUD_PROVIDER_NAME azure',' --CLOUD_ENVIRONMENT_NAME azure-env ',' --DEVICE_TEMPLATE_NAME default-ssg-template ',' --LOOKUP_SERVER_LIST 8.8.8.8',' --NTP_SERVER 0.pool.ntp.org',' --SSG_NAME ',variables('ssgName'),' --CM_IP ',reference(variables('cmPublicIPAddressId')).ipAddress,' --BIG_IQ_PWD \"$BIG_IQ_PWD\"','\n','/config/cloud/deploy-application.py --NODE_IP Outputs.HTTPServerIP') , variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;','echo ', variables('setUpCmScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {

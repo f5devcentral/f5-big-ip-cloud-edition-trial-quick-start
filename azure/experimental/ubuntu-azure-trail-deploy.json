@@ -26,7 +26,7 @@
     },
     "adminUsername": {
       "type": "string",
-      "defaultValue": "azureuser",
+      "defaultValue": "ubuntu",
       "metadata": {
         "description": "User name for the Virtual Machine."
       }
@@ -44,7 +44,7 @@
     },
     "adminPasswordOrKey": {
       "type": "securestring",
-      "defaultValue": "admin",
+      "defaultValue": "F5@56789jklm",
       "metadata": {
         "description": "Password for the Virtual Machine."
       }
@@ -64,7 +64,7 @@
     },
     "ubuntuOSVersion": {
       "type": "string",
-      "defaultValue": "18.04.0-LTS",
+      "defaultValue": "18.04-LTS",
       "allowedValues": [
         "12.04.5-LTS",
         "14.04.5-LTS",
@@ -92,7 +92,7 @@
     "imageOffer": "UbuntuServer",
     "computeApiVersion": "2018-10-01",
     "networkApiVersion": "2018-08-01",
-    "nicName": "[concat('ubuntu-nic-',uniqueString(resourceGroup().id, deployment().name))]",
+    "nicName": "[concat('ubuntu-nic-',uniqueString(variables('resourceGroupName'),resourceGroup().id, deployment().name))]",
     "location": "[resourceGroup().location]",
     "subnetName": "[parameters('subnet')]",
     "nsgName": "[concat('ubuntu-', parameters('ubuntuOSVersion'), '-' , variables('resourceGroupName'))]",
@@ -111,7 +111,7 @@
       }
     },
     "publicIPAddressName": "[concat('ubuntu-ip-',uniqueString(resourceGroup().id, deployment().name))]",
-    "publicIPAddressType": "Dynamic",
+    "publicIPAddressType": "Static",
     "publicIPAddressId" : "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
     "vmName": "[parameters('instanceName')]",
     "vmSize": "Standard_A1",
