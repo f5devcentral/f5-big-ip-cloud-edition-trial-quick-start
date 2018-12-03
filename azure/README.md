@@ -1,14 +1,14 @@
 BIG-IP® Cloud Edition Trial Quick Start - Azure
 ===============================================
 
-**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 14.0.1
+**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 13.1.1
 
-
+![Deployment Diagram](../images/azure-ssg-example-in-cloud.png)
 
 Instructions for Azure
 ----------------------
 
-To deploy this ARM template in Azure cluod, complete the following steps.
+To deploy this ARM template in Azure cloud, complete the following steps.
 
 **Note:** This template is not supported in the regions where Microsoft/insights is not available.
 
@@ -22,7 +22,7 @@ To deploy this ARM template in Azure cluod, complete the following steps.
    * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)]
         ( Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
 
-4. In the CloudFormation Template (CFT), populate this information:
+4. In the ARM Template, populate this information:
 
    * Resource group (Select existing or create new resource group that makes resource termination painless)
    * Chose admin user name (default value is azureuser)

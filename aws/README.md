@@ -1,7 +1,7 @@
 BIG-IP® Cloud Edition Trial Quick Start - AWS
 =============================================
 
-**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 14.1.0
+**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 14.0.0.1
 
 ![Deployment Diagram](../images/aws-ssg-example-in-cloud-2.png)
 
