@@ -18,9 +18,9 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 
 2. Enable programmatic deployment for these F5 products:
    * [F5 BIG-IQ Virtual Edition - (BYOL)]
-        ( Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
+        (Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
    * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)]
-        ( Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
+        (Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
 
 4. In the ARM Template, populate this information:
 
@@ -32,7 +32,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    * Service principal secret (Identity string created while app registration)
    * Enter azure client Id (Can be found under app registration section as Application ID)
    * Enter license keys of CM , DCD , BIG IP appropriately 
-   * Location ( default is resourceGroup's location - modify to deploy the resources in other location)
+   * Location (default is resourceGroup's location - modify to deploy the resources in other location)
    * Enter ssg , dcd , cm instance names(must be fewer than 25 characters)
 
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
@@ -63,7 +63,7 @@ Troubleshooting
 4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
 5.  In Azure market place ensure that programmatic deployment is enabled for F5 products deployed earlier.
 6.  In Azure Active directory make sure that app registration has all necessary permissions for api access, to delegate permissions to other users add the users to owner list of app regiration.
-7.  Do not forget to assign contirbutor role(RBAC) to the scope of current resource/subscription associated with the app registration 
+7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration 
 
 ### Copyright
 
