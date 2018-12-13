@@ -62,10 +62,10 @@ Naviagate to resources under appropriate resource group and delete the respectiv
 Troubleshooting
 ---------------
 
-1.  In BIG-IQ UI, if the application deployment failed, click Retry.
+1. In BIG-IQ UI, if the application deployment failed, click Retry.
 2.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
 3.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
-4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
+4.	In BIG-IQ CLI, check following logs: /var/log/setup.log, /var/log/restjavad.0.log and /var/log/orchestrator.log.
 5.  In Azure market place ensure that programmatic deployment is enabled for F5 products deployed earlier.
 6.  In Azure Active directory make sure that app registration has all necessary permissions for api access, to delegate permissions to other users add the users to owner list of app regiration.
 7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration 
