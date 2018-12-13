@@ -1,9 +1,9 @@
 #! /usr/local/bin/python2.7
 import argparse
 import logging
-import requests
 import string
 import sys
+
 import urllib3
 import util
 

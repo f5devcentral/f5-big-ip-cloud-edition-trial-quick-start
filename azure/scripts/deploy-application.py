@@ -2,13 +2,17 @@
 import argparse
 import time
 import util
+import azureutils
 import sys
 
 def parse_args ():
     # Ugly but expedient conversion of ansible-playbook to a parameterized python script
     parser = argparse.ArgumentParser()
     parser.add_argument("--NODE_IP", type=str, required=True)
-    parser.add_argument("--ELB_DNS_NAME", type=str, required=True)
+    parser.add_argument("--SUBSCRIPTION_ID", type=str, required=True)
+    parser.add_argument("--SERVICE_PRINCIPAL_SECRET", type=str, required=True)
+    parser.add_argument("--TENANT_ID", type=str, required=True)
+    parser.add_argument("--CLIENT_ID", type=str, required=True)
     return parser.parse_args()
 
 
@@ -52,7 +56,7 @@ def poll_for_ssg_ready (ssg_id, timeout=1200):
         util.print_partial(".")
         count += 1
 
-def deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):
+def deploy_application (ssg_id, node_ip, alb_dns_name):
     util.req(
         "http://localhost:8100/cm/global/tasks/apply-template",
         None,
@@ -146,7 +150,7 @@ def deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):
             "addAnalytics": True,
             "domains": [
                 {
-                    "domainName": elb_dns_name
+                    "domainName": alb_dns_name
                 }
             ],
             "configSetName": "apache-test-application",
@@ -173,6 +177,18 @@ def deploy_application (ssg_id, node_ip, elb_name, elb_dns_name):
         }
     )
 
+def getDnsName(args):
+    resource_group_name = ""
+    alb_dns_name = ""
+    try:
+        resource_group_name = azureutils.getContentsOfResourceGroupLockFile()
+        credentials = azureutils.getCredentials(args.TENANT_ID, args.CLIENT_ID, args.SERVICE_PRINCIPAL_SECRET)
+        client = azureutils.getResourceClient(credentials , args.SUBSCRIPTION_ID)
+        alb_dns_name = azureutils.getDnsName(client, resource_group_name, args.SUBSCRIPTION_ID)
+        util.print_partial('Application can be accessible through https on dns Name:' + alb_dns_name)
+    except Exception as e:
+        util.print_partial("Exception occurred while fetching azure dns name associated with ssg's resource group "+resource_group_name+" ,failed with error:"+str(e))
+    return alb_dns_name
 
 def main():
     args = parse_args()
@@ -192,8 +208,13 @@ def main():
 
     time.sleep(180) # Three minute wait for SSG to settle down
 
+    util.print_partial("Getting ALB DNS Name reference...")
+    alb_dns_name = getDnsName(args)
+    util.complete()
+    #TODO: can delete file here azureutils.deleteLockFile()
+
     util.print_partial("Deploying application...")
-    deploy_application(ssg_id, args.NODE_IP, args.ELB_DNS_NAME)
+    deploy_application(ssg_id, args.NODE_IP, alb_dns_name)
     util.complete()
 
 if __name__ == '__main__':

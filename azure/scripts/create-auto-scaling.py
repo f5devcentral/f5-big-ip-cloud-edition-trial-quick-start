@@ -1,6 +1,7 @@
 #! /usr/local/bin/python2.7
 import sys
 import argparse
+import azureutils
 import requests
 from requests.auth import HTTPBasicAuth
 import time
@@ -106,13 +107,13 @@ def create_cloud_resources(env, device_template_result):
             "azureProperties": {
                 "location": env.DEFAULT_LOCATION,
                 "mgmtSubnetName": env.SUBNET1,
-                "vnetName": env.VNET1",
-                "vnetResourceGroupName": env.RESOURCE",
+                "vnetName": env.VNET1,
+                "vnetResourceGroupName": env.RESOURCE,
                 "sourceAddrRestriction": "*",
                 "moduleSelection": "WAF",
                 "licenseType": "BYOL",
-                "imageName": env.BYOL_BIGIP_NAME",
-                "bigipVersion": env.BYOL_BIGIP_VERSION",
+                "imageName": env.BYOL_BIGIP_NAME,
+                "bigipVersion": env.BYOL_BIGIP_VERSION,
                 "instanceType": "Standard_DS4_v2",
                 "byolLicenseInformation": {
                     "bigiqAddress": env.CM_IP,
@@ -120,7 +121,7 @@ def create_cloud_resources(env, device_template_result):
                     "bigiqPassword": env.BIG_IQ_PWD,
                     "licensePoolName": "license-pool",
                 }
-            }
+            },
             "isVmwCluster": True
         }
     )
@@ -432,6 +433,7 @@ def main():
     print("Launching SSG...")
     ssg_result = create_ssg(env, cloud_environment_result)
     print("Creating scale workflows and rules...")
+    azureutils.writeAzureResourceGroupToFile(ssg_result["name"])
     create_scale_rules_and_alerts(env, ssg_result)
 
 if __name__ == '__main__':
