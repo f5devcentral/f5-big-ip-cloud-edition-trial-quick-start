@@ -41,8 +41,12 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
 
 6. View required commands to connect to CM , DCD instances under outputs section.
-
    *Expected time: ~20 min*
+
+Security instructions
+---------------------
+1. It is strongly recommended to configure autoshutdown / whitelist the public ip's in NSG from which one accesses the ssh port of the deployed azure VM's. (This template would deploy network security group with 22,80,443 ports open to the public)
+2. Avoid enabling root account on publicly exposed azure VM's.
 
 Teardown instructions
 ---------------------
@@ -58,7 +62,11 @@ Troubleshooting
 4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
 5.  In Azure market place ensure that programmatic deployment is enabled for F5 products deployed earlier.
 6.  In Azure Active directory make sure that app registration has all necessary permissions for api access, to delegate permissions to other users add the users to owner list of app regiration.
-7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration. 
+7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration 
+8. If encountered MarketPurchaseEligibility error while deploying template - Check the availability of bigip , bigiq etc 
+        Eg: For Big ip:
+        Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept
+9. If cloud provider test connection fails . Check whether the service prinicpal associated with application has all requried permissions , if yes and yet cloud provider connection is unsuccessful try to restart the VM's and check again.
 
 ### Copyright
 
