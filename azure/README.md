@@ -40,12 +40,17 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
 
-6. View required commands to connect to CM , DCD instances under outputs section.
+*Expected time: ~30 min*
 
-   *Expected time: ~30 min*
+6. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+
+   * Use the username `admin`.
+   * Click the Applications tab > APPLICATIONS. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
+   * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.   
 
 Security instructions
 ---------------------
+
 1. It is strongly recommended to configure autoshutdown / whitelist the public ip's in NSG from which one accesses the ssh port of the deployed azure VM's. (This template would deploy network security group with 22,80,443 ports open to the public)
 2. Avoid enabling root account on publicly exposed azure VM's.
 
