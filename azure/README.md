@@ -17,11 +17,14 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    Select **BIG-IP Cloud Edition - Advanced Web Application Firewall**
 
 2. Enable programmatic deployment for these F5 products:
-   * [F5 BIG-IQ Virtual Edition - (BYOL)]
-        (Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
-   * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)]
-        (Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment)
 
+   * F5 BIG-IQ Virtual Edition - (BYOL): [Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5/resetMenuId/)
+   * F5 BIG-IP VE - ALL (BYOL, 1 Boot Location): [Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5/resetMenuId/)
+
+3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
+
+   <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-big-ip-cloud-edition-trial-quick-start%2F6.1.0%2Fazure%2Fexperimental%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a> (new VPC/demo app)
+   
 4. In the ARM Template, populate this information:
 
    * Resource group (Select existing or create new resource group that makes resource termination painless)
@@ -38,32 +41,24 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
 
 6. View required commands to connect to CM , DCD instances under outputs section.
+
    *Expected time: ~20 min*
 
 Teardown instructions
 ---------------------
 
-1. Open BIG-IQ CM in a web browser by using the public IP address, for example: ``https://<public_ip>``
-
-   * Delete the application, under Applications tab > APPLICATIONS, select the application, then click Delete.
-
-   *Expected time: ~5 min*
-
-   * Delete the Service Scaling Group, under Application tab > ENVIRONMENTS > Service Scaling Groups, select the AWS SSG, then Delete.
-
-   *Expected time: ~15 min*
-
-2. Naviagate to resources under appropriate resource group and delete the respective resources associated with current deployment(can be found under resource group -> deployments, If a new resource group is created then simply deleting that resource group will remove all the associated resources)
+Naviagate to resources under appropriate resource group and delete the respective resources associated with current deployment (can be found under resource group -> deployments, If a new resource group is created then simply deleting that resource group will remove all the associated resources).
 
 Troubleshooting
 ---------------
+
 1.  In BIG-IQ UI, if the application deployment failed, click Retry.
 2.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
 3.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
 4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
 5.  In Azure market place ensure that programmatic deployment is enabled for F5 products deployed earlier.
 6.  In Azure Active directory make sure that app registration has all necessary permissions for api access, to delegate permissions to other users add the users to owner list of app regiration.
-7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration 
+7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration. 
 
 ### Copyright
 
