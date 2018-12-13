@@ -41,7 +41,8 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
 
 6. View required commands to connect to CM , DCD instances under outputs section.
-   *Expected time: ~20 min*
+
+   *Expected time: ~30 min*
 
 Security instructions
 ---------------------
