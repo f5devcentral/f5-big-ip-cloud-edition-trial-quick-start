@@ -9,7 +9,7 @@ From a centralized view, you can monitor the health and statistics of your appli
 
 This **CloudFormation Template (CFT)** or **Azure Resource Manager (ARM)** creates two BIG-IQ VE instances: 
 
-- a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE
+- a BIG-IQ Centralized Management (CM) instance to configure and orchestrate instances of BIG-IP VE
 - a BIG-IQ Data Collection Device (DCD) to store analytics data. 
 
 The templates also create an Apache demo web server. 
