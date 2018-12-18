@@ -5,6 +5,8 @@ import util
 import azureutils
 import sys
 
+config_set_name = "apache-test-application"
+
 def parse_args ():
     # Ugly but expedient conversion of ansible-playbook to a parameterized python script
     parser = argparse.ArgumentParser()
@@ -153,7 +155,7 @@ def deploy_application (ssg_id, node_ip, alb_dns_name):
                     "domainName": alb_dns_name
                 }
             ],
-            "configSetName": "apache-test-application",
+            "configSetName": config_set_name,
             "ssgReference": {
                 "link": "https://localhost/mgmt/cm/cloud/service-scaling-groups/" + ssg_id
             },
@@ -169,13 +171,26 @@ def deploy_application (ssg_id, node_ip, alb_dns_name):
                     }
                 ]
             },
-            "subPath": "apache-test-application",
+            "subPath": config_set_name,
             "templateReference": {
                 "link": "https://localhost/mgmt/cm/global/templates/10e8d657-ed1c-3cc9-962d-f291ef02512e"
             },
             "mode": "CREATE"
         }
     )
+
+def sanitizeAndGetDnsName(resource_group_name = "", alb_dns_name = ""):
+    sanitized_dns_name = ""
+    try:
+        if alb_dns_name.startswith(resource_group_name):
+            indexOf = alb_dns_name.index(".")
+            sanitized_dns_name = alb_dns_name[:indexOf]
+            #print(sanitized_dns_name)
+            sanitized_dns_name = sanitized_dns_name + '-' + config_set_name + alb_dns_name[indexOf:]
+            #print(sanitized_dns_name)
+    except Exception as e:
+        util.print_partial("Error occured while fetching dns Name " + resource_group_name + "," + alb_dns_name+" \n error:"+str(e))
+    return sanitized_dns_name
 
 def getDnsName(args):
     resource_group_name = ""
@@ -185,6 +200,7 @@ def getDnsName(args):
         credentials = azureutils.getCredentials(args.TENANT_ID, args.CLIENT_ID, args.SERVICE_PRINCIPAL_SECRET)
         client = azureutils.getResourceClient(credentials , args.SUBSCRIPTION_ID)
         alb_dns_name = azureutils.getDnsName(client, resource_group_name, args.SUBSCRIPTION_ID)
+        alb_dns_name = sanitizeAndGetDnsName(resource_group_name , alb_dns_name)
         util.print_partial('Application can be accessible through https on dns Name:' + alb_dns_name)
     except Exception as e:
         util.print_partial("Exception occurred while fetching azure dns name associated with ssg's resource group "+resource_group_name+" ,failed with error:"+str(e))

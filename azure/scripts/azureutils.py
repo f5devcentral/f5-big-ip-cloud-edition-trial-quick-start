@@ -54,34 +54,50 @@ def getResourceClient(credentials=None , subscription_id=None):
     resource_client = ResourceManagementClient(credentials,subscription_id)
     return resource_client
 
-def getResourceGroup(name=None,client = None):
-    return client.resource_groups.get(name)
+def getResourceGroup(resource_group=None,client = None):
+    return client.resource_groups.get(resource_group)
 
-def getDnsName(client = None,name = None,subscription_id = None):
+def getDnsName(client = None, resource_group = None, subscription_id = None , public_ip_resource_name = ''):
     dns_name = ""
     try:
-        resource_ip_id = public_ip_holder.replace(subscription_holder, subscription_id)
-        resource_ip_id = resource_ip_id.replace(resource_group_holder , name)
+        resource_ip_id = getPublicIpResourceName(resource_group, subscription_id , public_ip_resource_name)
         #print("subsc"+str(subscription_id)+",name"+str(name)+",,client"+str(client))
-        for item in client.resources.list_by_resource_group(name):
+        for item in client.resources.list_by_resource_group(resource_group):
             resource_id = "{}".format(item.id)
             is_public_ip_resource = resource_id.startswith(resource_ip_id)
             if is_public_ip_resource and doesResourceExists(client, resource_id):
-                resource = getResourceById(client,resource_id)
-                resource_resp = resource.properties
-                resource_properties = resource_resp["dnsSettings"]
-                dns_name = resource_properties["fqdn"]
+                dns_name = getFqdn(client, resource_id)
                 #print(dns_name + " is dns Name of resource id:" + resource_ip_id + resource_id)
     except Exception as e:
         print(e)
     return dns_name
 
 
+def getFqdn(client, resource_id):
+    resource = getResourceById(client, resource_id)
+    resource_resp = resource.properties
+    resource_properties = resource_resp["dnsSettings"]
+    dns_name = resource_properties["fqdn"]
+    return dns_name
+
+
+def getPublicIpResourceName(resource_group, subscription_id , public_ip_resource=""):
+    resource_ip_id = public_ip_holder.replace(subscription_holder, subscription_id)
+    resource_ip_id = resource_ip_id.replace(resource_group_holder, resource_group)
+    return resource_ip_id + public_ip_resource
+
+def doesPublicIpExists(client=None , subscription_id="", resource_group="" , resource_name="" ):
+    resource_id = getPublicIpResourceName(resource_group , subscription_id ,resource_name)
+    return getResourceById(client, resource_id) is not None
+
 def doesResourceExists(client = None , resource_id = None):
     return getResourceById(client,resource_id) is not None
 
 def getResourceById(client = None , resource_id = None):
     return client.resources.get_by_id(resource_id,api_version)
+
+def doesResourceGroupExists(client = None , name = ""):
+    return client.resources.list_by_resource_group(name) is not None
 
 def print_item(group):
     """Print a ResourceGroup instance."""

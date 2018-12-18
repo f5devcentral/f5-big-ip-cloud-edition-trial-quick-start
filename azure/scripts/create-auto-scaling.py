@@ -416,22 +416,30 @@ def create_scale_rules_and_alerts(env, ssg_result):
         }
     )
 
-def randomize_ssg_name (ssg_name):
-    ssg_name = ssg_name[0:10]
-    random_part = str(int(round(time.time() * 1000)))
-    return ssg_name + (random_part[-14:])
-
+#DELETING,LAUNCHING,OFFLINE,PAUSED,READY,TERMINATING, REDEPLOYING,
+def create_ssg_wrapper(env, cloud_environment_result):
+    result = create_ssg(env, cloud_environment_result)
+    status = result["status"]
+    try:
+        should_retry = status == 'DELETING' or status == 'OFFLINE' or status == 'TERMINATING' or status == 'PAUSED'
+        if should_retry:
+            print("SSG status is:"+status+", will retry deployment after 40 seconds")
+            time.sleep(40)
+            result = create_ssg(env, cloud_environment_result)
+            print("SSG Status after retry:"+str(result["status"]))
+    except Exception as e:
+        print(e)
+    return result
 
 def main():
     print("Parsing arguments...")
     env = parse_args()
-    env.SSG_NAME = randomize_ssg_name(env.SSG_NAME)
     print("Fetching device template...")
     device_template_result = create_device_template(env)
     print("Creating cloud resources...")
     cloud_environment_result = create_cloud_resources(env, device_template_result)
     print("Launching SSG...")
-    ssg_result = create_ssg(env, cloud_environment_result)
+    ssg_result = create_ssg_wrapper(env, cloud_environment_result)
     print("Creating scale workflows and rules...")
     azureutils.writeAzureResourceGroupToFile(ssg_result["name"])
     create_scale_rules_and_alerts(env, ssg_result)

@@ -259,37 +259,20 @@
           ]
         }
       }
-    },
-    {
-      "apiVersion": "[variables('computeApiVersion')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-      ],
-      "location": "[variables('location')]",
-      "name": "[concat(variables('vmName'),'/startupscript')]",
-      "properties": {
-        "protectedSettings": {
-          "commandToExecute": "[concat('#!/bin/bash -xe\n','# Install the files and packages from the metadata\n','apt-get -y update\n','apt-get -y install python-setuptools docker.io apache2-utils\n','apt-get -y install python-setuptools docker.io apache2-utils\n','docker run -d -p 80:80 --net=host --restart unless-stopped -e F5DEMO_APP=website -e F5DEMO_NODENAME=',variables('singleQuote'),'F5 Azure',variables('singleQuote'),' -e F5DEMO_COLOR=ffd734 -e F5DEMO_NODENAME_SSL=',variables('singleQuote'),'F5 Azure (SSL)',variables('singleQuote'),' -e F5DEMO_COLOR_SSL=a0bf37 f5devcentral/f5-demo-httpd\n','echo ',variables('singleQuote'),'* * * * * /usr/bin/ab -n 30 -c 30 https://',parameters('loadBalancerDnsName'),'/\n',variables('singleQuote'),' >> /var/spool/cron/crontabs/ubuntu \n','chown ubuntu:ubuntu /var/spool/cron/crontabs/ubuntu \n','crontab -u ubuntu /var/spool/cron/crontabs/ubuntu \n')]"
-        },
-        "publisher": "Microsoft.Azure.Extensions",
-        "settings": {
-          "fileUris": []
-        },
-        "type": "CustomScript",
-        "typeHandlerVersion": "2.0"
-      },
-      "tags": "[if(empty(parameters('tagValues')), json('null'), parameters('tagValues'))]",
-      "type": "Microsoft.Compute/virtualMachines/extensions"
     }
   ],
   "outputs": {
     "hostname": {
       "type": "string",
-      "value": "[reference(variables('publicIPAddressId')).ipAddress]"
+      "value": "[reference(variables('nicName')).ipConfigurations[0].properties.privateIPAddress]"
     },
     "sshCommand": {
       "type": "string",
       "value": "[concat('ssh ', parameters('adminUsername'), '@', reference(variables('publicIPAddressId')).ipAddress)]"
+    },
+    "vmname": {
+      "type": "string",
+      "value": "[resourceId('Microsoft.Compute/virtualMachines', parameters('instanceName'))]"
     }
   }
 }

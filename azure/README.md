@@ -68,6 +68,8 @@ Troubleshooting
         Eg: For Big ip:
         Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept
 9. If cloud provider test connection fails . Check whether the service prinicpal associated with application has all requried permissions , if yes and yet cloud provider connection is unsuccessful try to restart the VM's and check again.
+10. Only one SSG is supported for deploying application through automated scripts. To deploy more than one SSG and associate an application with it please follow manual process for configuration.
+11. If encountered following error "message":"Value 'ip10-azureinternal-f5' used in property 'properties.dnsSettings.domainNameLabel' of resource 'ubuntu-ip-xyz' (microsoft.network/publicipaddresses) is invalid then please edit the template and change the value under loadBalancerDnsName parameter of the linkedTemplate . (Reason being there is an existing public ip resource with same name,hence the deployment failure)
 
 ### Copyright
 
