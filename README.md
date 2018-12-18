@@ -12,7 +12,7 @@ This **CloudFormation Template (CFT)** or **Azure Resource Manager (ARM)** creat
 - a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE
 - a BIG-IQ Data Collection Device (DCD) to store analytics data. 
 
-The CFT also creates an Apache demo web server. 
+The templates also create an Apache demo web server. 
 
 After you configure the BIG-IQ instances, BIG-IQ automatically launches a BIG-IP VE instance in AWS or Azure.
 
