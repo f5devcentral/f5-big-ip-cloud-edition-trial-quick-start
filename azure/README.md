@@ -62,7 +62,8 @@ Security instructions
 Teardown instructions
 ---------------------
 
-Naviagate to resources under appropriate resource group and delete the respective resources associated with current deployment (can be found under resource group -> deployments, If a new resource group is created then simply deleting that resource group will remove all the associated resources).
+1. Naviagate to resources under appropriate resource group and delete the respective resources associated with current deployment (can be found under resource group -> deployments, If a new resource group is created then simply deleting that resource group will remove all the associated resources).
+2. SSG resource group deletion - A new resource group with ssg name would be found under resource groups. Select option to delete resource group assoicated with SSG(this step would ensure to clean up all the azure resources associated with SSG creation).
 
 Troubleshooting
 ---------------
