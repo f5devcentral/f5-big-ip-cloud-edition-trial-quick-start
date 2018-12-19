@@ -1,15 +1,18 @@
 BIG-IP® Cloud Edition Trial Quick Start
 =======================================
 
-**Note:** DRAFT - NOT AVAILABLE - TARGET December 2018
-
 F5® [BIG-IP® Cloud Edition](https://www.f5.com/pdf/products/f5_bigip_cloud_edition_solution_overview.pdf): Automatically deploy pre-built app services dedicated to each application.
 
-With F5® BIG-IQ® Centralized Management (CM), you can securely manage traffic to your applications in AWS by using what F5 calls a Service Scaling Group (SSG).
+With F5® BIG-IQ® Centralized Management (CM), you can securely manage traffic to your applications in AWS and Azure by using what F5 calls a Service Scaling Group (SSG).
 
 From a centralized view, you can monitor the health and statistics of your applications as well as devices that are load balancing traffic and hosting applications. You can also set up alert thresholds to immediately notify you of certain events.
 
-This **CloudFormation Template (CFT)** or **Azure Resource Manager (ARM)** creates two BIG-IQ VE instances: a BIG-IQ CM instance to configure and orchestrate instances of BIG-IP VE, and a BIG-IQ Data Collection Device (DCD) to store analytics data. The CFT also creates an Apache demo web server. 
+This **CloudFormation Template (CFT)** or **Azure Resource Manager (ARM)** creates two BIG-IQ VE instances: 
+
+- a BIG-IQ Centralized Management (CM) instance to configure and orchestrate instances of BIG-IP VE
+- a BIG-IQ Data Collection Device (DCD) to store analytics data. 
+
+The templates also create an Apache demo web server. 
 
 After you configure the BIG-IQ instances, BIG-IQ automatically launches a BIG-IP VE instance in AWS or Azure.
 

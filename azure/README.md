@@ -1,7 +1,9 @@
 BIG-IP® Cloud Edition Trial Quick Start - Azure
 ===============================================
 
-**Note:** Updated with BIG-IQ 6.1.0 and BIG-IP 13.1.1
+**Note:** DRAFT - UNDER TESTING - TARGET END DECEMBER 2018
+
+**Note:** Using BIG-IQ 6.1.0 and BIG-IP 13.1.1
 
 ![Deployment Diagram](../images/azure-ssg-example-in-cloud.png)
 
@@ -25,6 +27,8 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 
    <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-big-ip-cloud-edition-trial-quick-start%2F6.1.0%2Fazure%2Fexperimental%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a> (new VPC/demo app)
    
+   <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-big-ip-cloud-edition-trial-quick-start%2F6.1.0%2Fazure%2Fexperimental%2Fazuredeploy-with-exisiting-vnet.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a> (existing VPC/no demo app)
+   
 4. In the ARM Template, populate this information:
 
    * Resource group (Select existing or create new resource group that makes resource termination painless)
@@ -40,12 +44,17 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
 
-6. View required commands to connect to CM , DCD instances under outputs section.
+*Expected time: ~30 min*
 
-   *Expected time: ~30 min*
+6. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+
+   * Use the username `admin`.
+   * Click the Applications tab > APPLICATIONS. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
+   * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.   
 
 Security instructions
 ---------------------
+
 1. It is strongly recommended to configure autoshutdown / whitelist the public ip's in NSG from which one accesses the ssh port of the deployed azure VM's. (This template would deploy network security group with 22,80,443 ports open to the public)
 2. Avoid enabling root account on publicly exposed azure VM's.
 
@@ -57,10 +66,10 @@ Naviagate to resources under appropriate resource group and delete the respectiv
 Troubleshooting
 ---------------
 
-1.  In BIG-IQ UI, if the application deployment failed, click Retry.
+1. In BIG-IQ UI, if the application deployment failed, click Retry.
 2.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
 3.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
-4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
+4.	In BIG-IQ CLI, check following logs: /var/log/setup.log, /var/log/restjavad.0.log and /var/log/orchestrator.log.
 5.  In Azure market place ensure that programmatic deployment is enabled for F5 products deployed earlier.
 6.  In Azure Active directory make sure that app registration has all necessary permissions for api access, to delegate permissions to other users add the users to owner list of app regiration.
 7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration 
