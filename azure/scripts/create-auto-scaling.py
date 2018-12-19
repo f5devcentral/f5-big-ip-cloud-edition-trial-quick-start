@@ -416,15 +416,16 @@ def create_scale_rules_and_alerts(env, ssg_result):
         }
     )
 
-#DELETING,LAUNCHING,OFFLINE,PAUSED,READY,TERMINATING, REDEPLOYING,
+# Wrapper method to call ssg rest worker .
+# Retries ssg creation only once in case of failure on initial execution.
 def create_ssg_wrapper(env, cloud_environment_result):
     result = create_ssg(env, cloud_environment_result)
     status = result["status"]
     try:
-        should_retry = status == 'DELETING' or status == 'OFFLINE' or status == 'TERMINATING' or status == 'PAUSED'
+        should_retry = status == 'PAUSED'
         if should_retry:
-            print("SSG status is:"+status+", will retry deployment after 40 seconds")
-            time.sleep(40)
+            print("SSG status is:"+status+", will retry deployment after 60 seconds")
+            time.sleep(60)
             result = create_ssg(env, cloud_environment_result)
             print("SSG Status after retry:"+str(result["status"]))
     except Exception as e:
@@ -441,7 +442,9 @@ def main():
     print("Launching SSG...")
     ssg_result = create_ssg_wrapper(env, cloud_environment_result)
     print("Creating scale workflows and rules...")
-    azureutils.writeAzureResourceGroupToFile(ssg_result["name"])
+    # Store the resource group name in file to be read later
+    # Useful in case SSG Name is dynamic.
+    azureutils.writeAzureResourceGroupToFile(ssg_result["name"]) #TODO: Can remove if ssg name is not dynamic in nature
     create_scale_rules_and_alerts(env, ssg_result)
 
 if __name__ == '__main__':

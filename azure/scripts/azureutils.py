@@ -12,6 +12,7 @@ public_ip_holder = "/subscriptions/"+subscription_holder+"/resourceGroups/"+reso
 resource_file = "resource_group_file"
 
 # Vars which must exist in the env variable
+# RESOURCE ~ resource group
 def parse_args ():
     parser = argparse.ArgumentParser()
     parser.add_argument("--RESOURCE", type=str, required=True)
@@ -21,11 +22,13 @@ def parse_args ():
     parser.add_argument("--CLIENT_ID", type=str, required=True)
     return parser.parse_args()
 
+# Method to create a file with content
 def createLockfile(lockFileName = resource_file , writestring=None):
     with open(lockFileName,"w") as lock_file:
         lock_file.write(str(writestring))
         lock_file.close()
 
+# Method to delete the file
 def deleteLockFile(lockFileName = resource_file):
     os.remove(lockFileName)
 
@@ -42,6 +45,7 @@ def getContentsOfResourceGroupLockFile(lockFileName = resource_file):
     print("contents present in lock file are " + str(contents))
     return str(contents)
 
+# Get Azure credentials given tenant id , client id and service principal secret
 def getCredentials(TENANT_ID=None ,CLIENT=None , KEY=None ):
     credentials = ServicePrincipalCredentials(
         client_id = CLIENT,
@@ -50,29 +54,32 @@ def getCredentials(TENANT_ID=None ,CLIENT=None , KEY=None ):
     )
     return credentials
 
+# Get Azure resource client for given subscription_id and azure credentials
 def getResourceClient(credentials=None , subscription_id=None):
     resource_client = ResourceManagementClient(credentials,subscription_id)
     return resource_client
 
+# Get Azure resource group for given resource group name and azure resource client
 def getResourceGroup(resource_group=None,client = None):
     return client.resource_groups.get(resource_group)
 
+# Get DnsName/FQDN for given resource group and public ip resource name
 def getDnsName(client = None, resource_group = None, subscription_id = None , public_ip_resource_name = ''):
     dns_name = ""
     try:
         resource_ip_id = getPublicIpResourceName(resource_group, subscription_id , public_ip_resource_name)
-        #print("subsc"+str(subscription_id)+",name"+str(name)+",,client"+str(client))
         for item in client.resources.list_by_resource_group(resource_group):
             resource_id = "{}".format(item.id)
             is_public_ip_resource = resource_id.startswith(resource_ip_id)
             if is_public_ip_resource and doesResourceExists(client, resource_id):
                 dns_name = getFqdn(client, resource_id)
-                #print(dns_name + " is dns Name of resource id:" + resource_ip_id + resource_id)
     except Exception as e:
         print(e)
     return dns_name
 
-
+# Get FQDN for given resource id
+# resource id should be properly formatted
+# eg:/subscriptions/{subsctiption_id}/resourceGroups/{resource_group_name}/providers/Microsoft.Network/publicIPAddresses/{public_ip_name}
 def getFqdn(client, resource_id):
     resource = getResourceById(client, resource_id)
     resource_resp = resource.properties
@@ -80,12 +87,13 @@ def getFqdn(client, resource_id):
     dns_name = resource_properties["fqdn"]
     return dns_name
 
-
+# Supplement method to construct formatted public ip resource id
 def getPublicIpResourceName(resource_group, subscription_id , public_ip_resource=""):
     resource_ip_id = public_ip_holder.replace(subscription_holder, subscription_id)
     resource_ip_id = resource_ip_id.replace(resource_group_holder, resource_group)
     return resource_ip_id + public_ip_resource
 
+# Checks whether a public ip resource with given resource_name exists or not
 def doesPublicIpExists(client=None , subscription_id="", resource_group="" , resource_name="" ):
     resource_id = getPublicIpResourceName(resource_group , subscription_id ,resource_name)
     return getResourceById(client, resource_id) is not None
@@ -99,6 +107,7 @@ def getResourceById(client = None , resource_id = None):
 def doesResourceGroupExists(client = None , name = ""):
     return client.resources.list_by_resource_group(name) is not None
 
+# Method to print detailed information about given resource group object
 def print_item(group):
     """Print a ResourceGroup instance."""
     print("\tName: {}".format(group.name))
@@ -107,6 +116,7 @@ def print_item(group):
     print("\tTags: {}".format(group.tags))
     print_properties(group.properties)
 
+# Method to print detailed information about given resource group object properties
 def print_properties(props):
     """Print a ResourceGroup properties instance."""
     if props and props.provisioning_state:

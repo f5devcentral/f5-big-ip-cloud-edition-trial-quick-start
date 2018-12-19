@@ -179,19 +179,19 @@ def deploy_application (ssg_id, node_ip, alb_dns_name):
         }
     )
 
+# supplement method to construct fqdn for given alb_dns_name
 def sanitizeAndGetDnsName(resource_group_name = "", alb_dns_name = ""):
     sanitized_dns_name = ""
     try:
         if alb_dns_name.startswith(resource_group_name):
-            indexOf = alb_dns_name.index(".")
-            sanitized_dns_name = alb_dns_name[:indexOf]
-            #print(sanitized_dns_name)
-            sanitized_dns_name = sanitized_dns_name + '-' + config_set_name + alb_dns_name[indexOf:]
-            #print(sanitized_dns_name)
+            index_of = alb_dns_name.index(".")
+            sanitized_dns_name = alb_dns_name[:index_of]
+            sanitized_dns_name = sanitized_dns_name + '-' + config_set_name + alb_dns_name[index_of:]
     except Exception as e:
         util.print_partial("Error occured while fetching dns Name " + resource_group_name + "," + alb_dns_name+" \n error:"+str(e))
     return sanitized_dns_name
 
+# Method to get FQDN to access demo application on SSG
 def getDnsName(args):
     resource_group_name = ""
     alb_dns_name = ""
@@ -200,6 +200,10 @@ def getDnsName(args):
         credentials = azureutils.getCredentials(args.TENANT_ID, args.CLIENT_ID, args.SERVICE_PRINCIPAL_SECRET)
         client = azureutils.getResourceClient(credentials , args.SUBSCRIPTION_ID)
         alb_dns_name = azureutils.getDnsName(client, resource_group_name, args.SUBSCRIPTION_ID)
+        # Since public ip is created dynamically after deploy application python script execution
+        # Fetching the sample public ip name without demo application and sanitizing it accordingly
+        # eg: Dns name associated with alb initially would be azure-f5-ssg.eastus.cloudapp.azure.com
+        # After below method invocation:o/p would be azure-f5-ssg-apache-test-application.eastus.cloudapp.azure.com
         alb_dns_name = sanitizeAndGetDnsName(resource_group_name , alb_dns_name)
         util.print_partial('Application can be accessible through https on dns Name:' + alb_dns_name)
     except Exception as e:

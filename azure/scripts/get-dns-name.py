@@ -9,6 +9,9 @@ SEPARATOR = '-'
 config_set_name = "apache-test-application"
 UNHEALTHY_THRESHOLD = 180
 
+# NOTE: It is important to not have any print statements in case of successful execution in this script file.
+# reason being that output of stdout would be collected as fqdn to configure traffic generator in demo server's cron job
+# Args would be collected while arm template deployment from user inputs
 def parse_args ():
     # Ugly but expedient conversion of ansible-playbook to a parameterized python script
     parser = argparse.ArgumentParser()
@@ -36,6 +39,7 @@ def getDnsName(args , resource_name):
         util.print_partial("Exception occurred while fetching azure dns name associated with ssg's resource group "+resource_group_name+" ,failed with error:"+str(e))
     return alb_dns_name
 
+# Supplement method to construct public ip resouce name
 def getPublicIpResourceName(ssg_name=""):
     return ssg_name + SEPARATOR + config_set_name + SEPARATOR + 'pip'
 
@@ -47,6 +51,8 @@ def doesPublicIpExists(args,resource_name=""):
         public_ip_exists = False
     return public_ip_exists
 
+# NOTE: It is important to not have any print statements in case of successful execution in this script file.
+# reason being that output of stdout would be collected as fqdn to configure traffic generator in demo server's cron job
 def main():
     alb_dns_name = ""
     try:
@@ -54,7 +60,6 @@ def main():
         time.sleep(480)  # Eight minute wait for SSG to settle down
 
         client = getResourceClient(args)
-        #util.print_partial("Validating ssg resource group creation...")
         # Sleep till the time ssg resource group gets created
         retry_count = 1
         while retry_count < UNHEALTHY_THRESHOLD:
@@ -64,14 +69,11 @@ def main():
                 retry_count += 1
                 time.sleep(30)
 
-        #util.complete()
         retry_count = 1
         resource_name = getPublicIpResourceName(args.SSG_NAME)
-        #util.print_partial("Validating public ip "+resource_name+" ,resource creation...")
         while retry_count < UNHEALTHY_THRESHOLD:
             if doesPublicIpExists(args , resource_name ) == True:
                 alb_dns_name = getDnsName(args , resource_name)
-                #util.complete()
                 break
             else:
                 retry_count += 1
