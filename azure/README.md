@@ -31,16 +31,16 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    
 4. In the ARM Template, populate this information:
 
-   * Resource group (Select existing or create new resource group that makes resource termination painless)
-   * Chose admin user name (default value is azureuser)
-   * Chose authentication type (password of sshkey string)
+   * Resource group (select existing or create new resource group that makes resource termination painless)
+   * Choose admin user name (default value is azureuser)
+   * Choose authentication type (password of sshkey string)
    * Enter password / sshPublicKey for BigIq DCD , CM virtual machines (connect to VM using these credentials)
-   * Chose Big IQ password (management console's password)
-   * Service principal secret (Identity string created while app registration)
-   * Enter azure client Id (Can be found under app registration section as Application ID)
+   * Choose Big IQ password (management console's password)
+   * Service principal secret (identity string created while app registration)
+   * Enter azure client Id (can be found under app registration section as Application ID)
    * Enter license keys of CM , DCD , BIG IP appropriately 
    * Location (default is resourceGroup's location - modify to deploy the resources in other location)
-   * Enter ssg , dcd , cm instance names(must be fewer than 25 characters)
+   * Enter ssg, dcd, cm instance names (must be fewer than 25 characters)
 
 5. Accept the terms and conditions checkbox & launch the cloud deployment 
 
@@ -56,6 +56,7 @@ Security instructions
 ---------------------
 
 1. It is strongly recommended to configure autoshutdown / whitelist the public ip's in NSG from which one accesses the ssh port of the deployed azure VM's. (This template would deploy network security group with 22,80,443 ports open to the public)
+
 2. Avoid enabling root account on publicly exposed azure VM's.
 
 Teardown instructions
@@ -76,7 +77,7 @@ Troubleshooting
 8. If encountered MarketPurchaseEligibility error while deploying template - Check the availability of bigip , bigiq etc 
         Eg: For Big ip:
         Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept
-9. If cloud provider test connection fails . Check whether the service prinicpal associated with application has all requried permissions , if yes and yet cloud provider connection is unsuccessful try to restart the VM's and check again.
+9. If cloud provider test connection fails. Check whether the service prinicpal associated with application has all requried permissions, if yes and yet cloud provider connection is unsuccessful try to restart the VM's and check again.
 10. Only one SSG is supported for deploying application through automated scripts. To deploy more than one SSG and associate an application with it please follow manual process for configuration.
 11. If encountered following error "message":"Value 'ip10-azureinternal-f5' used in property 'properties.dnsSettings.domainNameLabel' of resource 'ubuntu-ip-xyz' (microsoft.network/publicipaddresses) is invalid then please edit the template and change the value under loadBalancerDnsName parameter of the linkedTemplate . (Reason being there is an existing public ip resource with same name,hence the deployment failure)
 
