@@ -213,6 +213,8 @@
         "bigIpVersion": "13.1.100000",
         "bigIpPassword": "[parameters('bigIqPassword')]",
         "bigIqPassword": "[parameters('bigIqPassword')]",
+        "cmDnsName": "[concat('azurebigiq-cm','-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
+        "dcdDnsName": "[concat('azurebigiq-dcd','-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "servicePrincipalSecret" : "[parameters('servicePrincipalSecret')]",
         "dcdInstanceName": "[toLower(parameters('dcdInstanceName'))]",
         "cmInstanceName": "[toLower(parameters('cmInstanceName'))]",
@@ -235,6 +237,7 @@
         "intpublicIPAddressName": "[concat('BIG-IQ-CM-' , variables('resourceGroupName') , '-IP','-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "cmPublicIPAddressId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('intPublicIPAddressName'))]",
         "tagValues": "[parameters('tagValues')]",
+        "lbDnsName" : "[concat( 'ip10-azureinternal-f5','-',uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name))]",
         "newDataStorageAccountName": "[concat(uniquestring(variables('resourceGroupName'), resourceGroup().id, deployment().name), 'data000')]",
         "dataStorageAccountType": "Standard_LRS",
         "customImage": "[replace(parameters('customImage'), 'OPTIONAL', '')]",
@@ -280,10 +283,6 @@
             "Standard_GS4",
             "Standard_GS5"
         ],
-        "dcdBackgroundConfig": "[concat('#!/usr/bin/env bash','\n','mkdir -p /config/cloud \n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz ','\n','/config/cloud/wait-for-rjd.py \n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config && set-basic-auth on \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqDCDLicenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD')]",
-        "setupDcdBackgroundScript": "[concat(variables('singleQuote'), variables('dcdBackgroundConfig'), variables('singleQuote'))]",
-        "setUpDcdScript": "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgdjEgCmVjaG8gCnJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIAp3aGlsZSBbICIkdjEiICE9ICIkQklHX0lRX1BXRCIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJSZS1lbnRlciBCSUctSVEgUGFzc3dvcmQgW0FscGhhbnVtZXJpY3Mgb25seV06ICIgQklHX0lRX1BXRCAKZG9uZSAKZWNobwpub2h1cCAvY29uZmlnL2Nsb3VkL3NldHVwLWRjZC1iYWNrZ3JvdW5kLnNoICIkQklHX0lRX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcyc=",
-        "setUpCmScript" : "IyEvdXNyL2Jpbi9lbnYgYmFzaApyZWFkIC1zIC1wICJBV1MgQWNjZXNzIEtleSBJRDogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQVdTIEFjY2VzcyBLZXkgSUQ6ICIgQVdTX0FDQ0VTU19LRVkgCndoaWxlIFsgIiR2MSIgIT0gIiRBV1NfQUNDRVNTX0tFWSIgXTsgZG8gCiAgICBlY2hvIAogICAgZWNobyAiRW50cmllcyBkaWQgbm90IG1hdGNoLCB0cnkgYWdhaW4iIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIkFXUyBBY2Nlc3MgS2V5IElEOiAiIHYxIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIlJlLWVudGVyIEFXUyBBY2Nlc3MgS2V5IElEOiAiIEFXU19BQ0NFU1NfS0VZIApkb25lIAplY2hvCnJlYWQgLXMgLXAgIkFXUyBTZWNyZXQgQWNjZXNzIEtleTogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQVdTIFNlY3JldCBBY2Nlc3MgS2V5OiAiIEFXU19TRUNSRVRfS0VZIAp3aGlsZSBbICIkdjEiICE9ICIkQVdTX1NFQ1JFVF9LRVkiIF07IGRvIAogICAgZWNobyAKICAgIGVjaG8gIkVudHJpZXMgZGlkIG5vdCBtYXRjaCwgdHJ5IGFnYWluIiAKICAgIGVjaG8gCiAgICByZWFkIC1zIC1wICJBV1MgU2VjcmV0IEFjY2VzcyBLZXk6ICIgdjEgCiAgICBlY2hvIAogICAgcmVhZCAtcyAtcCAiUmUtZW50ZXIgQVdTIFNlY3JldCBBY2Nlc3MgS2V5OiAiIEFXU19TRUNSRVRfS0VZIApkb25lIAplY2hvCnJlYWQgLXMgLXAgIkJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQklHLUlRIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIEJJR19JUV9QV0QgCndoaWxlIFsgIiR2MSIgIT0gIiRCSUdfSVFfUFdEIiBdOyBkbyAKICAgIGVjaG8gCiAgICBlY2hvICJFbnRyaWVzIGRpZCBub3QgbWF0Y2gsIHRyeSBhZ2FpbiIgCiAgICBlY2hvIAogICAgcmVhZCAtcyAtcCAiQklHLUlRIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIHYxIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUSBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVFfUFdEIApkb25lIAplY2hvCnJlYWQgLXMgLXAgIkJJRy1JUCBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiB2MSAKZWNobyAKcmVhZCAtcyAtcCAiUmUtZW50ZXIgQklHLUlQIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIEJJR19JUF9QV0QgCndoaWxlIFsgIiR2MSIgIT0gIiRCSUdfSVBfUFdEIiBdOyBkbyAKICAgIGVjaG8gCiAgICBlY2hvICJFbnRyaWVzIGRpZCBub3QgbWF0Y2gsIHRyeSBhZ2FpbiIgCiAgICBlY2hvIAogICAgcmVhZCAtcyAtcCAiQklHLUlQIFBhc3N3b3JkIFtBbHBoYW51bWVyaWNzIG9ubHldOiAiIHYxIAogICAgZWNobyAKICAgIHJlYWQgLXMgLXAgIlJlLWVudGVyIEJJRy1JUCBQYXNzd29yZCBbQWxwaGFudW1lcmljcyBvbmx5XTogIiBCSUdfSVBfUFdEIApkb25lIAplY2hvCm5vaHVwIC9jb25maWcvY2xvdWQvc2V0dXAtY20tYmFja2dyb3VuZC5zaCAiJEFXU19BQ0NFU1NfS0VZIiAiJEFXU19TRUNSRVRfS0VZIiAiJEJJR19JUV9QV0QiICIkQklHX0lQX1BXRCIgJj4gL3Zhci9sb2cvc2V0dXAubG9nIDwgL2Rldi9udWxsICYKZWNobyAndGFpbCAtZiAvdmFyL2xvZy9zZXR1cC5sb2cgaW4gb3JkZXIgdG8gbW9uaXRvciBzZXR1cCBwcm9ncmVzcycKZWNobztlY2hvICdNYWtlIHN1cmUgeW91IGZvbGxvdyBUZWFyZG93biBpbnN0cnVjdGlvbnMgZnJvbSB0aGUgR2l0SHViIHJlcG9zaXRvcnkgb25jZSB5b3UgYXJlIGRvbmUgd2l0aCB5b3VyIHRlc3RpbmcuJw==",
         "dcdStartupScript":"bm9odXAgL2NvbmZpZy9jbG91ZC9zZXR1cC1kY2QtYmFja2dyb3VuZC5zaCAmPiAvdmFyL2xvZy9zZXR1cC5sb2cgPCAvZGV2L251bGwgJgplY2hvICd0YWlsIC1mIC92YXIvbG9nL3NldHVwLmxvZyBpbiBvcmRlciB0byBtb25pdG9yIHNldHVwIHByb2dyZXNzJw==",
         "cmStartUpScript": "bm9odXAgL2NvbmZpZy9jbG91ZC9zZXR1cC1jbS1iYWNrZ3JvdW5kLnNoICY+IC92YXIvbG9nL3NldHVwLmxvZyA8IC9kZXYvbnVsbCAmCmVjaG8gJ3RhaWwgLWYgL3Zhci9sb2cvc2V0dXAubG9nIGluIG9yZGVyIHRvIG1vbml0b3Igc2V0dXAgcHJvZ3Jlc3MnCmVjaG87ZWNobyAnTWFrZSBzdXJlIHlvdSBmb2xsb3cgVGVhcmRvd24gaW5zdHJ1Y3Rpb25zIGZyb20gdGhlIEdpdEh1YiByZXBvc2l0b3J5IG9uY2UgeW91IGFyZSBkb25lIHdpdGggeW91ciB0ZXN0aW5nLic="
     },
@@ -296,7 +295,10 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "idleTimeoutInMinutes": 30,
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('cmDnsName')]"
+                  }
             }
         },
         {
@@ -307,7 +309,10 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "idleTimeoutInMinutes": 30,
-                "publicIPAllocationMethod": "[variables('publicIPAddressType')]"
+                "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('dcdDnsName')]"
+                  }
             }
         },
         {
@@ -646,7 +651,7 @@
                     "value": "[variables('mgmtSubnetName')]"
                   },
                   "loadBalancerDnsName":{
-                    "value": "ip10-ec2internal-new"
+                    "value": "[variables('lbDnsName')]" 
                   }
               }
             }
@@ -659,7 +664,7 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz ;tar --strip-components=1 -xvzf scripts.tar.gz ; echo ', variables('singleQuote'),concat('#!/usr/bin/env bash','\n','sleep 180','\n','mkdir -p /config/cloud \n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz ','\n','/config/cloud/wait-for-rjd.py \n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config && set-basic-auth on \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqDCDLicenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD'),variables('singleQuote') ,' > /config/cloud/setup-dcd-background.sh; chmod +x /config/cloud/setup-dcd-background.sh;','echo ', variables('dcdStartUpScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-dcd.sh; chmod +x /config/cloud/setup-dcd.sh;nohup /config/cloud/setup-dcd.sh &> /var/log/setup.log < /dev/null &')]"
+                    "commandToExecute": "[concat('mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz ;tar --strip-components=1 -xvzf scripts.tar.gz ; echo ', variables('singleQuote'),concat('#!/usr/bin/env bash','\n','sleep 180','\n','mkdir -p /config/cloud \n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz ','\n','tmsh create auth user adminUser password ',variables('bigIqPassword'),' shell tmsh partition-access add {all-partitions {role admin}} && tmsh save sys config' ,'\n','/config/cloud/wait-for-rjd.py \n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config && set-basic-auth on \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqDCDLicenseKey2'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE DCD --HOST_NAME ',reference(variables('extPublicIPAddressName')).dnsSettings.fqdn),variables('singleQuote') ,' > /config/cloud/setup-dcd-background.sh; chmod +x /config/cloud/setup-dcd-background.sh;','echo ', variables('dcdStartUpScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-dcd.sh; chmod +x /config/cloud/setup-dcd.sh;nohup /config/cloud/setup-dcd.sh &> /var/log/setup.log < /dev/null &')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
@@ -669,7 +674,8 @@
                 "typeHandlerVersion": "2.0"
             },
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('dcdInstanceName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('dcdInstanceName'))]",
+                "[variables('extPublicIPAddressName')]"
             ]
         },
         {
@@ -680,7 +686,7 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mount -o remount,rw /usr;sleep 180; pip install azure;mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz ;tar --strip-components=1 -xvzf scripts.tar.gz ; echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','sleep 90','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqCMLicenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 \n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ failed, might be an issue with license activation, tail -f /var/log/setup.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD ',variables('bigIqPassword'),' --DCD_USERNAME ',parameters('adminUsername'),'\n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config','\n','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('bigIPLicensePoolKey'),' --BIG_IQ_PWD ',variables('bigIqPassword'),' \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --RESOURCE ', variables('resourceGroupName') ,' --DEFAULT_LOCATION ',variables('location'),' --VNET1 ',variables('virtualNetworkName'),' --SUBNET1 ',variables('mgmtSubnetName'),' --BYOL_BIGIP_NAME ',variables('bigIpName'),' --BYOL_BIGIP_VERSION ',variables('bigIpVersion'),' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId'),' --BIGIQ_URI http://localhost:8100',' --BIGIP_USER adminUser',' --BIGIP_PWD ',variables('bigIpPassword'),' --CLOUD_PROVIDER_NAME azure',' --CLOUD_ENVIRONMENT_NAME azure-env ',' --DEVICE_TEMPLATE_NAME default-ssg-template ',' --LOOKUP_SERVER_LIST 8.8.8.8',' --NTP_SERVER 0.pool.ntp.org',' --SSG_NAME ',variables('ssgName'),' --CM_IP ',reference(variables('intNicName')).ipConfigurations[0].properties.privateIPAddress,' --BIG_IQ_PWD ',variables('bigIqPassword'),'\n','/config/cloud/deploy-application.py --NODE_IP ',reference('linkedDemoTemplate').outputs.hostname.value, ' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId')), variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;chmod +x /config/cloud/setup-cm-background.sh;','echo ', variables('cmStartUpScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;nohup /config/cloud/setup-cm.sh &> /var/log/setup.log < /dev/null &')]"                
+                    "commandToExecute": "[concat('mount -o remount,rw /usr;sleep 180; pip install azure;mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz ;tar --strip-components=1 -xvzf scripts.tar.gz ; echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','sleep 90','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqCMLicenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE CM --HOST_NAME ',reference(variables('intPublicIPAddressName')).dnsSettings.fqdn,'\n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ failed, might be an issue with license activation, tail -f /var/log/setup.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD ',variables('bigIqPassword'),' --DCD_USERNAME adminUser','\n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ DCD to CM failed, tail -f /var/log/restjavad.0.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config','\n','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('bigIPLicensePoolKey'),' --BIG_IQ_PWD ',variables('bigIqPassword'),' \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --RESOURCE ', variables('resourceGroupName') ,' --DEFAULT_LOCATION ',variables('location'),' --VNET1 ',variables('virtualNetworkName'),' --SUBNET1 ',variables('mgmtSubnetName'),' --BYOL_BIGIP_NAME ',variables('bigIpName'),' --BYOL_BIGIP_VERSION ',variables('bigIpVersion'),' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId'),' --BIGIQ_URI http://localhost:8100',' --BIGIP_USER adminUser',' --BIGIP_PWD ',variables('bigIpPassword'),' --CLOUD_PROVIDER_NAME azure',' --CLOUD_ENVIRONMENT_NAME azure-env ',' --DEVICE_TEMPLATE_NAME default-ssg-template ',' --LOOKUP_SERVER_LIST 8.8.8.8',' --NTP_SERVER 0.pool.ntp.org',' --SSG_NAME ',variables('ssgName'),' --CM_IP ',reference(variables('intNicName')).ipConfigurations[0].properties.privateIPAddress,' --BIG_IQ_PWD ',variables('bigIqPassword'),'\n','/config/cloud/deploy-application.py --NODE_IP ',reference('linkedDemoTemplate').outputs.hostname.value, ' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId')), variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;chmod +x /config/cloud/setup-cm-background.sh;','echo ', variables('cmStartUpScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;nohup /config/cloud/setup-cm.sh &> /var/log/setup.log < /dev/null &')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
@@ -690,7 +696,8 @@
                 "typeHandlerVersion": "2.0"
             },
             "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', variables('cmInstanceName'))]"
+                "[concat('Microsoft.Compute/virtualMachines/', variables('cmInstanceName'))]",
+                "[variables('intPublicIPAddressName')]"
             ]
         },
         {
