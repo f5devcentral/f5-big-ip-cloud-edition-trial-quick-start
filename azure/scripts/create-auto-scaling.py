@@ -422,9 +422,10 @@ def create_ssg_wrapper(env, cloud_environment_result):
     result = create_ssg(env, cloud_environment_result)
     status = result["status"]
     try:
-        should_retry = status == 'PAUSED'
+        should_retry = status == 'DELETING' or status == 'OFFLINE' or status == 'TERMINATING' or status == 'PAUSED'
+        print("SSG status is:" + str(status))
         if should_retry:
-            print("SSG status is:"+status+", will retry deployment after 60 seconds")
+            print(" Going to retry SSG deployment after 60 seconds")
             time.sleep(60)
             result = create_ssg(env, cloud_environment_result)
             print("SSG Status after retry:"+str(result["status"]))
@@ -439,6 +440,7 @@ def main():
     device_template_result = create_device_template(env)
     print("Creating cloud resources...")
     cloud_environment_result = create_cloud_resources(env, device_template_result)
+    time.sleep(60)
     print("Launching SSG...")
     ssg_result = create_ssg_wrapper(env, cloud_environment_result)
     print("Creating scale workflows and rules...")

@@ -13,6 +13,8 @@ from util import print_partial, complete
 
 util.kill_ssl_warnings(logging, urllib3)
 
+DEFAULT_HOSTNAME = 'bigiq1'
+
 # Enter the license key into the BIQ
 def enter_license_info (license_key):
     req(
@@ -92,7 +94,7 @@ def configure_big_iq_type (dcd=False):
         )
 
 # Step 3 configure managment address
-def set_management_address ():
+def set_management_address (host_name = DEFAULT_HOSTNAME):
     default_config_res = req(BIGIQ_REST_URL + "shared/system/easy-setup")
     cfg = default_config_res.json()
     # I guess just post back what is set, TODO is this required then?
@@ -102,7 +104,7 @@ def set_management_address ():
     req(
         BIGIQ_REST_URL + "shared/system/easy-setup",
         json={
-                "hostname": cfg["hostname"],
+                "hostname": host_name,
                 "managementIpAddress": cfg["managementIpAddress"],
                 "managementRouteAddress": cfg["managementRouteAddress"]
             },
@@ -304,7 +306,7 @@ def main():
     complete()
 
     print_partial("Setting management address...")
-    set_management_address()
+    set_management_address(HOST_NAME)
     complete()
 
     poll_for_services_available()
@@ -392,6 +394,11 @@ def generate_parser ():
         type=str,
         default="CM", help="Either 'CM' for central management or 'DCD' for data collection device"
     )
+    parser.add_argument(
+        "--HOST_NAME",
+        type=str,
+        help="The fqdn of the hostname to be configured on bigiq cm / dcd instances"
+    )
 
     args = parser.parse_args()
 
@@ -403,6 +410,7 @@ def generate_parser ():
     global ADMIN_PWD
     global NODE_TYPE
     global TIMEOUT_SEC
+    global HOST_NAME
 
     BIGIQ_ADDR = args.BIGIQ_ADDR
     # Remember DeMorgan...
@@ -418,6 +426,7 @@ def generate_parser ():
     ADMIN_PWD = args.ADMIN_PWD
     NODE_TYPE = args.NODE_TYPE
     TIMEOUT_SEC = args.TIMEOUT_SEC
+    HOST_NAME = args.HOST_NAME
 
     return args
 
