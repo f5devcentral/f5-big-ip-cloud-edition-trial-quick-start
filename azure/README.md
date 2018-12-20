@@ -1,9 +1,9 @@
-BIG-IP® Cloud Edition Trial Quick Start - Azure
-===============================================
+BIG-IP Cloud Edition Trial Quick Start - Azure
+==============================================
 
 **Note:** DRAFT - UNDER TESTING - TARGET END DECEMBER 2018
 
-**Note:** Using BIG-IQ 6.1.0 and BIG-IP 13.1.1
+**Note:** This template uses BIG-IQ 6.1.0 and BIG-IP 13.1.1
 
 ![Deployment Diagram](../images/azure-ssg-example-in-cloud.png)
 
@@ -31,56 +31,63 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    
 4. In the ARM Template, populate this information:
 
-   * Resource group (select existing or create new resource group that makes resource termination painless)
-   * Choose admin user name (default value is azureuser)
-   * Choose authentication type (password of sshkey string)
-   * Enter password / sshPublicKey for BigIq DCD , CM virtual machines (connect to VM using these credentials)
-   * Choose Big IQ password (management console's password)
-   * Service principal secret (identity string created while app registration)
-   * Enter azure client Id (can be found under app registration section as Application ID)
-   * Enter license keys of CM , DCD , BIG IP appropriately 
-   * Location (default is resourceGroup's location - modify to deploy the resources in other location)
-   * Enter ssg, dcd, cm instance names (must be fewer than 25 characters)
+   * Resource group (select existing or create new)
+   * Admin user name (default value is **azureuser**)
+   * Authentication type (password or ssh key string)
+   * Password / sshPublicKey for the BIG-IQ Data Collection Device (DCD) and Centralized Management (CM) instances (you will connect to the instances by using these credentials)
+   * BIG-IQ password (management console's password)
+   * Service principal secret (identity string created during app registration)
+   * Azure client ID (under app registration, the Application ID)
+   * License keys for CM, DCD, and BIG-IP 
+   * Location (the default is the resource group's location; change if you want to deploy the resources in another location)
+   * Service Scaling Group (SSG), DCD, and CM instance names (must be fewer than 25 characters)
 
-5. Accept the terms and conditions checkbox & launch the cloud deployment 
+5. Accept the terms and conditions and launch the cloud deployment. 
 
-*Expected time: ~30 min*
+   *Expected time: ~30 min*
 
 6. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
    * Use the username `admin`.
-   * Click the Applications tab > APPLICATIONS. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
-   * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.   
+   * Click the **Applications** tab > **APPLICATIONS**. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
+   * You can manage the Service Scaling Group by clicking the **Applications** tab > **ENVIRONMENTS** > **Service Scaling Groups**.   
 
 Security instructions
 ---------------------
 
-1. It is strongly recommended to configure autoshutdown / whitelist the public ip's in NSG from which one accesses the ssh port of the deployed azure VM's. (This template would deploy network security group with 22,80,443 ports open to the public)
+1. F5 strongly recommends that you configure autoshutdown / whitelist the public IP addresses in the network security group you use to access the SSH port of the Azure instances. (This template deploys a network security group with ports 22, 80, and 443 open to the public.)
 
-2. Avoid enabling root account on publicly exposed azure VM's.
+2. Avoid enabling the `root` account on publicly exposed Azure instances.
 
-Teardown instructions
----------------------
+Tear down instructions
+----------------------
 
-1. Naviagate to resources under appropriate resource group and delete the respective resources associated with current deployment (can be found under resource group -> deployments, If a new resource group is created then simply deleting that resource group will remove all the associated resources).
-2. SSG resource group deletion - A new resource group with ssg name would be found under resource groups. Select option to delete resource group assoicated with SSG(this step would ensure to clean up all the azure resources associated with SSG creation).
+1. If you want to preserve other resouces in the group, delete only the resources that were created. You can find these resources under **Resource Group** > **Deployments**. Otherwise, you can delete the entire resource group.
+2. An SSG resource group was also created; it has SSG in its name. Find and delete this group.
 
 Troubleshooting
 ---------------
 
-1. In BIG-IQ UI, if the application deployment failed, click Retry.
-2.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
-3.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
-4.	In BIG-IQ CLI, check following logs: /var/log/setup.log, /var/log/restjavad.0.log and /var/log/orchestrator.log.
-5.  In Azure market place ensure that programmatic deployment is enabled for F5 products deployed earlier.
-6.  In Azure Active directory make sure that app registration has all necessary permissions for api access, to delegate permissions to other users add the users to owner list of app regiration.
-7.  Do not forget to assign contirbutor role (RBAC) to the scope of current resource/subscription associated with the app registration 
-8. If encountered MarketPurchaseEligibility error while deploying template - Check the availability of bigip , bigiq etc 
-        Eg: For Big ip:
-        Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept
-9. If cloud provider test connection fails. Check whether the service prinicpal associated with application has all requried permissions, if yes and yet cloud provider connection is unsuccessful try to restart the VM's and check again.
-10. Only one SSG is supported for deploying application through automated scripts. To deploy more than one SSG and associate an application with it please follow manual process for configuration.
-11. If encountered following error "message":"Value 'ip10-azureinternal-f5' used in property 'properties.dnsSettings.domainNameLabel' of resource 'ubuntu-ip-xyz' (microsoft.network/publicipaddresses) is invalid then please edit the template and change the value under loadBalancerDnsName parameter of the linkedTemplate . (Reason being there is an existing public ip resource with same name,hence the deployment failure)
+1. In the BIG-IQ UI, if the application deployment failed, click **Retry**.
+2. In the BIG-IQ UI, check the BIG-IQ license on Console Node and Data Collection Device (**System** > **THIS DEVICE** > **Licensing**) and the BIG-IP license pool (**Devices** > **LICENSE MANAGEMENT** > **Licenses**).
+3. In the BIG-IQ UI, check the Cloud Environment to ensure all of the information is populated correctly (**Applications** > **ENVIRONMENTS** > **Cloud Environments**).
+4. In the BIG-IQ CLI, check following logs: /var/log/setup.log, /var/log/restjavad.0.log and /var/log/orchestrator.log.
+5. In the Azure Marketplace, ensure that programmatic deployment is enabled for F5 products.
+6. In Azure Active Directory, ensure that app registration has the necessary permissions for API access, to delegate permissions to other users, and to add the users to the owner list of app registration.
+7. Ensure you assigned the contributor role (RBAC) to the scope of the current resource/subscription associated with the app registration.
+8. If you encountere a **MarketPurchaseEligibility** error while deploying the template, check the availability of BIG-IP and BIG-IQ. 
+   
+   For example, for BIG-IP:
+
+   ``Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept``
+
+9. If the cloud provider test connection fails, ensure the service prinicpal associated with application has all requried permissions. If the cloud provider connection is still unsuccessful, restart the instances and check again.
+10. When you deploy an application by using automated scripts, only one SSG is supported. To deploy more than one SSG and associate an application with it, follow the manual configuration process.
+11. If you encounter the following error:
+
+    ``"message":"Value 'ip10-azureinternal-f5' used in property 'properties.dnsSettings.domainNameLabel' of resource 'ubuntu-ip-xyz' (microsoft.network/publicipaddresses) is invalid``
+    
+    Edit the template to change the value under **loadBalancerDnsName** parameter of the **linkedTemplate**. (The deployment can fail when there is an existing public IP resource with same name.)
 
 ### Copyright
 

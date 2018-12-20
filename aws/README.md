@@ -1,12 +1,12 @@
-BIG-IP® Cloud Edition Trial Quick Start - AWS
-=============================================
+BIG-IP Cloud Edition Trial Quick Start - AWS
+============================================
 
-**Note:** Using BIG-IQ 6.1.0 and BIG-IP 14.0.0.1
+**Note:** This template uses BIG-IQ 6.1.0 and BIG-IP 14.0.0.1
 
 ![Deployment Diagram](../images/aws-ssg-example-in-cloud-2.png)
 
-Instructions for AWS
---------------------
+Deploy CFT in AWS
+-----------------
 
 To deploy this CFT in AWS, complete the following steps.
 
@@ -34,8 +34,8 @@ To deploy this CFT in AWS, complete the following steps.
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
    * If you did not do it previously, accept the BIG-IQ and BIG-IP license terms by visiting the URLs specified,
    clicking **Continue to Subscribe**, and accepting terms
-   * BIG-IQ CM License Key (from F5 trial **BIG-IQ Console Node**)
-   * BIG-IQ DCD License Key (from F5 trial **BIG-IQ Data Collection Device**)
+   * BIG-IQ Centralized Management (CM) License Key (from F5 trial **BIG-IQ Console Node**)
+   * BIG-IQ Data Collection Device (DCD) License Key (from F5 trial **BIG-IQ Data Collection Device**)
    * BIG-IP WAF License Pool Key (from F5 trial **BIG-IP VE Trial, Adv WAF, Per App VE, 3 Instances**, used for the SSG)
    * SSH Key (your AWS key pair name)
    * SSG CloudFormation Stack Name (must be unique and fewer than 25 characters)
@@ -70,23 +70,25 @@ To deploy this CFT in AWS, complete the following steps.
 
    * Enter the [AWS access key ID/secret key](https://docs.aws.amazon.com/general/latest/gr/managing-aws-access-keys.html) (used for the Service Scaling Group object creation), BIG-IQ and BIG-IP passwords.
    * The password must match the password you used on the BIG-IQ DCD instance in the previous step.
-   * The password for the BIG-IP must pass the basic pam_cracklib checks (e.g. ``olleH!321olleH!321``), which checks for the following issues:
-      * Does the password contain dictionary words.
-      * Is the password a palindrome.
-      * Is the password too simple.
+   * The password for BIG-IP must pass the basic pam_cracklib checks (e.g., ``olleH!321olleH!321``), which ensure that the password:
+      * Does not contain dictionary words.
+      * Is not a palindrome.
+      * Is not too simple.
    * Let the scripts finish before moving to the next step.
 
    *Expected time: ~30 min*
    
-**Note:** the AWS access key ID/secret key requires full access permissions for the following AWS resources: Auto Scale Groups, Instances, SQS, S3, CloudWatch, and CloudFormation. Additionally, you need list, create, and delete permissions for the IAM role/rolePolicy/InstanceProfile. For quicker testing, assign a AdministratorAccess policy to your keys.
+   **Note:** the AWS access key ID/secret key requires full access permissions for the following AWS resources: Auto Scale Groups, Instances, SQS, S3, CloudWatch, and CloudFormation. Additionally, you need list, create, and delete permissions for the IAM role/rolePolicy/InstanceProfile. For quicker testing, assign a AdministratorAccess policy to your keys.
 
-8a. **[new VPC/demo app CFT]** Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+8. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+
+   **If you have new VPC/demo app CFT** 
 
    * Use the username `admin`.
-   * Click the Applications tab > APPLICATIONS. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
-   * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
+   * Click the **Applications** tab > **APPLICATIONS**. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
+   * You can manage the Service Scaling Group by clicking the **Applications** tab > **ENVIRONMENTS** > **Service Scaling Groups**.
 
-8b. **[existing VPC/no demo app CFT]** Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+   **If you have an existing VPC/no demo app CFT** 
 
    * Use the username `admin`.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
@@ -100,8 +102,8 @@ To deploy this CFT in AWS, complete the following steps.
 
 For more information, go to [the BIG-IP Cloud Edition Knowledge Center](https://support.f5.com/csp/knowledge-center/software/BIG-IP?module=BIG-IP%20Cloud%20Edition).
 
-Teardown instructions
----------------------
+Tear down instructions
+----------------------
 1. Open BIG-IQ CM in a web browser by using the public IP address, for example: ``https://<public_ip>``
 
    * Delete the application, under Applications tab > APPLICATIONS, select the application, then click Delete.
@@ -118,11 +120,11 @@ Teardown instructions
 
 Troubleshooting
 ---------------
-1.  In BIG-IQ UI, if the application deployment failed, click Retry.
-2.	In BIG-IQ UI, check BIG-IQ license on Console Node and Data Collection Device (System > THIS DEVICE > Licensing) and BIG-IP license pool (Devices > LICENSE MANAGEMENT > Licenses).
-3.	In BIG-IQ UI, check the Cloud Environment if all the information are populated correctly (Applications > ENVIRONEMENTS > Cloud Environments).
-4.	In BIG-IQ CLI, check following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
-5.	In AWS Marketplace, check if you have subscribed and accepted the terms for the F5 products.
+1. In the BIG-IQ UI, if the application deployment fails, click **Retry**.
+2.	In the BIG-IQ UI, check the BIG-IQ license on the Console Node and Data Collection Device (**System** > **THIS DEVICE** > **Licensing**) and the BIG-IP license pool (**Devices** > **LICENSE MANAGEMENT** > **Licenses**).
+3.	In the BIG-IQ UI, check the Cloud Environment to ensure all the information is populated correctly (**Applications** > **ENVIRONMENTS** > **Cloud Environments**).
+4.	In the BIG-IQ CLI, check the following logs: /var/log/restjavad.0.log and /var/log/orchestrator.log.
+5.	In AWS Marketplace, ensure you have subscribed and accepted the terms for F5 products.
 6.	In AWS CFT Console, check the CFT status, make sure it is COMPLETED.
 7.	In AWS IAM Console, confirm the Access Key has the necessary permissions.
 8.	In AWS EC2 Console, check the Activity History in the Auto Scaling Group.
