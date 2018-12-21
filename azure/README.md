@@ -55,7 +55,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    * Click the **Applications** tab > **APPLICATIONS**. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
    * You can manage the Service Scaling Group by clicking the **Applications** tab > **ENVIRONMENTS** > **Service Scaling Groups**.
 
-   **If you have an existing VPC/no demo app** 
+   **If you have an existing VNET/no demo app** 
 
    * Use the username `admin`.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
