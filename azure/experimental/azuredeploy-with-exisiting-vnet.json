@@ -136,7 +136,10 @@
         },
         "ssgName" : {
             "type":"string",
-            "defaultValue": "azure-f5-ssg"
+            "defaultValue": "azure-f5-ssg",
+            "metadata": {
+                "description": "SSG name must be fewer than 25 characters"
+            }
         },
         "dcdInstanceName": {
             "defaultValue": "demo-ssg-trial-dcd",
@@ -625,37 +628,6 @@
                 "[variables('intNicName2')]"
             ]
         },
-        {
-            "apiVersion": "2018-05-01",
-            "name": "linkedDemoTemplate",
-            "type": "Microsoft.Resources/deployments",
-            "properties": {
-              "mode": "Incremental",
-              "templateLink": {
-                 "uri":"https://raw.githubusercontent.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/6.1.0/azure/experimental/ubuntu-azure-trail-deploy.json"
-              },
-              "parameters": {
-                 "location":{
-                    "value": "[variables('location')]"
-                  },
-                  "authenticationType":{
-                    "value": "[parameters('authenticationType')]"
-                  },
-                  "adminPasswordOrKey":{
-                    "value": "[variables('adminPasswordOrKey')]"
-                  },
-                  "vnetName":{
-                     "value":"[variables('virtualNetworkName')]"   
-                  },
-                  "subnet":{
-                    "value": "[variables('mgmtSubnetName')]"
-                  },
-                  "loadBalancerDnsName":{
-                    "value": "[variables('lbDnsName')]" 
-                  }
-              }
-            }
-         },
          {
             "type": "Microsoft.Compute/virtualMachines/extensions",
             "name": "[concat(variables('dcdInstanceName'),'/dcdStartupScript')]",
@@ -686,7 +658,7 @@
             "tags": "[if(empty(variables('tagValues')), json('null'), variables('tagValues'))]",
             "properties": {
                 "protectedSettings": {
-                    "commandToExecute": "[concat('mount -o remount,rw /usr;sleep 180; pip install azure;mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz ;tar --strip-components=1 -xvzf scripts.tar.gz ; echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','sleep 90','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqCMLicenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE CM --HOST_NAME ',reference(variables('intPublicIPAddressName')).dnsSettings.fqdn,'\n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ failed, might be an issue with license activation, tail -f /var/log/setup.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD ',variables('bigIqPassword'),' --DCD_USERNAME adminUser','\n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ DCD to CM failed, tail -f /var/log/restjavad.0.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config','\n','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('bigIPLicensePoolKey'),' --BIG_IQ_PWD ',variables('bigIqPassword'),' \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --RESOURCE ', variables('resourceGroupName') ,' --DEFAULT_LOCATION ',variables('location'),' --VNET1 ',variables('virtualNetworkName'),' --SUBNET1 ',variables('mgmtSubnetName'),' --BYOL_BIGIP_NAME ',variables('bigIpName'),' --BYOL_BIGIP_VERSION ',variables('bigIpVersion'),' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId'),' --BIGIQ_URI http://localhost:8100',' --BIGIP_USER adminUser',' --BIGIP_PWD ',variables('bigIpPassword'),' --CLOUD_PROVIDER_NAME azure',' --CLOUD_ENVIRONMENT_NAME azure-env ',' --DEVICE_TEMPLATE_NAME default-ssg-template ',' --LOOKUP_SERVER_LIST 8.8.8.8',' --NTP_SERVER 0.pool.ntp.org',' --SSG_NAME ',variables('ssgName'),' --CM_IP ',reference(variables('intNicName')).ipConfigurations[0].properties.privateIPAddress,' --BIG_IQ_PWD ',variables('bigIqPassword'),'\n','/config/cloud/deploy-application.py --NODE_IP ',reference('linkedDemoTemplate').outputs.hostname.value, ' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId')), variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;chmod +x /config/cloud/setup-cm-background.sh;','echo ', variables('cmStartUpScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;nohup /config/cloud/setup-cm.sh &> /var/log/setup.log < /dev/null &')]"
+                    "commandToExecute": "[concat('mount -o remount,rw /usr;sleep 180; pip install azure;mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz ;tar --strip-components=1 -xvzf scripts.tar.gz ; echo ' ,variables('singleQuote') , concat('#!/usr/bin/env bash','\n','sleep 90','\n','mount -o remount,rw /usr','\n','mkdir -p /config/cloud\n','cd /config/cloud \n','curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz \n','tar --strip-components=1 -xvzf scripts.tar.gz \n','/config/cloud/configure-bigiq.py --LICENSE_KEY ', parameters('bigIqCMLicenseKey1'),' --MASTER_PASSPHRASE ValidPassphrase1234567812345678! --TIMEOUT_SEC 1200 --NODE_TYPE CM --HOST_NAME ',reference(variables('intPublicIPAddressName')).dnsSettings.fqdn,'\n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ failed, might be an issue with license activation, tail -f /var/log/setup.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','/config/cloud/add-dcd.py --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,' --DCD_PWD ',variables('bigIqPassword'),' --DCD_USERNAME adminUser','\n','if [ $? -ne 0 ]','\n','then','\n','  echo Configuring BIG-IQ DCD to CM failed, tail -f /var/log/restjavad.0.log for more details.','\n','  exit 1','\n','fi\n','sleep 10\n','tmsh modify auth user admin password ',variables('bigIqPassword'),' && tmsh save sys config','\n','/config/cloud/activate-dcd-services.py --SERVICES asm --DCD_IP_ADDRESS ',reference(variables('mgmtNicID')).ipConfigurations[0].properties.privateIPAddress,'\n','set-basic-auth on \n','/config/cloud/create-license-pool.py --REG_KEY ',parameters('bigIPLicensePoolKey'),' --BIG_IQ_PWD ',variables('bigIqPassword'),' \n','set-basic-auth off \n','/config/cloud/create-auto-scaling.py --RESOURCE ', variables('resourceGroupName') ,' --DEFAULT_LOCATION ',variables('location'),' --VNET1 ',variables('virtualNetworkName'),' --SUBNET1 ',variables('mgmtSubnetName'),' --BYOL_BIGIP_NAME ',variables('bigIpName'),' --BYOL_BIGIP_VERSION ',variables('bigIpVersion'),' --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId'),' --BIGIQ_URI http://localhost:8100',' --BIGIP_USER adminUser',' --BIGIP_PWD ',variables('bigIpPassword'),' --CLOUD_PROVIDER_NAME azure',' --CLOUD_ENVIRONMENT_NAME azure-env ',' --DEVICE_TEMPLATE_NAME default-ssg-template ',' --LOOKUP_SERVER_LIST 8.8.8.8',' --NTP_SERVER 0.pool.ntp.org',' --SSG_NAME ',variables('ssgName'),' --CM_IP ',reference(variables('intNicName')).ipConfigurations[0].properties.privateIPAddress,' --BIG_IQ_PWD ',variables('bigIqPassword'),'\n'), variables('singleQuote'), ' > /config/cloud/setup-cm-background.sh;chmod +x /config/cloud/setup-cm-background.sh;','echo ', variables('cmStartUpScript'), ' | /usr/bin/base64 -d > /config/cloud/setup-cm.sh; chmod +x /config/cloud/setup-cm.sh;nohup /config/cloud/setup-cm.sh &> /var/log/setup.log < /dev/null &')]"
                 },
                 "publisher": "Microsoft.Azure.Extensions",
                 "settings": {
@@ -699,27 +671,6 @@
                 "[concat('Microsoft.Compute/virtualMachines/', variables('cmInstanceName'))]",
                 "[variables('intPublicIPAddressName')]"
             ]
-        },
-        {
-            "apiVersion": "[variables('computeApiVersion')]",
-           "location": "[variables('location')]",
-            "name": "[concat('apache-demo-server','/startupscript')]",
-            "properties": {
-              "protectedSettings": {
-                "commandToExecute": "[concat('#!/bin/bash -xe\n','sleep 10\n','mount -o remount,rw /usr\n','sudo apt-get -y update\n','sudo apt-get -y install python-pip\n','sudo pip install azure\n','mkdir -p /config/cloud; cd /config/cloud ; curl -L https://github.com/f5devcentral/f5-big-ip-cloud-edition-trial-quick-start/blob/6.1.0/azure/built/scripts.tar.gz?raw=true > scripts.tar.gz;tar --strip-components=1 -xvzf scripts.tar.gz\n','DNS_NAME=`python /config/cloud/get-dns-name.py --SUBSCRIPTION_ID ',variables('subscriptionID'),' --SERVICE_PRINCIPAL_SECRET ',variables('servicePrincipalSecret'),' --TENANT_ID ',variables('tenantID'),' --CLIENT_ID ',variables('azureclientId'),' --SSG_NAME ',variables('ssgname'),'`','\n','# Install the files and packages from the metadata\n','apt-get -y update\n','apt-get -y install python-setuptools docker.io apache2-utils\n','apt-get -y install python-setuptools docker.io apache2-utils\n','docker run -d -p 80:80 --net=host --restart unless-stopped -e F5DEMO_APP=website -e F5DEMO_NODENAME=',variables('singleQuote'),'F5 Azure',variables('singleQuote'),' -e F5DEMO_COLOR=ffd734 -e F5DEMO_NODENAME_SSL=',variables('singleQuote'),'F5 Azure (SSL)',variables('singleQuote'),' -e F5DEMO_COLOR_SSL=a0bf37 f5devcentral/f5-demo-httpd\n','echo ',variables('singleQuote'),'* * * * * /usr/bin/ab -n 30 -c 30 https://',variables('singleQuote'),'$DNS_NAME',variables('singleQuote'),'/\n',variables('singleQuote'),' >> /var/spool/cron/crontabs/ubuntu \n','chown ubuntu:ubuntu /var/spool/cron/crontabs/ubuntu \n','crontab -u ubuntu /var/spool/cron/crontabs/ubuntu \n')]"
-            },
-              "publisher": "Microsoft.Azure.Extensions",
-              "settings": {
-                "fileUris": []
-              },
-              "type": "CustomScript",
-              "typeHandlerVersion": "2.0"
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Resources/deployments/','linkedDemoTemplate')]",
-                "[concat('Microsoft.Compute/virtualMachines/', variables('cmInstanceName'))]"
-            ],
-            "type": "Microsoft.Compute/virtualMachines/extensions"
         }
     ],
     "outputs": {
