@@ -90,8 +90,8 @@ Troubleshooting
 12. If you encouter the following error:
 
    ``Error {u'message': u"The subscription is not registered for the resource type 'components' in the location 'westus'. Please re-register for this provider in order to have access to this location.", u'code': u'MissingRegistrationForLocation'}``
-   
-      This is caused by recent changes in Azure Application Insight GA in some regions. Try to deploy the quickstart in different location.
+    
+    This is caused by recent changes in Azure Application Insight GA in some regions. Try to deploy the quickstart in different location.
 
 ### Copyright
 
