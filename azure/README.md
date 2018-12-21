@@ -39,7 +39,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    * License keys for CM, DCD, and BIG-IP 
    * Location (the default is the resource group's location; change if you want to deploy the resources in another location)
    
-   **Note:** This template is not supported in the regions where Microsoft/insights is not available (example of supported region: East US, Central US, Central India, UK South)
+   **Note:** This template is not supported in the regions where Microsoft/insights is not available (example of supported region: East US, Central India, UK South)
    
    * Service Scaling Group (SSG), DCD, and CM instance names (must be fewer than 25 characters)
 
