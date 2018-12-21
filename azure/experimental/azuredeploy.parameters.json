@@ -11,28 +11,37 @@
         "adminPasswordOrKey": {
             "value": null
         },
-        "licenseKey1": {
+        "bigIQPassword": {
             "value": null
         },
         "instanceType": {
-            "value": "Standard_D2s_v3"
+            "value": "Standard_D4s_v3"
         },
         "bigIqVersion": {
-            "value": "6.0.100813"
+            "value": "6.1.000000"
         },
-        "licenseKey2": {
-            "value": null
+        "servicePrincipalSecret": {
+            "value": ""
         },
-        "licensePoolKey": {
-            "value": null
+        "azureClientId": {
+            "value": ""
+        },
+        "bigIqCMLicenseKey1": {
+            "value": ""
+        },
+        "bigIqDCDLicenseKey2": {
+            "value": ""
+        },
+        "bigIPLicensePoolKey": {
+            "value": ""
         },
         "location": {
-            "value": "eastus2"
+            "value": "centralindia"
         },
         "restrictedSrcAddress": {
             "value": "*"
         },
-        "extSubnetPrefix": {
+        "mgmtSubnetPrefix": {
             "value": "10.1.1.0/24"
         },
         "intSubnetPrefix": {
@@ -40,6 +49,9 @@
         },
         "vnetAddressPrefix": {
             "value": "10.1.0.0/16"
+        },
+        "ssgName": {
+            "value": "azure-f5-ssg"
         },
         "dcdInstanceName": {
             "value": "demo-ssg-trial-dcd"
