@@ -10,7 +10,7 @@ Instructions for Azure
 
 To deploy this ARM template in Azure cloud, complete the following steps.
 
-**Note:** This template is not supported in the regions where Microsoft/insights is not available.
+**Note:** This template is not supported in the regions where Microsoft/insights is not available
 
 1. To get a BIG-IQ trial license, go to [F5 Cloud Edition Trial](https://f5.com/products/trials/product-trials).
 
@@ -38,11 +38,14 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    * Azure client ID (under app registration, the Application ID)
    * License keys for CM, DCD, and BIG-IP 
    * Location (the default is the resource group's location; change if you want to deploy the resources in another location)
+   
+   **Note:** This template is not supported in the regions where Microsoft/insights is not available (example of supported region: East US, Central US, Central India, UK South)
+   
    * Service Scaling Group (SSG), DCD, and CM instance names (must be fewer than 25 characters)
 
 5. Accept the terms and conditions and launch the cloud deployment. 
 
-   *Expected time: ~30 min*
+   *Expected time: ~40 min*
 
 6. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
