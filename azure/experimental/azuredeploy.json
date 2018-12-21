@@ -139,7 +139,10 @@
         },
         "ssgName" : {
             "type":"string",
-            "defaultValue": "azure-f5-ssg"
+            "defaultValue": "azure-f5-ssg",
+            "metadata": {
+                "description": " SSG name must be fewer than 25 characters"
+            }
         },
         "dcdInstanceName": {
             "defaultValue": "demo-ssg-trial-dcd",
