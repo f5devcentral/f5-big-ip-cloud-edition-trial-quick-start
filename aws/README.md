@@ -82,13 +82,13 @@ To deploy this CFT in AWS, complete the following steps.
 
 8. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
-   **If you have new VPC/demo app CFT** 
+   **If you have new VPC/demo app** 
 
    * Use the username `admin`.
    * Click the **Applications** tab > **APPLICATIONS**. An application demo protected with an F5 Web Application Firewall (WAF) is displayed.
    * You can manage the Service Scaling Group by clicking the **Applications** tab > **ENVIRONMENTS** > **Service Scaling Groups**.
 
-   **If you have an existing VPC/no demo app CFT** 
+   **If you have an existing VPC/no demo app** 
 
    * Use the username `admin`.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
