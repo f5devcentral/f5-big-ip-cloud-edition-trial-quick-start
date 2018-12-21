@@ -1,8 +1,6 @@
 BIG-IP Cloud Edition Trial Quick Start - Azure
 ==============================================
 
-**Note:** DRAFT - UNDER TESTING - TARGET END DECEMBER 2018
-
 **Note:** This template uses BIG-IQ 6.1.0 and BIG-IP 13.1.1
 
 ![Deployment Diagram](../images/azure-ssg-example-in-cloud.png)
