@@ -45,7 +45,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 
 5. Accept the terms and conditions and launch the cloud deployment. 
 
-   *Expected time: ~40 min*
+   *Expected time: ~30 min*
 
 6. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
