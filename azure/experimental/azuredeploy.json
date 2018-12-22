@@ -184,7 +184,7 @@
         "networkApiVersion": "2018-08-01",
         "storageApiVersion": "2017-10-01",
         "location": "[parameters('location')]",
-        "adminPasswordOrKey": "[replace(parameters('adminPasswordOrKey'),'\\n', '\n')]",
+        "adminPasswordOrKey": "[parameters('adminPasswordOrKey')]",
         "linuxConfiguration": {
             "disablePasswordAuthentication": true,
             "ssh": {
