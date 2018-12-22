@@ -111,6 +111,12 @@ Troubleshooting
     
     This is caused by recent changes in Azure Application Insight GA in some regions. Try to deploy the quickstart in different location.
 
+13. If encountered the following error:
+
+    ``The value of parameter linuxConfiguration.ssh.publicKeys.keyData is invalid``
+  
+    Ensure to give sshPublicKey in the openssh convention for example in following format **ssh-rsa keyData user@domain**
+
 ### Copyright
 
 Copyright 2014-2019 F5 Networks Inc.
