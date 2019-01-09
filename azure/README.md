@@ -105,11 +105,13 @@ Troubleshooting
     
     Edit the template to change the value under **loadBalancerDnsName** parameter of the **linkedTemplate**. (The deployment can fail when there is an existing public IP resource with same name.)
 
-12. If you encouter the following error:
+12. If you encounter the following error:
 
     ``Error {u'message': u"The subscription is not registered for the resource type 'components' in the location 'westus'. Please re-register for this provider in order to have access to this location.", u'code': u'MissingRegistrationForLocation'}``
     
     This is caused by recent changes in Azure Application Insight GA in some regions. Try to deploy the quickstart in different location.
+    
+    **Note:** This template is not supported in the regions where [Microsoft/insights](https://azure.microsoft.com/en-us/global-infrastructure/services/?regions=all&products=monitor) is not available (example of supported region: East US, Southeast Asia, Canada Central, West Europe, Central India, UK South, more to come in Q1 2019)
 
 13. If encountered the following error:
 
