@@ -91,7 +91,7 @@ Troubleshooting
 5. In the Azure Marketplace, ensure that programmatic deployment is enabled for F5 products.
 6. In Azure Active Directory, ensure that app registration has the necessary permissions for API access, to delegate permissions to other users, and to add the users to the owner list of app registration.
 7. Ensure you assigned the contributor role (RBAC) to the scope of the current resource/subscription associated with the app registration.
-8. If you encountere a **MarketPurchaseEligibility** error while deploying the template, check the availability of BIG-IP and BIG-IQ. 
+8. If you encounter a **MarketPurchaseEligibility** error while deploying the template, check the availability of BIG-IP and BIG-IQ. 
    
    For example, for BIG-IP:
 
