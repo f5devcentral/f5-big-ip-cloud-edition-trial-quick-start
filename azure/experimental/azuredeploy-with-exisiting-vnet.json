@@ -136,7 +136,7 @@
         },
         "ssgName" : {
             "type":"string",
-            "defaultValue": "azure-f5-ssg",
+            "defaultValue": "trial-azure-ssg",
             "metadata": {
                 "description": "SSG name must be fewer than 25 characters"
             }
