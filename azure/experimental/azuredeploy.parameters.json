@@ -51,7 +51,7 @@
             "value": "10.1.0.0/16"
         },
         "ssgName": {
-            "value": "azure-f5-ssg"
+            "value": "trial-azure-ssg"
         },
         "dcdInstanceName": {
             "value": "demo-ssg-trial-dcd"
