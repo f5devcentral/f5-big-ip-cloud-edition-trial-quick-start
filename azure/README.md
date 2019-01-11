@@ -59,7 +59,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 
    * Use the username `admin`.
    * You can manage the Service Scaling Group by clicking the Application tab > ENVIRONMENTS > Service Scaling Groups.
-   * Click the Applications tab > APPLICATIONS. Create. Select `Default-AWS-f5-HTTPS-WAF-lb-template`.
+   * Click the Applications tab > APPLICATIONS. Create. Select `Default-f5-HTTPS-WAF-lb-template`.
        * **Name**: your application name
        * **Domain Names**: your application domain names
        * **Environment**: select the available Service Scaling Group
