@@ -131,7 +131,7 @@
             "defaultValue": "*",
             "type": "string",
             "metadata": {
-                "description": " The IP address range used to SSH and access managment GUI on the EC2 instances"
+                "description": " The IP address range used to SSH and access managment GUI on the BIG-IQ instances"
             }
         },
         "ssgName" : {
