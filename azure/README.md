@@ -21,13 +21,15 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    * F5 BIG-IQ Virtual Edition - (BYOL) or F5 BIG-IQ Centralized Manager (BYOL): [Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-iq/resetMenuId/)
    * F5 Per-App VE – Advanced WAF (BYOL): [Navigate to Home > Marketplace > F5 Per-App VE – Advanced WAF (BYOL) > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-ip-per-app-ve+byol/resetMenuId/)
 
-3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
+3. [Setting up an IAM resource](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module4/lab1.html) for the Service Scaling Group
+
+4. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
    <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-big-ip-cloud-edition-trial-quick-start%2F6.1.0%2Fazure%2Fexperimental%2Fazuredeploy.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a> (new VNET/demo app)
    
    <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-big-ip-cloud-edition-trial-quick-start%2F6.1.0%2Fazure%2Fexperimental%2Fazuredeploy-with-exisiting-vnet.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a> (existing VNET/no demo app)
    
-4. In the ARM Template, populate this information:
+5. In the ARM Template, populate this information:
 
    * Resource group (select existing or create new)
    * Admin user name (default value is **azureuser**)
@@ -43,11 +45,11 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    
    * Service Scaling Group (SSG), DCD, and CM instance names (must be fewer than 25 characters)
 
-5. Accept the terms and conditions and launch the cloud deployment. 
+6. Accept the terms and conditions and launch the cloud deployment. 
 
    *Expected time: ~30 min*
 
-6. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+7. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
    **If you have new VNET/demo app** 
 

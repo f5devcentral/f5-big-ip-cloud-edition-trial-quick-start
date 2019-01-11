@@ -22,13 +22,15 @@ To deploy this CFT in AWS, complete the following steps.
    * [F5 BIG-IQ Virtual Edition - (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
    * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)](https://aws.amazon.com/marketplace/pp/B07G5MT2KT)
 
-3. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
+3. [Setting up a Service Principal Account](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module5/lab1.html) for the Service Scaling Group
+
+4. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
    <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates-aws%2F6.1.0%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (new VPC/demo app)
 
    <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-iq-quickstart-cf-templates-aws%2F6.1.0.1%2Fbigiq-cm-dcd-pair-with-ssg-existing-vpc.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (existing VPC/no demo app)
 
-4. In the CloudFormation Template (CFT), populate this information:
+5. In the CloudFormation Template (CFT), populate this information:
 
    * Stack name (must be fewer than 25 characters)
    * Subnets in each availability zone (AZ1 and AZ2) (ensure they are not the same)
@@ -42,14 +44,14 @@ To deploy this CFT in AWS, complete the following steps.
 
    *Expected time: ~5 min*
 
-5. Open the [EC2 console](https://console.aws.amazon.com/ec2/v2/home) and wait until the BIG-IQ instances are fully deployed.
+6. Open the [EC2 console](https://console.aws.amazon.com/ec2/v2/home) and wait until the BIG-IQ instances are fully deployed.
 
    * Instance State: running
    * Status Checks: 2/2 checks passed
 
    *Expected time: ~5 min*
 
-6. Use admin user and your AWS SSH key to SSH into the BIG-IQ DCD instance, then execute the following commands:
+7. Use admin user and your AWS SSH key to SSH into the BIG-IQ DCD instance, then execute the following commands:
 
    ```
    # bash
@@ -61,7 +63,7 @@ To deploy this CFT in AWS, complete the following steps.
 
    *Expected time: ~2 min*
 
-7. Use admin user and your AWS SSH key to SSH into the BIG-IQ CM instance, then execute the following commands:
+8. Use admin user and your AWS SSH key to SSH into the BIG-IQ CM instance, then execute the following commands:
 
    ```
    # bash
@@ -80,7 +82,7 @@ To deploy this CFT in AWS, complete the following steps.
    
    **Note:** the AWS access key ID/secret key requires full access permissions for the following AWS resources: Auto Scale Groups, Instances, SQS, S3, CloudWatch, and CloudFormation. Additionally, you need list, create, and delete permissions for the IAM role/rolePolicy/InstanceProfile. For quicker testing, assign a AdministratorAccess policy to your keys.
 
-8. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
+9. Open BIG-IQ CM in a web browser by using the public IP address with https, for example: ``https://<public_ip>``
 
    **If you have new VPC/demo app** 
 
