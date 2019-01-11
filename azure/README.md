@@ -95,7 +95,7 @@ Troubleshooting
    
    For example, for BIG-IP:
 
-   ``Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept``
+   ``Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-ip-per-app-ve-awf-byol" | Set-AzureRmMarketplaceTerms -Accept``
 
 9. If the cloud provider test connection fails, ensure the service prinicpal associated with application has all requried permissions. If the cloud provider connection is still unsuccessful, restart the instances and check again.
 10. When you deploy an application by using automated scripts, only one SSG is supported. To deploy more than one SSG and associate an application with it, follow the manual configuration process.
