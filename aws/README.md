@@ -22,7 +22,7 @@ To deploy this CFT in AWS, complete the following steps.
    * [F5 BIG-IQ Virtual Edition - (BYOL)](https://aws.amazon.com/marketplace/pp/B00KIZG6KA)
    * [F5 BIG-IP VE - ALL (BYOL, 1 Boot Location)](https://aws.amazon.com/marketplace/pp/B07G5MT2KT)
 
-3. [Setting up a Service Principal Account](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module5/lab1.html) for the Service Scaling Group
+3. [Setting up an IAM resource](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module4/lab1.html) for the Service Scaling Group
 
 4. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 

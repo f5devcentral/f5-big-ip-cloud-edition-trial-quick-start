@@ -21,7 +21,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
    * F5 BIG-IQ Virtual Edition - (BYOL) or F5 BIG-IQ Centralized Manager (BYOL): [Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-iq/resetMenuId/)
    * F5 Per-App VE – Advanced WAF (BYOL): [Navigate to Home > Marketplace > F5 Per-App VE – Advanced WAF (BYOL) > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-ip-per-app-ve+byol/resetMenuId/)
 
-3. [Setting up an IAM resource](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module4/lab1.html) for the Service Scaling Group
+3. [Setting up a Service Principal Account](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module5/lab1.html) for the Service Scaling Group
 
 4. Launch the *trial stack* template by right-clicking this button and choosing **Open link in new window**:
 
