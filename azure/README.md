@@ -19,7 +19,7 @@ To deploy this ARM template in Azure cloud, complete the following steps.
 2. Enable programmatic deployment for these F5 products:
 
    * F5 BIG-IQ Virtual Edition - (BYOL) or F5 BIG-IQ Centralized Manager (BYOL): [Navigate to Home > Marketplace > F5 BIG-IQ BYOL > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-iq/resetMenuId/)
-   * F5 Per-App VE – Advanced WAF (BYOL): [Navigate to Home > Marketplace > F5 Per-App VE – Advanced WAF (BYOL) > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-ip-per-app-ve+byol/resetMenuId/)
+   * F5 BIG-IP VE – ALL (BYOL, 1 Boot Location) [Navigate to Home > Marketplace > F5 BIG-IP VE – ALL (BYOL, 1 Boot Location) > Configure Programmatic Deployment](https://portal.azure.com/#blade/Microsoft_Azure_Marketplace/GalleryFeaturedMenuItemBlade/selectedMenuItemId/home/searchQuery/f5-big-ip-ve+byol/resetMenuId/)
 
 3. [Setting up a Service Principal Account](https://clouddocs.f5.com/training/community/cloud-edition/html/class02/module5/lab1.html) for the Service Scaling Group
 
@@ -97,7 +97,7 @@ Troubleshooting
    
    For example, for BIG-IP:
 
-   ``Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-ip-per-app-ve-awf-byol" | Set-AzureRmMarketplaceTerms -Accept``
+   ``Get-AzureRmMarketplaceTerms -Publisher "f5-networks" -Product "f5-big-ip-byol" -Name "f5-big-all-1slot-byol" | Set-AzureRmMarketplaceTerms -Accept``
 
 9. If the cloud provider test connection fails, ensure the service prinicpal associated with application has all requried permissions. If the cloud provider connection is still unsuccessful, restart the instances and check again.
 10. When you deploy an application by using automated scripts, only one SSG is supported. To deploy more than one SSG and associate an application with it, follow the manual configuration process.
