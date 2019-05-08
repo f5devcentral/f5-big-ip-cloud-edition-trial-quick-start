@@ -28,7 +28,7 @@ To deploy this CFT in AWS, complete the following steps.
 
    <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-ip-ce-quickstart-cf-templates-aws%2F6.1.0%2Fbigiq-cm-dcd-pair-with-ssg.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (new VPC/demo app)
 
-   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-ip-ce-quickstart-cf-templates-aws%2F6.1.0.1%2Fbigiq-cm-dcd-pair-with-ssg-existing-vpc.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (existing VPC/no demo app)
+   <a href="https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/new?stackName=F5-BIG-IP-CE-Trial&templateURL=https:%2F%2Fs3.amazonaws.com%2Fbig-ip-ce-quickstart-cf-templates-aws%2F6.1.0%2Fbigiq-cm-dcd-pair-with-ssg-existing-vpc.template" target="_blank"><img src="https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png"/></a> (existing VPC/no demo app)
 
 5. In the CloudFormation Template (CFT), populate this information:
 
