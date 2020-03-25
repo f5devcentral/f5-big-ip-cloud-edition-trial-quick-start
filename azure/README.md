@@ -1,7 +1,7 @@
 BIG-IP Cloud Edition Trial Quick Start - Azure
 ==============================================
 
-**Note:** This template uses BIG-IQ 6.1.0 and BIG-IP 13.1.1
+**Note:** This template uses BIG-IQ 6.1.0 and BIG-IP 13.1.1. Looking for BIG-IQ 7.x releases? Check out this other [git repository](https://github.com/f5devcentral/f5-big-iq-trial-quick-start)
 
 ![Deployment Diagram](../images/azure-ssg-example-in-cloud.png)
 
