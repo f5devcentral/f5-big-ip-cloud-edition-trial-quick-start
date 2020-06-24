@@ -1,6 +1,8 @@
 BIG-IP Cloud Edition Trial Quick Start
 ======================================
 
+**Note**: Looking for BIG-IQ 7.x releases? Check out this other [git repository](https://github.com/f5devcentral/f5-big-iq-trial-quick-start)
+
 F5 [BIG-IP Cloud Edition](https://www.f5.com/pdf/products/f5_bigip_cloud_edition_solution_overview.pdf): Automatically deploy pre-built app services dedicated to each application.
 
 With F5 BIG-IQ Centralized Management (CM), you can securely manage traffic to your applications in AWS and Azure by using what F5 calls a Service Scaling Group (SSG).
